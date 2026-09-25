@@ -37,6 +37,30 @@ import xyz.angames.astolfoclient.client.module.setting.NumberSetting;
 
 @Environment(EnvType.CLIENT)
 public class AmbientsModule extends Module {
+   /**
+    * Builds a perspective projection that is free of the view-bobbing tilt.
+    *
+    * GameRenderer.renderWorld computes the basic projection first (getBasicProjectionMatrix),
+    * then applies bobView() to a MatrixStack and multiplies that basic projection by the
+    * bobbed position matrix before Fabric snapshots it into
+    * WorldRenderContext.projectionMatrix(). So the projection Fabric hands out carries the
+    * bobbing tilt on its off-diagonal terms, and a skybox drawn with it wobbles while the
+    * camera bobs. Rebuilding the plain perspective from the same inputs gives the same
+    * frustum minus the bob, matching the vanilla skybox.
+    */
+   private static Matrix4f buildCleanProjection(WorldRenderContext context) {
+      MinecraftClient client = MinecraftClient.getInstance();
+      float fov = client.options.getFov().getValue().intValue();
+      float aspect = (float)client.getWindow().getFramebufferWidth()
+         / (float)client.getWindow().getFramebufferHeight();
+      return new Matrix4f().perspective(
+         (float)Math.toRadians(fov),
+         aspect,
+         0.05F,
+         500.0F
+      );
+   }
+
    public final BooleanSetting sphereBlur = new BooleanSetting("Sphere Blur", false);
    public final NumberSetting sphereRadius = new NumberSetting("Sphere Radius", 30.0, 3.0, 150.0, 1.0) {
       @Override
@@ -579,7 +603,11 @@ public class AmbientsModule extends Module {
                RenderSystem.enableDepthTest();
                GL20.glUseProgram(program);
                Matrix4f modelViewMat = new Matrix4f().rotation(new Quaternionf(context.camera().getRotation()).conjugate());
-               Matrix4f projMat = context.projectionMatrix();
+               // NOTE: context.projectionMatrix() carries the view-bobbing tilt (GameRenderer
+               // multiplies the basic projection by the bobbed position matrix before Fabric
+               // snapshots it). Building a clean perspective projection ourselves keeps the
+               // skybox steady while the camera bobs, exactly like the vanilla skybox.
+               Matrix4f projMat = buildCleanProjection(context);
                float[] modelViewArr = new float[16];
                modelViewMat.get(modelViewArr);
                float[] projArr = new float[16];
@@ -718,7 +746,7 @@ public class AmbientsModule extends Module {
                RenderSystem.depthFunc(516);
                GL20.glUseProgram(this.blackProgram);
                Matrix4f modelViewMat = new Matrix4f().rotation(new Quaternionf(context.camera().getRotation()).conjugate());
-               Matrix4f projMat = context.projectionMatrix();
+               Matrix4f projMat = buildCleanProjection(context);
                float[] modelViewArr = new float[16];
                modelViewMat.get(modelViewArr);
                float[] projArr = new float[16];
@@ -848,7 +876,7 @@ public class AmbientsModule extends Module {
                RenderSystem.enableDepthTest();
                GL20.glUseProgram(program);
                Matrix4f modelViewMat = new Matrix4f().rotation(new Quaternionf(context.camera().getRotation()).conjugate());
-               Matrix4f projMat = context.projectionMatrix();
+               Matrix4f projMat = buildCleanProjection(context);
                float[] modelViewArr = new float[16];
                modelViewMat.get(modelViewArr);
                float[] projArr = new float[16];
@@ -1070,7 +1098,7 @@ public class AmbientsModule extends Module {
                      RenderSystem.disableBlend();
                      GL20.glUseProgram(this.sphereBlurProgram);
                      Matrix4f viewRotMat = new Matrix4f().rotation(new Quaternionf(context.camera().getRotation()).conjugate());
-                     Matrix4f projMat = new Matrix4f(context.projectionMatrix());
+                     Matrix4f projMat = buildCleanProjection(context);
                      Matrix4f invViewProjMat = new Matrix4f(projMat).mul(viewRotMat).invert();
                      float[] invViewProjArr = new float[16];
                      invViewProjMat.get(invViewProjArr);
