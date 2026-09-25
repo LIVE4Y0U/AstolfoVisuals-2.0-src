@@ -12,6 +12,9 @@ repositories {
     mavenCentral()
     // MRE (dev.sxmurxy.mre) — не публикуется в maven, лежит локально в libs/
     flatDir { dirs 'libs' }
+    // Локальный maven-репо для MRE: include() (JiJ) требует модульный компонент
+    // с GAV/capabilities, плоский files(...) Loom вкладывать отказывается.
+    maven { url = uri("local-maven") }
 }
 
 dependencies {
@@ -34,7 +37,11 @@ dependencies {
     // sxmurxy0/Minecraft-Render-Enhancer-2D-1.21 fabric-1.21.4 — СТАРЕЕ: в ней
     // нет Builder.liquidGlass() и MsdfFont.Builder.glyphMapper(), из-за чего
     // иконки ClickGUI и liquid-glass не работают.
-    modImplementation files('libs/mre-1.0-1.21.4.jar')
+    modImplementation "dev.sxmurxy:mre:1.0-1.21.4"
+    // include() = JiJ: Loom вкладывает jar в META-INF/jars и прописывает в манифест.
+    // Без этого MRE есть в dev-запуске (classpath), но отсутствует в собранном jar
+    // → NoClassDefFoundError: dev/sxmurxy/mre/msdf/MsdfFont в обычном лаунчере.
+    include "dev.sxmurxy:mre:1.0-1.21.4"
 }
 
 processResources {
