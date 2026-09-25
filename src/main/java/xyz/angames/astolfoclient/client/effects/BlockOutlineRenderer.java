@@ -5,24 +5,24 @@ import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.class_10142;
-import net.minecraft.class_2338;
-import net.minecraft.class_238;
-import net.minecraft.class_239;
-import net.minecraft.class_265;
-import net.minecraft.class_2680;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_310;
-import net.minecraft.class_3965;
-import net.minecraft.class_4184;
-import net.minecraft.class_4587;
-import net.minecraft.class_5944;
-import net.minecraft.class_9801;
-import net.minecraft.class_239.class_240;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.client.render.BuiltBuffer;
+import net.minecraft.util.hit.HitResult.Type;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -31,15 +31,15 @@ import xyz.angames.astolfoclient.client.module.modules.render.BlockOutlineModule
 @Environment(EnvType.CLIENT)
 public class BlockOutlineRenderer {
    private BlockOutlineRenderer.RenderBox currentBox = null;
-   private class_2338 lastPos = null;
+   private util.math.BlockPos lastPos = null;
    private long lastRenderTime = System.currentTimeMillis();
    private float fadeAlpha = 0.0F;
 
    public void render(WorldRenderContext context) {
       BlockOutlineModule module = (BlockOutlineModule)AstolfoclientClient.moduleManager.getModuleByName("BlockOutline");
       if (module != null && module.isEnabled()) {
-         class_310 mc = class_310.method_1551();
-         if (mc.field_1687 != null && mc.field_1724 != null) {
+         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         if (mc.world != null && mc.player != null) {
             long now = System.currentTimeMillis();
             float deltaTime = (float)(now - this.lastRenderTime) / 1000.0F;
             this.lastRenderTime = now;
@@ -51,8 +51,8 @@ public class BlockOutlineRenderer {
                deltaTime = 0.001F;
             }
 
-            class_239 hit = mc.field_1765;
-            boolean hasBlockTarget = hit != null && hit.method_17783() == class_240.field_1332;
+            util.hit.HitResult hit = mc.crosshairTarget;
+            boolean hasBlockTarget = hit != null && hit.getType() == hit.HitResult.Type.BLOCK;
             if (module.fadeEffect.get()) {
                float fadeRate = (float)module.fadeSpeed.get();
                if (hasBlockTarget) {
@@ -69,18 +69,18 @@ public class BlockOutlineRenderer {
                this.lastPos = null;
             } else {
                if (hasBlockTarget) {
-                  class_3965 blockHit = (class_3965)hit;
-                  class_2338 pos = blockHit.method_17777();
-                  class_2680 state = mc.field_1687.method_8320(pos);
-                  class_265 shape = state.method_26218(mc.field_1687, pos);
-                  if (!shape.method_1110()) {
-                     class_238 targetBox = shape.method_1107().method_996(pos).method_1014(0.002);
+                  util.hit.BlockHitResult blockHit = (util.hit.BlockHitResult)hit;
+                  util.math.BlockPos pos = blockHit.getBlockPos();
+                  minecraft.block.BlockState state = mc.world.getBlockState(pos);
+                  util.shape.VoxelShape shape = state.getOutlineShape(mc.world, pos);
+                  if (!shape.isEmpty()) {
+                     util.math.Box targetBox = shape.getBoundingBox().offset(pos).expand(0.002);
                      BlockOutlineRenderer.RenderBox targetRenderBox = new BlockOutlineRenderer.RenderBox(
-                        targetBox.field_1323, targetBox.field_1322, targetBox.field_1321, targetBox.field_1320, targetBox.field_1325, targetBox.field_1324
+                        targetBox.minX, targetBox.minY, targetBox.minZ, targetBox.maxX, targetBox.maxY, targetBox.maxZ
                      );
                      float morphSpeed = (float)module.animSpeed.get();
                      float lerpAmount = Math.min(1.0F, deltaTime * morphSpeed);
-                     if (this.currentBox != null && module.smoothAnim.get() && (this.lastPos == null || !(pos.method_10262(this.lastPos) > 64.0))) {
+                     if (this.currentBox != null && module.smoothAnim.get() && (this.lastPos == null || !(pos.getSquaredDistance(this.lastPos) > 64.0))) {
                         this.currentBox = this.currentBox.lerp(targetRenderBox, lerpAmount);
                      } else {
                         this.currentBox = targetRenderBox;
@@ -91,10 +91,10 @@ public class BlockOutlineRenderer {
                }
 
                if (this.currentBox != null) {
-                  class_4184 camera = context.camera();
-                  class_4587 matrices = context.matrixStack();
-                  matrices.method_22903();
-                  matrices.method_22904(-camera.method_19326().field_1352, -camera.method_19326().field_1351, -camera.method_19326().field_1350);
+                  client.render.Camera camera = context.camera();
+                  util.math.MatrixStack matrices = context.matrixStack();
+                  matrices.push();
+                  matrices.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
                   Color themeColor = new Color(ThemeManager.getThemedColor(0L));
                   float r = themeColor.getRed() / 255.0F;
                   float g = themeColor.getGreen() / 255.0F;
@@ -108,13 +108,13 @@ public class BlockOutlineRenderer {
                      RenderSystem.disableDepthTest();
                   }
 
-                  class_289 tessellator = class_289.method_1348();
+                  client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
                   if (module.shaderFill.get()) {
-                     class_5944 shader = RenderSystem.setShader(AstolfoclientClient.BLOCK_OUTLINE_SHADER);
+                     client.gl.ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.BLOCK_OUTLINE_SHADER);
                      if (shader != null) {
                         float timeSecs = (float)(System.currentTimeMillis() % 1000000L) / 1000.0F;
-                        if (shader.method_34582("uTime") != null) {
-                           shader.method_34582("uTime").method_1251(timeSecs);
+                        if (shader.getUniform("uTime") != null) {
+                           shader.getUniform("uTime").set(timeSecs);
                         }
 
                         int color1 = ThemeManager.getThemedColor(0L);
@@ -125,50 +125,50 @@ public class BlockOutlineRenderer {
                         float r2 = (color2 >> 16 & 0xFF) / 255.0F;
                         float g2 = (color2 >> 8 & 0xFF) / 255.0F;
                         float b2 = (color2 & 0xFF) / 255.0F;
-                        if (shader.method_34582("uColor1") != null) {
-                           shader.method_34582("uColor1").method_1249(r1, g1, b1);
+                        if (shader.getUniform("uColor1") != null) {
+                           shader.getUniform("uColor1").set(r1, g1, b1);
                         }
 
-                        if (shader.method_34582("uColor2") != null) {
-                           shader.method_34582("uColor2").method_1249(r2, g2, b2);
+                        if (shader.getUniform("uColor2") != null) {
+                           shader.getUniform("uColor2").set(r2, g2, b2);
                         }
 
-                        if (shader.method_34582("uBlockCenter") != null) {
+                        if (shader.getUniform("uBlockCenter") != null) {
                            double centerX = (this.currentBox.minX + this.currentBox.maxX) / 2.0;
                            double centerY = (this.currentBox.minY + this.currentBox.maxY) / 2.0;
                            double centerZ = (this.currentBox.minZ + this.currentBox.maxZ) / 2.0;
-                           shader.method_34582("uBlockCenter").method_1249((float)centerX, (float)centerY, (float)centerZ);
+                           shader.getUniform("uBlockCenter").set((float)centerX, (float)centerY, (float)centerZ);
                         }
 
-                        if (shader.method_34582("uGlowIntensity") != null) {
-                           shader.method_34582("uGlowIntensity").method_1251((float)module.glowIntensity.get());
+                        if (shader.getUniform("uGlowIntensity") != null) {
+                           shader.getUniform("uGlowIntensity").set((float)module.glowIntensity.get());
                         }
 
-                        if (shader.method_34582("uPulseSpeed") != null) {
-                           shader.method_34582("uPulseSpeed").method_1251((float)module.pulseSpeed.get());
+                        if (shader.getUniform("uPulseSpeed") != null) {
+                           shader.getUniform("uPulseSpeed").set((float)module.pulseSpeed.get());
                         }
 
-                        if (shader.method_34582("uPulseWidth") != null) {
-                           shader.method_34582("uPulseWidth").method_1251((float)module.pulseWidth.get());
+                        if (shader.getUniform("uPulseWidth") != null) {
+                           shader.getUniform("uPulseWidth").set((float)module.pulseWidth.get());
                         }
 
-                        if (shader.method_34582("uDistortion") != null) {
-                           shader.method_34582("uDistortion").method_1251(module.distortion.get() ? 1.0F : 0.0F);
+                        if (shader.getUniform("uDistortion") != null) {
+                           shader.getUniform("uDistortion").set(module.distortion.get() ? 1.0F : 0.0F);
                         }
 
-                        if (shader.method_34582("uChromatic") != null) {
-                           shader.method_34582("uChromatic").method_1251(module.chromatic.get() ? 1.0F : 0.0F);
+                        if (shader.getUniform("uChromatic") != null) {
+                           shader.getUniform("uChromatic").set(module.chromatic.get() ? 1.0F : 0.0F);
                         }
 
-                        if (shader.method_34582("uFadeAlpha") != null) {
-                           shader.method_34582("uFadeAlpha").method_1251(this.fadeAlpha);
+                        if (shader.getUniform("uFadeAlpha") != null) {
+                           shader.getUniform("uFadeAlpha").set(this.fadeAlpha);
                         }
 
-                        if (shader.method_34582("uFillAlpha") != null) {
-                           shader.method_34582("uFillAlpha").method_1251((float)module.fillAlpha.get());
+                        if (shader.getUniform("uFillAlpha") != null) {
+                           shader.getUniform("uFillAlpha").set((float)module.fillAlpha.get());
                         }
 
-                        if (shader.method_34582("uMode") != null) {
+                        if (shader.getUniform("uMode") != null) {
                            int modeIdx = 0;
                            byte var47;
                            if (module.mode.is("Pulse Wave")) {
@@ -185,28 +185,28 @@ public class BlockOutlineRenderer {
                               var47 = 5;
                            }
 
-                           shader.method_34582("uMode").method_35649(var47);
+                           shader.getUniform("uMode").set(var47);
                         }
                      }
 
-                     class_287 buffer = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+                     client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
                      this.drawBoxFaces(matrices, buffer, this.currentBox, r, g, b, 1.0F);
-                     class_9801 builtBuffer = buffer.method_60794();
+                     client.render.BuiltBuffer builtBuffer = buffer.endNullable();
                      if (builtBuffer != null) {
-                        class_286.method_43433(builtBuffer);
+                        client.render.BufferRenderer.drawWithGlobalProgram(builtBuffer);
                      }
                   }
 
                   if (module.outline.get()) {
-                     RenderSystem.setShader(class_10142.field_53876);
+                     RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
                      RenderSystem.lineWidth((float)module.lineWidth.get());
                      float finalOutlineAlpha = (float)module.outlineAlpha.get() * this.fadeAlpha;
                      if (finalOutlineAlpha > 0.01F) {
-                        class_287 lineBuffer = tessellator.method_60827(class_5596.field_29344, class_290.field_1576);
+                        client.render.BufferBuilder lineBuffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINES, client.render.VertexFormats.POSITION_COLOR);
                         this.drawBoxOutline(matrices, lineBuffer, this.currentBox, r, g, b, finalOutlineAlpha);
-                        class_9801 builtLines = lineBuffer.method_60794();
+                        client.render.BuiltBuffer builtLines = lineBuffer.endNullable();
                         if (builtLines != null) {
-                           class_286.method_43433(builtLines);
+                           client.render.BufferRenderer.drawWithGlobalProgram(builtLines);
                         }
                      }
 
@@ -216,7 +216,7 @@ public class BlockOutlineRenderer {
                   RenderSystem.enableDepthTest();
                   RenderSystem.enableCull();
                   RenderSystem.disableBlend();
-                  matrices.method_22909();
+                  matrices.pop();
                }
             }
          }
@@ -227,72 +227,72 @@ public class BlockOutlineRenderer {
       }
    }
 
-   private void drawBoxFaces(class_4587 matrices, class_287 buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
+   private void drawBoxFaces(util.math.MatrixStack matrices, client.render.BufferBuilder buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
       float minX = (float)box.minX;
       float minY = (float)box.minY;
       float minZ = (float)box.minZ;
       float maxX = (float)box.maxX;
       float maxY = (float)box.maxY;
       float maxZ = (float)box.maxZ;
-      Matrix4f m = matrices.method_23760().method_23761();
-      buffer.method_22918(m, minX, minY, maxZ).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, maxZ).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, minZ).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, minZ).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, minZ).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, minZ).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, maxZ).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, maxZ).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, minZ).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, minZ).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, minZ).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, minZ).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, maxZ).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, maxZ).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, maxZ).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, maxZ).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, minZ).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, maxZ).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, maxZ).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, minZ).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, maxZ).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, minZ).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, minZ).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, maxZ).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
+      Matrix4f m = matrices.peek().getPositionMatrix();
+      buffer.vertex(m, minX, minY, maxZ).texture(0.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, maxZ).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, minZ).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, minZ).texture(0.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, minZ).texture(0.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, minZ).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, maxZ).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, maxZ).texture(0.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, minZ).texture(0.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, minZ).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, minZ).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, minZ).texture(0.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, maxZ).texture(0.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, maxZ).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, maxZ).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, maxZ).texture(0.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, minZ).texture(0.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, maxZ).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, maxZ).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, minZ).texture(0.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, maxZ).texture(0.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, minZ).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, minZ).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, maxZ).texture(0.0F, 1.0F).color(r, g, b, a);
    }
 
-   private void drawBoxOutline(class_4587 matrices, class_287 buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
+   private void drawBoxOutline(util.math.MatrixStack matrices, client.render.BufferBuilder buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
       float minX = (float)box.minX;
       float minY = (float)box.minY;
       float minZ = (float)box.minZ;
       float maxX = (float)box.maxX;
       float maxY = (float)box.maxY;
       float maxZ = (float)box.maxZ;
-      Matrix4f m = matrices.method_23760().method_23761();
-      buffer.method_22918(m, minX, minY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, minZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, minY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, maxX, maxY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, minY, maxZ).method_22915(r, g, b, a);
-      buffer.method_22918(m, minX, maxY, maxZ).method_22915(r, g, b, a);
+      Matrix4f m = matrices.peek().getPositionMatrix();
+      buffer.vertex(m, minX, minY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, minZ).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, minZ).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, minZ).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, minZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, minY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, maxX, maxY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, minY, maxZ).color(r, g, b, a);
+      buffer.vertex(m, minX, maxY, maxZ).color(r, g, b, a);
    }
 
    @Environment(EnvType.CLIENT)

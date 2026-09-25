@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_3675.class_306;
-import net.minecraft.class_3675.class_307;
+import net.minecraft.client.util.InputUtil.Key;
+import net.minecraft.client.util.InputUtil.Type;
 
 @Environment(EnvType.CLIENT)
 public class KeyUtils {
@@ -34,8 +34,8 @@ public class KeyUtils {
 
       for (int i = 0; i < 350; i++) {
          try {
-            class_306 key = class_307.field_1668.method_1447(i);
-            String name = key.method_1441();
+            util.InputUtil.Key key = util.InputUtil.Type.KEYSYM.createFromCode(i);
+            String name = key.getTranslationKey();
             if (name != null && !name.isEmpty() && !name.contains("unknown")) {
                String simpleName = name.replace("key.keyboard.", "").toUpperCase();
                keyNameToCode.put(simpleName, i);

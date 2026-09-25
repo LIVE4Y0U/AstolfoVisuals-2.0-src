@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_332;
-import net.minecraft.class_3532;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.module.setting.EnumSetting;
 import xyz.angames.astolfoclient.client.module.setting.ModeSetting;
@@ -142,11 +142,11 @@ public class ModePopupState {
       }
 
       float sY = ACTIVE.triggerY - 2.0F;
-      return class_3532.method_15363(sY, winY + 38.0F, winY + winH - subH - 8.0F);
+      return util.math.MathHelper.clamp(sY, winY + 38.0F, winY + winH - subH - 8.0F);
    }
 
    public static void renderActive(
-      class_332 context, float winX, float winY, float winW, float winH, int mouseX, int mouseY, float deltaTime, float masterAlpha, Color themeColor
+      client.gui.DrawContext context, float winX, float winY, float winW, float winH, int mouseX, int mouseY, float deltaTime, float masterAlpha, Color themeColor
    ) {
       if (ACTIVE != null) {
          ACTIVE.anim = GuiUtils.animate(ACTIVE.anim, ACTIVE.isClosing ? 0.0F : 1.0F, 18.0F, deltaTime);
@@ -184,16 +184,16 @@ public class ModePopupState {
             float subH = visibleCount * 16.0F + 8.0F;
             float sX = calculatePopupX(winX, winW, subW);
             float sY = calculatePopupY(winY, winH, subH);
-            context.method_51448().method_22903();
+            context.getMatrices().push();
             if (scale < 0.999F) {
                float scx = sX + subW / 2.0F;
                float scy = sY + subH / 2.0F;
-               context.method_51448().method_46416(scx, scy, 0.0F);
-               context.method_51448().method_22905(scale, scale, 1.0F);
-               context.method_51448().method_46416(-scx, -scy, 0.0F);
+               context.getMatrices().translate(scx, scy, 0.0F);
+               context.getMatrices().scale(scale, scale, 1.0F);
+               context.getMatrices().translate(-scx, -scy, 0.0F);
             }
 
-            Matrix4f matrix = context.method_51448().method_23760().method_23761();
+            Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
 
             for (int i = 6; i >= 0; i--) {
                float progress = i / 6.0F;
@@ -218,7 +218,7 @@ public class ModePopupState {
             float contentTop = sY + 4.0F;
             float contentBottom = sY + subH - 4.0F;
             float contentH = contentBottom - contentTop;
-            context.method_44379((int)sX, (int)contentTop, (int)(sX + subW), (int)contentBottom);
+            context.enableScissor((int)sX, (int)contentTop, (int)(sX + subW), (int)contentBottom);
             String curMode = "";
             if (ACTIVE.setting instanceof ModeSetting ms) {
                curMode = ms.get();
@@ -291,11 +291,11 @@ public class ModePopupState {
                }
             }
 
-            context.method_44380();
+            context.disableScissor();
             if (maxScroll > 0.5F) {
                float scrollTrackH = subH - 12.0F;
                float scrollThumbH = Math.max(14.0F, contentH / totalContentH * scrollTrackH);
-               float scrollProgress = class_3532.method_15363(-ACTIVE.scrollY / maxScroll, 0.0F, 1.0F);
+               float scrollProgress = util.math.MathHelper.clamp(-ACTIVE.scrollY / maxScroll, 0.0F, 1.0F);
                float scrollThumbY = sY + 6.0F + scrollProgress * (scrollTrackH - scrollThumbH);
                Builder.rectangle()
                   .size(new SizeState(2.5F, scrollThumbH))
@@ -305,7 +305,7 @@ public class ModePopupState {
                   .render(matrix, sX + subW - 4.5F, scrollThumbY);
             }
 
-            context.method_51448().method_22909();
+            context.getMatrices().pop();
          }
       }
    }
@@ -364,7 +364,7 @@ public class ModePopupState {
          float maxScroll = Math.max(0.0F, totalContentH - visibleCount * 16.0F);
          if (GuiUtils.isMouseOver((float)mouseX, (float)mouseY, sX, sY, subW, subH)) {
             if (maxScroll > 0.5F) {
-               ACTIVE.targetScrollY = class_3532.method_15363(ACTIVE.targetScrollY + (float)amount * 18.0F, -maxScroll, 0.0F);
+               ACTIVE.targetScrollY = util.math.MathHelper.clamp(ACTIVE.targetScrollY + (float)amount * 18.0F, -maxScroll, 0.0F);
             }
 
             return true;

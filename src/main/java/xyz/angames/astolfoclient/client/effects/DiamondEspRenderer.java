@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -10,17 +10,17 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.class_10142;
-import net.minecraft.class_1297;
-import net.minecraft.class_243;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_2960;
-import net.minecraft.class_4587;
-import net.minecraft.class_7833;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -30,7 +30,7 @@ import xyz.angames.astolfoclient.client.util.TargetUtils;
 
 @Environment(EnvType.CLIENT)
 public class DiamondEspRenderer {
-   private static final class_2960 BLOOM_TEXTURE = class_2960.method_60655("astolfoclient", "textures/effects/bloom.png");
+   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
    private final DiamondEspManager manager;
 
    public DiamondEspRenderer(DiamondEspManager manager) {
@@ -41,7 +41,7 @@ public class DiamondEspRenderer {
       Module targetEspModule = AstolfoclientClient.moduleManager.getModuleByName("TargetESP");
       if (targetEspModule != null && targetEspModule.isEnabled()) {
          if (!(targetEspModule instanceof TargetEspModule tem && !tem.mode.is("Diamond"))) {
-            Map<class_1297, DiamondEspManager.DiamondEffect> allEffects = this.manager.getEffects();
+            Map<minecraft.entity.Entity, DiamondEspManager.DiamondEffect> allEffects = this.manager.getEffects();
             if (!allEffects.isEmpty()) {
                List<DiamondEspManager.DiamondEffect> validEffects = new ArrayList<>(allEffects.values());
                if (!validEffects.isEmpty()) {
@@ -50,23 +50,23 @@ public class DiamondEspRenderer {
                   RenderSystem.enableDepthTest();
                   RenderSystem.depthFunc(515);
                   RenderSystem.depthMask(false);
-                  RenderSystem.blendFunc(class_4535.SRC_ALPHA, class_4534.ONE);
-                  class_289 tessellator = class_289.method_1348();
+                  RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+                  client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
                   long currentTime = System.currentTimeMillis();
-                  class_243 cameraPos = context.camera().method_19326();
+                  util.math.Vec3d cameraPos = context.camera().getPos();
 
                   for (DiamondEspManager.DiamondEffect effect : validEffects) {
-                     class_1297 target = effect.target;
-                     if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+                     minecraft.entity.Entity target = effect.target;
+                     if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long timeSinceStart = currentTime - effect.startTime;
                         long timeSinceHit = currentTime - effect.lastHitTime;
                         if (timeSinceHit <= 450L) {
                            float fastTime = (float)timeSinceStart / 1000.0F;
-                           float tickDelta = context.tickCounter().method_60637(true);
-                           double tX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                           double tY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                           double tZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                           float entityCenterY = (float)(tY + target.method_17682() * 0.5F);
+                           float tickDelta = context.tickCounter().getTickDelta(true);
+                           double tX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                           double tY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                           double tZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                           float entityCenterY = (float)(tY + target.getHeight() * 0.5F);
                            float arriveProgress = Math.min(1.0F, (float)timeSinceStart / 400.0F);
                            float arriveEase = this.easeOutCubic(arriveProgress);
                            float scatterProgress = Math.max(0.0F, ((float)timeSinceHit - 360.0F) / 90.0F);
@@ -87,63 +87,63 @@ public class DiamondEspRenderer {
                               float cg = 1.0F - hitColorFactor;
                               float cb = 1.0F - hitColorFactor;
                               int numDiamonds = 18;
-                              float baseRadius = target.method_17681() * 1.1F;
-                              class_4587 matrices = context.matrixStack();
+                              float baseRadius = target.getWidth() * 1.1F;
+                              util.math.MatrixStack matrices = context.matrixStack();
                               RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
-                              RenderSystem.setShader(class_10142.field_53880);
-                              class_287 bbBloom = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+                              RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+                              client.render.BufferBuilder bbBloom = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
 
                               for (int i = 0; i < numDiamonds; i++) {
                                  float[] pos = this.calculateDiamondPosition(
-                                    i, numDiamonds, fastTime, baseRadius, target.method_17682(), arriveEase, scatterEase
+                                    i, numDiamonds, fastTime, baseRadius, target.getHeight(), arriveEase, scatterEase
                                  );
-                                 matrices.method_22903();
-                                 matrices.method_22904(
-                                    tX + pos[0] - cameraPos.field_1352, entityCenterY + pos[1] - cameraPos.field_1351, tZ + pos[2] - cameraPos.field_1350
+                                 matrices.push();
+                                 matrices.translate(
+                                    tX + pos[0] - cameraPos.x, entityCenterY + pos[1] - cameraPos.y, tZ + pos[2] - cameraPos.z
                                  );
-                                 matrices.method_22907(context.camera().method_23767());
+                                 matrices.multiply(context.camera().getRotation());
                                  this.drawBloom(matrices, bbBloom, 0.35F, r, g, b, baseAlpha * 0.6F * pos[3]);
-                                 matrices.method_22909();
+                                 matrices.pop();
                               }
 
-                              class_286.method_43433(bbBloom.method_60800());
-                              RenderSystem.setShader(class_10142.field_53876);
-                              class_287 bbSolid = tessellator.method_60827(class_5596.field_27379, class_290.field_1576);
+                              client.render.BufferRenderer.drawWithGlobalProgram(bbBloom.end());
+                              RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+                              client.render.BufferBuilder bbSolid = tessellator.begin(render.VertexFormat.DrawMode.TRIANGLES, client.render.VertexFormats.POSITION_COLOR);
 
                               for (int i = 0; i < numDiamonds; i++) {
                                  float[] pos = this.calculateDiamondPosition(
-                                    i, numDiamonds, fastTime, baseRadius, target.method_17682(), arriveEase, scatterEase
+                                    i, numDiamonds, fastTime, baseRadius, target.getHeight(), arriveEase, scatterEase
                                  );
-                                 matrices.method_22903();
-                                 matrices.method_22904(
-                                    tX + pos[0] - cameraPos.field_1352, entityCenterY + pos[1] - cameraPos.field_1351, tZ + pos[2] - cameraPos.field_1350
+                                 matrices.push();
+                                 matrices.translate(
+                                    tX + pos[0] - cameraPos.x, entityCenterY + pos[1] - cameraPos.y, tZ + pos[2] - cameraPos.z
                                  );
-                                 matrices.method_22907(class_7833.field_40716.rotationDegrees(fastTime * 60.0F + i * 15.0F));
-                                 matrices.method_22907(class_7833.field_40714.rotationDegrees(fastTime * 40.0F + i * 10.0F));
+                                 matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(fastTime * 60.0F + i * 15.0F));
+                                 matrices.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(fastTime * 40.0F + i * 10.0F));
                                  this.draw3DDiamond(matrices, bbSolid, 0.08F, r, g, b, baseAlpha * 0.8F * pos[3]);
                                  this.draw3DDiamond(matrices, bbSolid, 0.07F, cr, cg, cb, baseAlpha * pos[3]);
-                                 matrices.method_22909();
+                                 matrices.pop();
                               }
 
-                              class_286.method_43433(bbSolid.method_60800());
+                              client.render.BufferRenderer.drawWithGlobalProgram(bbSolid.end());
                               RenderSystem.lineWidth(1.5F);
-                              class_287 bbLines = tessellator.method_60827(class_5596.field_29344, class_290.field_1576);
+                              client.render.BufferBuilder bbLines = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINES, client.render.VertexFormats.POSITION_COLOR);
 
                               for (int i = 0; i < numDiamonds; i++) {
                                  float[] pos = this.calculateDiamondPosition(
-                                    i, numDiamonds, fastTime, baseRadius, target.method_17682(), arriveEase, scatterEase
+                                    i, numDiamonds, fastTime, baseRadius, target.getHeight(), arriveEase, scatterEase
                                  );
-                                 matrices.method_22903();
-                                 matrices.method_22904(
-                                    tX + pos[0] - cameraPos.field_1352, entityCenterY + pos[1] - cameraPos.field_1351, tZ + pos[2] - cameraPos.field_1350
+                                 matrices.push();
+                                 matrices.translate(
+                                    tX + pos[0] - cameraPos.x, entityCenterY + pos[1] - cameraPos.y, tZ + pos[2] - cameraPos.z
                                  );
-                                 matrices.method_22907(class_7833.field_40716.rotationDegrees(fastTime * 60.0F + i * 15.0F));
-                                 matrices.method_22907(class_7833.field_40714.rotationDegrees(fastTime * 40.0F + i * 10.0F));
+                                 matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(fastTime * 60.0F + i * 15.0F));
+                                 matrices.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(fastTime * 40.0F + i * 10.0F));
                                  this.draw3DDiamondLines(matrices, bbLines, 0.08F, r, g, b, baseAlpha * pos[3]);
-                                 matrices.method_22909();
+                                 matrices.pop();
                               }
 
-                              class_286.method_43433(bbLines.method_60800());
+                              client.render.BufferRenderer.drawWithGlobalProgram(bbLines.end());
                               RenderSystem.lineWidth(1.0F);
                            }
                         }
@@ -201,16 +201,16 @@ public class DiamondEspRenderer {
       return t * t;
    }
 
-   private void drawBloom(class_4587 stack, class_287 buffer, float size, float r, float g, float b, float a) {
-      Matrix4f m = stack.method_23760().method_23761();
-      buffer.method_22918(m, -size, size, 0.0F).method_22913(0.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, size, size, 0.0F).method_22913(1.0F, 1.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, size, -size, 0.0F).method_22913(1.0F, 0.0F).method_22915(r, g, b, a);
-      buffer.method_22918(m, -size, -size, 0.0F).method_22913(0.0F, 0.0F).method_22915(r, g, b, a);
+   private void drawBloom(util.math.MatrixStack stack, client.render.BufferBuilder buffer, float size, float r, float g, float b, float a) {
+      Matrix4f m = stack.peek().getPositionMatrix();
+      buffer.vertex(m, -size, size, 0.0F).texture(0.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, size, size, 0.0F).texture(1.0F, 1.0F).color(r, g, b, a);
+      buffer.vertex(m, size, -size, 0.0F).texture(1.0F, 0.0F).color(r, g, b, a);
+      buffer.vertex(m, -size, -size, 0.0F).texture(0.0F, 0.0F).color(r, g, b, a);
    }
 
-   private void draw3DDiamond(class_4587 stack, class_287 buffer, float size, float r, float g, float b, float a) {
-      Matrix4f m = stack.method_23760().method_23761();
+   private void draw3DDiamond(util.math.MatrixStack stack, client.render.BufferBuilder buffer, float size, float r, float g, float b, float a) {
+      Matrix4f m = stack.peek().getPositionMatrix();
       float h = size * 1.8F;
       float w = size * 0.7F;
       this.drawTri(m, buffer, 0.0F, h, 0.0F, -w, 0.0F, -w, w, 0.0F, -w, r, g, b, a);
@@ -224,15 +224,15 @@ public class DiamondEspRenderer {
    }
 
    private void drawTri(
-      Matrix4f m, class_287 b, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float r, float g, float bl, float a
+      Matrix4f m, client.render.BufferBuilder b, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float r, float g, float bl, float a
    ) {
-      b.method_22918(m, x1, y1, z1).method_22915(r, g, bl, a);
-      b.method_22918(m, x2, y2, z2).method_22915(r, g, bl, a);
-      b.method_22918(m, x3, y3, z3).method_22915(r, g, bl, a);
+      b.vertex(m, x1, y1, z1).color(r, g, bl, a);
+      b.vertex(m, x2, y2, z2).color(r, g, bl, a);
+      b.vertex(m, x3, y3, z3).color(r, g, bl, a);
    }
 
-   private void draw3DDiamondLines(class_4587 stack, class_287 buffer, float size, float r, float g, float b, float a) {
-      Matrix4f m = stack.method_23760().method_23761();
+   private void draw3DDiamondLines(util.math.MatrixStack stack, client.render.BufferBuilder buffer, float size, float r, float g, float b, float a) {
+      Matrix4f m = stack.peek().getPositionMatrix();
       float h = size * 1.8F;
       float w = size * 0.7F;
       this.drawLine(m, buffer, -w, 0.0F, -w, w, 0.0F, -w, r, g, b, a);
@@ -249,8 +249,8 @@ public class DiamondEspRenderer {
       this.drawLine(m, buffer, 0.0F, -h, 0.0F, -w, 0.0F, w, r, g, b, a);
    }
 
-   private void drawLine(Matrix4f m, class_287 b, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float bl, float a) {
-      b.method_22918(m, x1, y1, z1).method_22915(r, g, bl, a);
-      b.method_22918(m, x2, y2, z2).method_22915(r, g, bl, a);
+   private void drawLine(Matrix4f m, client.render.BufferBuilder b, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float bl, float a) {
+      b.vertex(m, x1, y1, z1).color(r, g, bl, a);
+      b.vertex(m, x2, y2, z2).color(r, g, bl, a);
    }
 }

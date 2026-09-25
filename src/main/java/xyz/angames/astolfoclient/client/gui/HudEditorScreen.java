@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2561;
-import net.minecraft.class_310;
-import net.minecraft.class_332;
-import net.minecraft.class_437;
+import net.minecraft.text.Text;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 
 @Environment(EnvType.CLIENT)
-public class HudEditorScreen extends class_437 {
+public class HudEditorScreen extends gui.screen.Screen {
    private static final Supplier<MsdfFont> BIKO_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("biko").data("biko").build());
    private Object currentlyDraggedManager = null;
    private static boolean activeVLine = false;
@@ -28,11 +28,11 @@ public class HudEditorScreen extends class_437 {
    private static float activeHLineY = 0.0F;
 
    public HudEditorScreen() {
-      super(class_2561.method_43470("HUD Editor"));
+      super(minecraft.text.Text.literal("HUD Editor"));
    }
 
-   protected void method_25426() {
-      super.method_25426();
+   protected void init() {
+      super.init();
       this.clampAllElements();
    }
 
@@ -55,8 +55,8 @@ public class HudEditorScreen extends class_437 {
                float scale = this.getManagerScaleModifier(manager);
                float w = this.getManagerWidth(manager) * scale;
                float h = this.getManagerHeight(manager) * scale;
-               float maxElemX = Math.max(0.0F, this.field_22789 - w);
-               float maxElemY = Math.max(0.0F, this.field_22790 - h);
+               float maxElemX = Math.max(0.0F, this.width - w);
+               float maxElemY = Math.max(0.0F, this.height - h);
                float curX = 0.0F;
 
                try {
@@ -94,31 +94,31 @@ public class HudEditorScreen extends class_437 {
       }
    }
 
-   public void method_52752(class_332 context) {
+   public void renderInGameBackground(client.gui.DrawContext context) {
    }
 
-   public void method_25394(class_332 context, int mouseX, int mouseY, float delta) {
-      if (class_437.method_25442()) {
+   public void render(client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
+      if (gui.screen.Screen.hasShiftDown()) {
          float gridSpacing = 10.0F;
          int gridColor = 234881023;
 
-         for (float x = gridSpacing; x < this.field_22789; x += gridSpacing) {
-            context.method_25294((int)x, 0, (int)x + 1, this.field_22790, gridColor);
+         for (float x = gridSpacing; x < this.width; x += gridSpacing) {
+            context.fill((int)x, 0, (int)x + 1, this.height, gridColor);
          }
 
-         for (float y = gridSpacing; y < this.field_22790; y += gridSpacing) {
-            context.method_25294(0, (int)y, this.field_22789, (int)y + 1, gridColor);
+         for (float y = gridSpacing; y < this.height; y += gridSpacing) {
+            context.fill(0, (int)y, this.width, (int)y + 1, gridColor);
          }
       }
 
-      class_310 mc = class_310.method_1551();
-      double currentGuiScale = mc.method_22683().method_4495();
+      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      double currentGuiScale = mc.getWindow().getScaleFactor();
       float scaleModifier = (float)(2.0 / currentGuiScale);
-      float hudWidth = this.field_22789 / scaleModifier;
-      float hudHeight = this.field_22790 / scaleModifier;
-      context.method_51448().method_22903();
-      context.method_51448().method_22905(scaleModifier, scaleModifier, 1.0F);
-      Matrix4f matrix = context.method_51448().method_23760().method_23761();
+      float hudWidth = this.width / scaleModifier;
+      float hudHeight = this.height / scaleModifier;
+      context.getMatrices().push();
+      context.getMatrices().scale(scaleModifier, scaleModifier, 1.0F);
+      Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
       MsdfFont bikoFont = (MsdfFont)BIKO_FONT.get();
       Color white = Color.WHITE;
       Color gray = new Color(170, 170, 170);
@@ -143,7 +143,7 @@ public class HudEditorScreen extends class_437 {
       float exitY = 34.0F / scaleModifier;
       Builder.text().font(bikoFont).text(exit).color(new Color(0, 0, 0, 150)).size(exitSize).build().render(matrix, exitX + 1.0F, exitY + 1.0F);
       Builder.text().font(bikoFont).text(exit).color(gray).size(exitSize).build().render(matrix, exitX, exitY);
-      context.method_51448().method_22909();
+      context.getMatrices().pop();
       if (AstolfoclientClient.hudRenderer != null && AstolfoclientClient.hudRenderer.getLogoRenderer() != null) {
          AstolfoclientClient.hudRenderer.getLogoRenderer().render(context);
       }
@@ -157,19 +157,19 @@ public class HudEditorScreen extends class_437 {
       AstolfoclientClient.testHudManager.render(context, delta);
       AstolfoclientClient.musicHudManager.render(context, delta);
       AstolfoclientClient.infoHudManager.render(context, delta);
-      if (class_437.method_25442()) {
+      if (gui.screen.Screen.hasShiftDown()) {
          int guideColor = -65281;
          if (activeVLine) {
-            context.method_25294((int)activeVLineX, 0, (int)activeVLineX + 1, this.field_22790, guideColor);
+            context.fill((int)activeVLineX, 0, (int)activeVLineX + 1, this.height, guideColor);
          }
 
          if (activeHLine) {
-            context.method_25294(0, (int)activeHLineY, this.field_22789, (int)activeHLineY + 1, guideColor);
+            context.fill(0, (int)activeHLineY, this.width, (int)activeHLineY + 1, guideColor);
          }
       }
    }
 
-   public boolean method_25402(double mouseX, double mouseY, int button) {
+   public boolean mouseClicked(double mouseX, double mouseY, int button) {
       this.currentlyDraggedManager = null;
       if (AstolfoclientClient.infoHudManager != null && AstolfoclientClient.infoHudManager.onMouseClicked(mouseX, mouseY, button)) {
          this.currentlyDraggedManager = AstolfoclientClient.infoHudManager;
@@ -199,11 +199,11 @@ public class HudEditorScreen extends class_437 {
          this.currentlyDraggedManager = AstolfoclientClient.targetHudManager;
          return true;
       } else {
-         return super.method_25402(mouseX, mouseY, button);
+         return super.mouseClicked(mouseX, mouseY, button);
       }
    }
 
-   public boolean method_25403(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+   public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
       if (this.currentlyDraggedManager == AstolfoclientClient.infoHudManager && AstolfoclientClient.infoHudManager != null) {
          AstolfoclientClient.infoHudManager.onMouseDragged(mouseX, mouseY, button);
       } else if (this.currentlyDraggedManager == AstolfoclientClient.musicHudManager && AstolfoclientClient.musicHudManager != null) {
@@ -226,15 +226,15 @@ public class HudEditorScreen extends class_437 {
 
       HudEditorScreen.DraggedElement de = this.getDraggedElement();
       if (de != null) {
-         if (class_437.method_25442()) {
+         if (gui.screen.Screen.hasShiftDown()) {
             this.applySnapping(de);
          }
 
          float currentScale = de.scaleModifier;
          float elemW = de.width * currentScale;
          float elemH = de.height * currentScale;
-         float maxElemX = Math.max(0.0F, this.field_22789 - elemW);
-         float maxElemY = Math.max(0.0F, this.field_22790 - elemH);
+         float maxElemX = Math.max(0.0F, this.width - elemW);
+         float maxElemY = Math.max(0.0F, this.height - elemH);
          float curX = de.x;
 
          try {
@@ -271,10 +271,10 @@ public class HudEditorScreen extends class_437 {
          activeHLine = false;
       }
 
-      return super.method_25403(mouseX, mouseY, button, deltaX, deltaY);
+      return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
    }
 
-   public boolean method_25406(double mouseX, double mouseY, int button) {
+   public boolean mouseReleased(double mouseX, double mouseY, int button) {
       activeVLine = false;
       activeHLine = false;
       if (AstolfoclientClient.targetHudManager != null) {
@@ -314,15 +314,15 @@ public class HudEditorScreen extends class_437 {
       }
 
       this.currentlyDraggedManager = null;
-      return super.method_25406(mouseX, mouseY, button);
+      return super.mouseReleased(mouseX, mouseY, button);
    }
 
-   public boolean method_25401(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+   public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
       AstolfoclientClient.musicHudManager.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-      return super.method_25401(mouseX, mouseY, horizontalAmount, verticalAmount);
+      return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
    }
 
-   public boolean method_25421() {
+   public boolean shouldPause() {
       return false;
    }
 
@@ -453,7 +453,7 @@ public class HudEditorScreen extends class_437 {
             f.setAccessible(true);
             return ((Number)f.get(manager)).floatValue();
          } catch (Exception var4) {
-            double currentGuiScale = class_310.method_1551().method_22683().method_4495();
+            double currentGuiScale = minecraft.client.MinecraftClient.getInstance().getWindow().getScaleFactor();
             return (float)(2.0 / currentGuiScale);
          }
       }
@@ -575,7 +575,7 @@ public class HudEditorScreen extends class_437 {
    }
 
    private void applySnapping(HudEditorScreen.DraggedElement de) {
-      if (!class_437.method_25442()) {
+      if (!gui.screen.Screen.hasShiftDown()) {
          activeVLine = false;
          activeHLine = false;
       } else {
@@ -594,7 +594,7 @@ public class HudEditorScreen extends class_437 {
          boolean xSnapped = false;
          activeVLine = false;
          activeVLineX = 0.0F;
-         float screenCenterX = this.field_22789 / 2.0F;
+         float screenCenterX = this.width / 2.0F;
          if (Math.abs(centerX - screenCenterX) < snapThreshold) {
             snappedLeft = screenCenterX - width / 2.0F;
             xSnapped = true;
@@ -652,8 +652,8 @@ public class HudEditorScreen extends class_437 {
             if (Math.abs(left - margin) < snapThreshold) {
                snappedLeft = margin;
                xSnapped = true;
-            } else if (Math.abs(right - (this.field_22789 - margin)) < snapThreshold) {
-               snappedLeft = this.field_22789 - margin - width;
+            } else if (Math.abs(right - (this.width - margin)) < snapThreshold) {
+               snappedLeft = this.width - margin - width;
                xSnapped = true;
             }
          }
@@ -666,7 +666,7 @@ public class HudEditorScreen extends class_437 {
          boolean ySnapped = false;
          activeHLine = false;
          activeHLineY = 0.0F;
-         float screenCenterY = this.field_22790 / 2.0F;
+         float screenCenterY = this.height / 2.0F;
          if (Math.abs(centerY - screenCenterY) < snapThreshold) {
             snappedTop = screenCenterY - height / 2.0F;
             ySnapped = true;
@@ -723,8 +723,8 @@ public class HudEditorScreen extends class_437 {
             if (Math.abs(top - margin) < snapThreshold) {
                snappedTop = margin;
                ySnapped = true;
-            } else if (Math.abs(bottom - (this.field_22790 - margin)) < snapThreshold) {
-               snappedTop = this.field_22790 - margin - height;
+            } else if (Math.abs(bottom - (this.height - margin)) < snapThreshold) {
+               snappedTop = this.height - margin - height;
                ySnapped = true;
             }
          }
@@ -733,8 +733,8 @@ public class HudEditorScreen extends class_437 {
             snappedTop = Math.round(top / gridSpacing) * gridSpacing;
          }
 
-         float maxLeft = Math.max(0.0F, this.field_22789 - width);
-         float maxTop = Math.max(0.0F, this.field_22790 - height);
+         float maxLeft = Math.max(0.0F, this.width - width);
+         float maxTop = Math.max(0.0F, this.height - height);
          snappedLeft = Math.max(0.0F, Math.min(maxLeft, snappedLeft));
          snappedTop = Math.max(0.0F, Math.min(maxTop, snappedTop));
          de.apply(snappedLeft, snappedTop);

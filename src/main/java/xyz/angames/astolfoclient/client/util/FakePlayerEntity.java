@@ -3,38 +3,38 @@ package xyz.angames.astolfoclient.client.util;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1297;
-import net.minecraft.class_1304;
-import net.minecraft.class_1799;
-import net.minecraft.class_1802;
-import net.minecraft.class_638;
-import net.minecraft.class_745;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.network.OtherClientPlayerEntity;
 
 @Environment(EnvType.CLIENT)
-public class FakePlayerEntity extends class_745 {
+public class FakePlayerEntity extends client.network.OtherClientPlayerEntity {
    public static FakePlayerEntity instance = null;
 
-   public FakePlayerEntity(class_638 world, GameProfile profile) {
+   public FakePlayerEntity(client.world.ClientWorld world, GameProfile profile) {
       super(world, profile);
-      this.method_6033(20.0F);
+      this.setHealth(20.0F);
    }
 
-   public boolean method_5810() {
+   public boolean isPushable() {
       return false;
    }
 
-   public boolean method_30948() {
+   public boolean isCollidable() {
       return false;
    }
 
-   public boolean method_30949(class_1297 other) {
+   public boolean collidesWith(minecraft.entity.Entity other) {
       return false;
    }
 
-   public void method_6005(double strength, double x, double z) {
+   public void takeKnockback(double strength, double x, double z) {
    }
 
-   public class_1799 method_6118(class_1304 slot) {
-      return slot == class_1304.field_6171 ? new class_1799(class_1802.field_8288) : super.method_6118(slot);
+   public minecraft.item.ItemStack getEquippedStack(minecraft.entity.EquipmentSlot slot) {
+      return slot == minecraft.entity.EquipmentSlot.OFFHAND ? new minecraft.item.ItemStack(minecraft.item.Items.TOTEM_OF_UNDYING) : super.getEquippedStack(slot);
    }
 }

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_9958;
+import net.minecraft.client.render.Fog;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -16,7 +16,7 @@ import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 @Mixin(RenderSystem.class)
 public class RenderSystemMixin {
    @ModifyVariable(method = "setShaderFog", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-   private static class_9958 modifyFog(class_9958 originalFog) {
+   private static client.render.Fog modifyFog(client.render.Fog originalFog) {
       if (AstolfoclientClient.moduleManager == null) {
          return originalFog;
       }
@@ -44,7 +44,7 @@ public class RenderSystemMixin {
             }
          }
 
-         return new class_9958(start, end, originalFog.comp_3011(), r, g, b, a);
+         return new client.render.Fog(start, end, originalFog.comp_3011(), r, g, b, a);
       } else {
          return originalFog;
       }

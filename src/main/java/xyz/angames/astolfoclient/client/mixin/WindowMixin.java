@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1011;
-import net.minecraft.class_1041;
-import net.minecraft.class_3262;
-import net.minecraft.class_8518;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.util.Window;
+import net.minecraft.resource.ResourcePack;
+import net.minecraft.client.util.Icons;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWImage.Buffer;
@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_1041.class)
+@Mixin(client.util.Window.class)
 public class WindowMixin {
    private boolean iconsSet = false;
 
@@ -30,7 +30,7 @@ public class WindowMixin {
    }
 
    @Inject(method = "setIcon", at = @At("HEAD"), cancellable = true)
-   private void onSetIcon(class_3262 resourcePack, class_8518 icons, CallbackInfo ci) {
+   private void onSetIcon(minecraft.resource.ResourcePack resourcePack, client.util.Icons icons, CallbackInfo ci) {
       ci.cancel();
       if (!this.iconsSet) {
          this.setCustomIcons();
@@ -39,8 +39,8 @@ public class WindowMixin {
    }
 
    private void setCustomIcons() {
-      class_1041 window = (class_1041)this;
-      long handle = window.method_4490();
+      client.util.Window window = (client.util.Window)this;
+      long handle = window.getHandle();
       String[] paths = new String[]{
          "/assets/astolfoclient/textures/gui/logo_black_32.png",
          "/assets/astolfoclient/textures/gui/logo_black_64.png",
@@ -53,15 +53,15 @@ public class WindowMixin {
          for (String path : paths) {
             try (InputStream is = WindowMixin.class.getResourceAsStream(path)) {
                if (is != null) {
-                  class_1011 image = class_1011.method_4309(is);
+                  client.texture.NativeImage image = client.texture.NativeImage.read(is);
                   if (image != null) {
-                     int w = image.method_4307();
-                     int h = image.method_4323();
+                     int w = image.getWidth();
+                     int h = image.getHeight();
                      ByteBuffer buf = MemoryUtil.memAlloc(w * h * 4);
 
                      for (int y = 0; y < h; y++) {
                         for (int x = 0; x < w; x++) {
-                           int argb = image.method_61940(x, y);
+                           int argb = image.getColorArgb(x, y);
                            buf.put((byte)(argb >> 16 & 0xFF));
                            buf.put((byte)(argb >> 8 & 0xFF));
                            buf.put((byte)(argb & 0xFF));

@@ -1,23 +1,23 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.class_10142;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_2960;
-import net.minecraft.class_3532;
-import net.minecraft.class_4587;
-import net.minecraft.class_7833;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -25,11 +25,11 @@ import xyz.angames.astolfoclient.client.module.modules.render.ParticlesModule;
 
 @Environment(EnvType.CLIENT)
 public class ParticleRenderer {
-   private static final class_2960 BUBBLES_TEX = class_2960.method_60655("astolfoclient", "textures/effects/bubbles.png");
-   private static final class_2960 STARS_TEX = class_2960.method_60655("astolfoclient", "textures/effects/stars.png");
-   private static final class_2960 DOLLARS_TEX = class_2960.method_60655("astolfoclient", "textures/effects/dollars.png");
-   private static final class_2960 HEART_TEX = class_2960.method_60655("astolfoclient", "textures/effects/bloom.png");
-   private static final class_2960 SMOLESTAR_TEX = class_2960.method_60655("astolfoclient", "textures/effects/mini-star.png");
+   private static final minecraft.util.Identifier BUBBLES_TEX = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bubbles.png");
+   private static final minecraft.util.Identifier STARS_TEX = minecraft.util.Identifier.of("astolfoclient", "textures/effects/stars.png");
+   private static final minecraft.util.Identifier DOLLARS_TEX = minecraft.util.Identifier.of("astolfoclient", "textures/effects/dollars.png");
+   private static final minecraft.util.Identifier HEART_TEX = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
+   private static final minecraft.util.Identifier SMOLESTAR_TEX = minecraft.util.Identifier.of("astolfoclient", "textures/effects/mini-star.png");
    private final ParticleManager manager;
 
    public ParticleRenderer(ParticleManager manager) {
@@ -42,27 +42,27 @@ public class ParticleRenderer {
          List<Particle> allParticles = this.manager.getParticles();
          if (!allParticles.isEmpty()) {
             long currentTime = System.currentTimeMillis();
-            float tickDelta = context.tickCounter().method_60637(true);
+            float tickDelta = context.tickCounter().getTickDelta(true);
             RenderSystem.enableBlend();
             RenderSystem.disableCull();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
-            RenderSystem.blendFunc(class_4535.SRC_ALPHA, class_4534.ONE);
-            RenderSystem.setShader(class_10142.field_53880);
-            class_289 tessellator = class_289.method_1348();
+            RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+            client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
 
             for (ParticlesModule.ParticleType type : ParticlesModule.ParticleType.values()) {
                boolean bound = false;
-               class_287 buffer = null;
+               client.render.BufferBuilder buffer = null;
 
                for (Particle particle : allParticles) {
                   if (particle.type == type) {
                      long age = currentTime - particle.creationTime;
                      if (age <= particle.lifespan) {
                         if (!bound) {
-                           RenderSystem.setShader(class_10142.field_53880);
+                           RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
                            RenderSystem.setShaderTexture(0, this.getTextureForType(type));
-                           buffer = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+                           buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
                            bound = true;
                         }
 
@@ -72,32 +72,32 @@ public class ParticleRenderer {
                         float r = particleColor.getRed() / 255.0F;
                         float g = particleColor.getGreen() / 255.0F;
                         float b = particleColor.getBlue() / 255.0F;
-                        double x = class_3532.method_16436(tickDelta, particle.prevPosition.field_1352, particle.position.field_1352);
-                        double y = class_3532.method_16436(tickDelta, particle.prevPosition.field_1351, particle.position.field_1351);
-                        double z = class_3532.method_16436(tickDelta, particle.prevPosition.field_1350, particle.position.field_1350);
-                        class_4587 matrixStack = context.matrixStack();
-                        matrixStack.method_22903();
-                        matrixStack.method_22904(
-                           x - context.camera().method_19326().field_1352,
-                           y - context.camera().method_19326().field_1351,
-                           z - context.camera().method_19326().field_1350
+                        double x = util.math.MathHelper.lerp(tickDelta, particle.prevPosition.x, particle.position.x);
+                        double y = util.math.MathHelper.lerp(tickDelta, particle.prevPosition.y, particle.position.y);
+                        double z = util.math.MathHelper.lerp(tickDelta, particle.prevPosition.z, particle.position.z);
+                        util.math.MatrixStack matrixStack = context.matrixStack();
+                        matrixStack.push();
+                        matrixStack.translate(
+                           x - context.camera().getPos().x,
+                           y - context.camera().getPos().y,
+                           z - context.camera().getPos().z
                         );
-                        matrixStack.method_22907(context.camera().method_23767());
+                        matrixStack.multiply(context.camera().getRotation());
                         float finalScale = particle.scale / 2.5F;
-                        matrixStack.method_22905(finalScale, finalScale, finalScale);
-                        matrixStack.method_22907(class_7833.field_40718.rotationDegrees(particle.rotation + (float)age * 0.1F));
-                        Matrix4f matrix = matrixStack.method_23760().method_23761();
-                        buffer.method_22918(matrix, -0.5F, -0.5F, 0.0F).method_22913(0.0F, 1.0F).method_22915(r, g, b, alpha);
-                        buffer.method_22918(matrix, 0.5F, -0.5F, 0.0F).method_22913(1.0F, 1.0F).method_22915(r, g, b, alpha);
-                        buffer.method_22918(matrix, 0.5F, 0.5F, 0.0F).method_22913(1.0F, 0.0F).method_22915(r, g, b, alpha);
-                        buffer.method_22918(matrix, -0.5F, 0.5F, 0.0F).method_22913(0.0F, 0.0F).method_22915(r, g, b, alpha);
-                        matrixStack.method_22909();
+                        matrixStack.scale(finalScale, finalScale, finalScale);
+                        matrixStack.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(particle.rotation + (float)age * 0.1F));
+                        Matrix4f matrix = matrixStack.peek().getPositionMatrix();
+                        buffer.vertex(matrix, -0.5F, -0.5F, 0.0F).texture(0.0F, 1.0F).color(r, g, b, alpha);
+                        buffer.vertex(matrix, 0.5F, -0.5F, 0.0F).texture(1.0F, 1.0F).color(r, g, b, alpha);
+                        buffer.vertex(matrix, 0.5F, 0.5F, 0.0F).texture(1.0F, 0.0F).color(r, g, b, alpha);
+                        buffer.vertex(matrix, -0.5F, 0.5F, 0.0F).texture(0.0F, 0.0F).color(r, g, b, alpha);
+                        matrixStack.pop();
                      }
                   }
                }
 
                if (bound && buffer != null) {
-                  class_286.method_43433(buffer.method_60800());
+                  client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
                }
             }
 
@@ -110,7 +110,7 @@ public class ParticleRenderer {
       }
    }
 
-   private class_2960 getTextureForType(ParticlesModule.ParticleType type) {
+   private minecraft.util.Identifier getTextureForType(ParticlesModule.ParticleType type) {
       switch (type) {
          case BUBBLES:
             return BUBBLES_TEX;

@@ -19,13 +19,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRe
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.AfterTranslucent;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.Last;
-import net.minecraft.class_10149;
-import net.minecraft.class_10156;
-import net.minecraft.class_1299;
-import net.minecraft.class_1309;
-import net.minecraft.class_290;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
+import net.minecraft.client.gl.Defines;
+import net.minecraft.client.gl.ShaderProgramKey;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
 import xyz.angames.astolfoclient.client.command.CommandManager;
 import xyz.angames.astolfoclient.client.config.ConfigManager;
 import xyz.angames.astolfoclient.client.effects.BlockOutlineRenderer;
@@ -132,20 +132,20 @@ public class AstolfoclientClient implements ClientModInitializer {
    public static DiamondEspRenderer diamondEspRenderer;
    public static TrajectoriesRenderer trajectoriesRenderer;
    public static ActiveBindsManager activeBindsManager;
-   public static final class_10156 CHAMS_OUTLINE_SHADER = new class_10156(
-      class_2960.method_60655("astolfoclient", "core/chams_outline"), class_290.field_1585, class_10149.field_53930
+   public static final client.gl.ShaderProgramKey CHAMS_OUTLINE_SHADER = new client.gl.ShaderProgramKey(
+      minecraft.util.Identifier.of("astolfoclient", "core/chams_outline"), client.render.VertexFormats.POSITION_TEXTURE, client.gl.Defines.EMPTY
    );
-   public static final class_10156 LIQUID_GLASS_SHADER = new class_10156(
-      class_2960.method_60655("astolfoclient", "core/liquid_glass"), class_290.field_1580, class_10149.field_53930
+   public static final client.gl.ShaderProgramKey LIQUID_GLASS_SHADER = new client.gl.ShaderProgramKey(
+      minecraft.util.Identifier.of("astolfoclient", "core/liquid_glass"), client.render.VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, client.gl.Defines.EMPTY
    );
-   public static final class_10156 COSMOS_FILL_SHADER = new class_10156(
-      class_2960.method_60655("astolfoclient", "core/cosmos_fill"), class_290.field_1575, class_10149.field_53930
+   public static final client.gl.ShaderProgramKey COSMOS_FILL_SHADER = new client.gl.ShaderProgramKey(
+      minecraft.util.Identifier.of("astolfoclient", "core/cosmos_fill"), client.render.VertexFormats.POSITION_TEXTURE_COLOR, client.gl.Defines.EMPTY
    );
-   public static final class_10156 CHINA_HAT_SHADER = new class_10156(
-      class_2960.method_60655("astolfoclient", "core/china_hat"), class_290.field_1575, class_10149.field_53930
+   public static final client.gl.ShaderProgramKey CHINA_HAT_SHADER = new client.gl.ShaderProgramKey(
+      minecraft.util.Identifier.of("astolfoclient", "core/china_hat"), client.render.VertexFormats.POSITION_TEXTURE_COLOR, client.gl.Defines.EMPTY
    );
-   public static final class_10156 BLOCK_OUTLINE_SHADER = new class_10156(
-      class_2960.method_60655("astolfoclient", "core/block_outline"), class_290.field_1575, class_10149.field_53930
+   public static final client.gl.ShaderProgramKey BLOCK_OUTLINE_SHADER = new client.gl.ShaderProgramKey(
+      minecraft.util.Identifier.of("astolfoclient", "core/block_outline"), client.render.VertexFormats.POSITION_TEXTURE_COLOR, client.gl.Defines.EMPTY
    );
    private DiscordRpcManager discordRpcManager;
    public static int clickGuiKeyCode = 260;
@@ -289,17 +289,17 @@ public class AstolfoclientClient implements ClientModInitializer {
          } catch (Exception var16) {
          }
 
-         if (FakePlayerEntity.instance != null && (client.field_1687 == null || FakePlayerEntity.instance.method_37908() != client.field_1687)) {
+         if (FakePlayerEntity.instance != null && (client.world == null || FakePlayerEntity.instance.getWorld() != client.world)) {
             try {
-               FakePlayerEntity.instance.method_31472();
+               FakePlayerEntity.instance.discard();
             } catch (Exception var15) {
             }
 
             FakePlayerEntity.instance = null;
          }
 
-         if (client.method_22683() != null) {
-            client.method_22683().method_24286("Astolfo Visuals 2.0 | https://fakecrime.bio/SRS");
+         if (client.getWindow() != null) {
+            client.getWindow().setTitle("Astolfo Visuals 2.0 | https://fakecrime.bio/SRS");
          }
 
          for (Module module : moduleManager.getModules()) {
@@ -309,10 +309,10 @@ public class AstolfoclientClient implements ClientModInitializer {
             }
          }
 
-         if (client.field_1724 != null && client.field_1687 != null) {
-            if (!(client.field_1755 instanceof HudEditorScreen)) {
+         if (client.player != null && client.world != null) {
+            if (!(client.currentScreen instanceof HudEditorScreen)) {
                try {
-                  class_1309 lookedTarget = TargetUtils.getLookedAtTarget(client, 40.0);
+                  minecraft.entity.LivingEntity lookedTarget = TargetUtils.getLookedAtTarget(client, 40.0);
                   if (lookedTarget != null) {
                      if (targetHudManager != null && isModuleEnabled("TargetHUD")) {
                         targetHudManager.setTarget(lookedTarget);
@@ -369,7 +369,7 @@ public class AstolfoclientClient implements ClientModInitializer {
       });
       LivingEntityFeatureRendererRegistrationCallback.EVENT
          .register((LivingEntityFeatureRendererRegistrationCallback)(entityType, entityRenderer, registrationHelper, context) -> {
-            if (entityType == class_1299.field_6097) {
+            if (entityType == minecraft.entity.EntityType.PLAYER) {
                registrationHelper.register(new ChinaHatFeatureRenderer(entityRenderer));
             }
          });
@@ -459,7 +459,7 @@ public class AstolfoclientClient implements ClientModInitializer {
          }
       });
       HudRenderCallback.EVENT.register((HudRenderCallback)(drawContext, tickDelta) -> {
-         class_310 client = class_310.method_1551();
+         minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
 
          for (Module module : moduleManager.getModules()) {
             if (module.isEnabled()) {
@@ -470,10 +470,10 @@ public class AstolfoclientClient implements ClientModInitializer {
             }
          }
 
-         if (client.field_1724 != null && client.field_1755 == null) {
+         if (client.player != null && client.currentScreen == null) {
             if (isModuleEnabled("TargetHUD")) {
                try {
-                  targetHudManager.render(drawContext, tickDelta.method_60637(true));
+                  targetHudManager.render(drawContext, tickDelta.getTickDelta(true));
                } catch (Exception var19) {
                }
             }
@@ -494,21 +494,21 @@ public class AstolfoclientClient implements ClientModInitializer {
 
             if (isModuleEnabled("ActiveBinds")) {
                try {
-                  activeBindsManager.render(drawContext, tickDelta.method_60637(true));
+                  activeBindsManager.render(drawContext, tickDelta.getTickDelta(true));
                } catch (Exception var16) {
                }
             }
 
             if (isModuleEnabled("Test")) {
                try {
-                  testHudManager.render(drawContext, tickDelta.method_60637(true));
+                  testHudManager.render(drawContext, tickDelta.getTickDelta(true));
                } catch (Exception var15) {
                }
             }
 
             if (isModuleEnabled("InfoHud")) {
                try {
-                  infoHudManager.render(drawContext, tickDelta.method_60637(true));
+                  infoHudManager.render(drawContext, tickDelta.getTickDelta(true));
                } catch (Exception var14) {
                }
             }
@@ -536,7 +536,7 @@ public class AstolfoclientClient implements ClientModInitializer {
 
             if (isModuleEnabled("CustomHotbar")) {
                try {
-                  customHotbarManager.render(drawContext, tickDelta.method_60637(true));
+                  customHotbarManager.render(drawContext, tickDelta.getTickDelta(true));
                } catch (Exception var10) {
                }
             }
@@ -550,13 +550,13 @@ public class AstolfoclientClient implements ClientModInitializer {
 
             if (isModuleEnabled("MusicHUD")) {
                try {
-                  musicHudManager.render(drawContext, tickDelta.method_60637(true));
+                  musicHudManager.render(drawContext, tickDelta.getTickDelta(true));
                } catch (Exception var8) {
                }
             }
 
             try {
-               hudRenderer.render(drawContext, tickDelta.method_60637(true));
+               hudRenderer.render(drawContext, tickDelta.getTickDelta(true));
             } catch (Exception var7) {
             }
 

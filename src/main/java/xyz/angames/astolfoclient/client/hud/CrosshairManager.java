@@ -6,35 +6,35 @@ import dev.sxmurxy.mre.builders.states.SizeState;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_310;
-import net.minecraft.class_332;
-import net.minecraft.class_5498;
-import net.minecraft.class_239.class_240;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.option.Perspective;
+import net.minecraft.util.hit.HitResult.Type;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.modules.render.CrosshairModule;
 
 @Environment(EnvType.CLIENT)
 public class CrosshairManager {
-   private final class_310 client = class_310.method_1551();
+   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
    private final Color entityColor = new Color(255, 50, 50);
 
-   public void render(class_332 context) {
-      if (this.client.field_1724 != null && this.client.field_1690.method_31044() == class_5498.field_26664) {
+   public void render(client.gui.DrawContext context) {
+      if (this.client.player != null && this.client.options.getPerspective() == client.option.Perspective.FIRST_PERSON) {
          CrosshairModule module = (CrosshairModule)AstolfoclientClient.moduleManager.getModuleByName("Crosshair");
          if (module != null && module.isEnabled()) {
-            Matrix4f matrix = context.method_51448().method_23760().method_23761();
-            float x = this.client.method_22683().method_4486() / 2.0F;
-            float y = this.client.method_22683().method_4502() / 2.0F;
+            Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
+            float x = this.client.getWindow().getScaledWidth() / 2.0F;
+            float y = this.client.getWindow().getScaledHeight() / 2.0F;
             float gap = module.getGap();
             if (module.hasDynamicGap()) {
-               float cooldown = 1.0F - this.client.field_1724.method_7261(0.0F);
+               float cooldown = 1.0F - this.client.player.getAttackCooldownProgress(0.0F);
                gap += 8.0F * cooldown * cooldown;
             }
 
             float thickness = module.getThickness();
             float length = module.getLength();
-            Color color = module.usesEntityColor() && this.client.field_1765 != null && this.client.field_1765.method_17783() == class_240.field_1331
+            Color color = module.usesEntityColor() && this.client.crosshairTarget != null && this.client.crosshairTarget.getType() == hit.HitResult.Type.ENTITY
                ? this.entityColor
                : Color.WHITE;
             Builder.rectangle()

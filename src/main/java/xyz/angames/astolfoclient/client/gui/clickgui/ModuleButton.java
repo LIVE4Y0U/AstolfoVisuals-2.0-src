@@ -9,7 +9,7 @@ import dev.sxmurxy.mre.msdf.MsdfFont;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_332;
+import net.minecraft.client.gui.DrawContext;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.gui.ClickGuiScreen;
@@ -53,7 +53,7 @@ public class ModuleButton {
       return 24.0F + this.settingsPanel.getTotalHeight();
    }
 
-   public void render(class_332 context, ClickGuiScreen parentGui, int mouseX, int mouseY, float alpha, float deltaTime) {
+   public void render(client.gui.DrawContext context, ClickGuiScreen parentGui, int mouseX, int mouseY, float alpha, float deltaTime) {
       float effectiveAlpha = alpha * this.renderAlpha;
       if (!(effectiveAlpha <= 0.02F)) {
          this.settingsPanel.updateRows();
@@ -64,16 +64,16 @@ public class ModuleButton {
          boolean hov = GuiUtils.isMouseOver(mouseX, mouseY, this.x, this.y, this.width, 24.0F);
          this.hoverAnim = GuiUtils.animate(this.hoverAnim, hov ? 1.0F : 0.0F, 14.0F, deltaTime);
          Color themeColor = new Color(ThemeManager.getThemedColor(0L));
-         context.method_51448().method_22903();
+         context.getMatrices().push();
          if (this.renderScale < 0.999F) {
             float cx = this.x + this.width / 2.0F;
             float cy = this.y + this.height / 2.0F;
-            context.method_51448().method_46416(cx, cy, 0.0F);
-            context.method_51448().method_22905(this.renderScale, this.renderScale, 1.0F);
-            context.method_51448().method_46416(-cx, -cy, 0.0F);
+            context.getMatrices().translate(cx, cy, 0.0F);
+            context.getMatrices().scale(this.renderScale, this.renderScale, 1.0F);
+            context.getMatrices().translate(-cx, -cy, 0.0F);
          }
 
-         Matrix4f mx = context.method_51448().method_23760().method_23761();
+         Matrix4f mx = context.getMatrices().peek().getPositionMatrix();
          Color cardBg = GuiUtils.interpolateColor(C_CARD_BG, C_CARD_BG_HOV, this.hoverAnim);
          Builder.rectangle()
             .size(new SizeState(this.width, this.height))
@@ -138,7 +138,7 @@ public class ModuleButton {
             this.settingsPanel.render(context, this.x, this.y + 24.0F, this.width, effectiveAlpha, mouseX, mouseY, deltaTime);
          }
 
-         context.method_51448().method_22909();
+         context.getMatrices().pop();
       }
    }
 

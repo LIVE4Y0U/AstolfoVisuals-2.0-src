@@ -2,10 +2,10 @@ package xyz.angames.astolfoclient.client.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
-import net.minecraft.class_742;
-import net.minecraft.class_8685;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.util.SkinTextures;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,24 +13,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.util.FriendManager;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_742.class)
+@Mixin(client.network.AbstractClientPlayerEntity.class)
 public class AbstractClientPlayerEntityMixin {
-   private static final class_2960 CUSTOM_CAPE = class_2960.method_60655("astolfoclient", "textures/cape.png");
+   private static final minecraft.util.Identifier CUSTOM_CAPE = minecraft.util.Identifier.of("astolfoclient", "textures/cape.png");
 
    @Inject(method = "getSkinTextures", at = @At("RETURN"), cancellable = true)
-   private void onGetSkinTextures(CallbackInfoReturnable<class_8685> cir) {
-      class_742 player = (class_742)this;
-      class_310 mc = class_310.method_1551();
-      boolean isSelf = mc.field_1724 != null && player.method_5667().equals(mc.field_1724.method_5667());
-      boolean isFriend = player.method_5477() != null && FriendManager.isFriend(player.method_5477().getString())
-         || player.method_7334() != null && FriendManager.isFriend(player.method_7334().getName());
+   private void onGetSkinTextures(CallbackInfoReturnable<client.util.SkinTextures> cir) {
+      client.network.AbstractClientPlayerEntity player = (client.network.AbstractClientPlayerEntity)this;
+      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      boolean isSelf = mc.player != null && player.getUuid().equals(mc.player.getUuid());
+      boolean isFriend = player.getName() != null && FriendManager.isFriend(player.getName().getString())
+         || player.getGameProfile() != null && FriendManager.isFriend(player.getGameProfile().getName());
       if (isSelf || isFriend) {
-         class_8685 original = (class_8685)cir.getReturnValue();
+         client.util.SkinTextures original = (client.util.SkinTextures)cir.getReturnValue();
          if (original == null) {
             return;
          }
 
-         class_8685 customTextures = new class_8685(
+         client.util.SkinTextures customTextures = new client.util.SkinTextures(
             original.comp_1626(), original.comp_1911(), CUSTOM_CAPE, CUSTOM_CAPE, original.comp_1629(), original.comp_1630()
          );
          cir.setReturnValue(customTextures);

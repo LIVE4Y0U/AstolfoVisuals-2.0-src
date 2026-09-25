@@ -3,14 +3,14 @@ package xyz.angames.astolfoclient.client.effects;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_243;
+import net.minecraft.util.math.Vec3d;
 import xyz.angames.astolfoclient.client.module.modules.render.ParticlesModule;
 
 @Environment(EnvType.CLIENT)
 public class Particle {
-   public class_243 position;
-   public class_243 prevPosition;
-   public class_243 velocity;
+   public util.math.Vec3d position;
+   public util.math.Vec3d prevPosition;
+   public util.math.Vec3d velocity;
    public final long creationTime = System.currentTimeMillis();
    public final float rotation;
    public final float scale;
@@ -19,11 +19,11 @@ public class Particle {
    public final long lifespan;
    public final Color color;
    public final Particle.ParticleAnimation animation;
-   public final class_243 origin;
+   public final util.math.Vec3d origin;
    public double extraData1;
    public double extraData2;
 
-   public Particle(class_243 position, class_243 velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan) {
+   public Particle(util.math.Vec3d position, util.math.Vec3d velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan) {
       this(
          position,
          velocity,
@@ -38,7 +38,7 @@ public class Particle {
       );
    }
 
-   public Particle(class_243 position, class_243 velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan, Color color) {
+   public Particle(util.math.Vec3d position, util.math.Vec3d velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan, Color color) {
       this(
          position,
          velocity,
@@ -54,14 +54,14 @@ public class Particle {
    }
 
    public Particle(
-      class_243 position,
-      class_243 velocity,
+      util.math.Vec3d position,
+      util.math.Vec3d velocity,
       ParticlesModule.ParticleType type,
       boolean hasPhysics,
       long lifespan,
       Color color,
       Particle.ParticleAnimation animation,
-      class_243 origin,
+      util.math.Vec3d origin,
       double extraData1,
       double extraData2
    ) {

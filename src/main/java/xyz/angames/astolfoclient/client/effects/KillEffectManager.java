@@ -8,11 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1297;
-import net.minecraft.class_1309;
-import net.minecraft.class_238;
-import net.minecraft.class_243;
-import net.minecraft.class_310;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.MinecraftClient;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.modules.render.KillEffectModule;
 
@@ -21,16 +21,16 @@ public class KillEffectManager {
    public static final long LIFESPAN = 3000L;
    private final List<KillEffectManager.KillEffect> effects = new CopyOnWriteArrayList<>();
    private final Map<Integer, KillEffectManager.TrackedTarget> recentAttacks = new ConcurrentHashMap<>();
-   private final class_310 client = class_310.method_1551();
+   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
 
-   public void onAttack(class_1297 target) {
-      if (target instanceof class_1309 living) {
-         this.recentAttacks.put(target.method_5628(), new KillEffectManager.TrackedTarget(living));
+   public void onAttack(minecraft.entity.Entity target) {
+      if (target instanceof minecraft.entity.LivingEntity living) {
+         this.recentAttacks.put(target.getId(), new KillEffectManager.TrackedTarget(living));
       }
    }
 
    public void tick() {
-      if (this.client.field_1687 != null && this.client.field_1724 != null) {
+      if (this.client.world != null && this.client.player != null) {
          long now = System.currentTimeMillis();
 
          for (Entry<Integer, KillEffectManager.TrackedTarget> entry : this.recentAttacks.entrySet()) {
@@ -39,25 +39,25 @@ public class KillEffectManager {
             if (now - tracked.lastHitTime > 10000L) {
                this.recentAttacks.remove(id);
             } else {
-               class_1297 currentEntity = this.client.field_1687.method_8469(id);
+               minecraft.entity.Entity currentEntity = this.client.world.getEntityById(id);
                boolean isKilled = false;
-               class_243 deathPos = tracked.lastPos;
-               class_238 deathBox = tracked.lastBox;
+               util.math.Vec3d deathPos = tracked.lastPos;
+               util.math.Box deathBox = tracked.lastBox;
                if (currentEntity == null) {
                   isKilled = true;
-               } else if (currentEntity instanceof class_1309 living) {
-                  class_243 currentPos = living.method_19538();
-                  if (living.method_29504() || living.method_6032() <= 0.0F || living.field_6213 > 0 || !living.method_5805()) {
+               } else if (currentEntity instanceof minecraft.entity.LivingEntity living) {
+                  util.math.Vec3d currentPos = living.getPos();
+                  if (living.isDead() || living.getHealth() <= 0.0F || living.deathTime > 0 || !living.isAlive()) {
                      isKilled = true;
                      deathPos = currentPos;
-                     deathBox = living.method_5829();
-                  } else if (currentPos.method_1025(tracked.lastPos) > 400.0) {
+                     deathBox = living.getBoundingBox();
+                  } else if (currentPos.squaredDistanceTo(tracked.lastPos) > 400.0) {
                      isKilled = true;
                   }
 
                   if (!isKilled) {
                      tracked.lastPos = currentPos;
-                     tracked.lastBox = living.method_5829();
+                     tracked.lastBox = living.getBoundingBox();
                   }
                }
 
@@ -83,29 +83,29 @@ public class KillEffectManager {
 
    @Environment(EnvType.CLIENT)
    public static class KillEffect {
-      public final class_243 pos;
+      public final util.math.Vec3d pos;
       public final String mode;
       public final long startTime;
-      public final List<class_243> zapPoints = new ArrayList<>();
+      public final List<util.math.Vec3d> zapPoints = new ArrayList<>();
       public final List<KillEffectManager.ThanosParticle> thanosParticles = new ArrayList<>();
 
-      public KillEffect(class_243 pos, class_238 box, String mode, long startTime) {
+      public KillEffect(util.math.Vec3d pos, util.math.Box box, String mode, long startTime) {
          this.pos = pos;
          this.mode = mode;
          this.startTime = startTime;
          if (mode.equals("Zap")) {
             float currentX = 0.0F;
             float currentZ = 0.0F;
-            this.zapPoints.add(new class_243(0.0, 0.0, 0.0));
+            this.zapPoints.add(new util.math.Vec3d(0.0, 0.0, 0.0));
 
             for (float y = 1.0F + (float)Math.random() * 1.5F; y <= 20.0F; y = (float)(y + (1.0 + Math.random() * 1.5))) {
                currentX = (float)(currentX + (Math.random() - 0.5) * 3.5);
                currentZ = (float)(currentZ + (Math.random() - 0.5) * 3.5);
-               this.zapPoints.add(new class_243(currentX, y, currentZ));
+               this.zapPoints.add(new util.math.Vec3d(currentX, y, currentZ));
             }
          } else if (mode.equals("Thanos")) {
-            float width = box != null ? (float)(box.field_1320 - box.field_1323) : 0.6F;
-            float height = box != null ? (float)(box.field_1325 - box.field_1322) : 1.8F;
+            float width = box != null ? (float)(box.maxX - box.minX) : 0.6F;
+            float height = box != null ? (float)(box.maxY - box.minY) : 1.8F;
 
             for (int i = 0; i < 500; i++) {
                KillEffectManager.ThanosParticle p = new KillEffectManager.ThanosParticle();
@@ -131,13 +131,13 @@ public class KillEffectManager {
 
    @Environment(EnvType.CLIENT)
    private static class TrackedTarget {
-      public class_243 lastPos;
-      public class_238 lastBox;
+      public util.math.Vec3d lastPos;
+      public util.math.Box lastBox;
       public final long lastHitTime;
 
-      public TrackedTarget(class_1309 entity) {
-         this.lastPos = entity.method_19538();
-         this.lastBox = entity.method_5829();
+      public TrackedTarget(minecraft.entity.LivingEntity entity) {
+         this.lastPos = entity.getPos();
+         this.lastBox = entity.getBoundingBox();
          this.lastHitTime = System.currentTimeMillis();
       }
    }

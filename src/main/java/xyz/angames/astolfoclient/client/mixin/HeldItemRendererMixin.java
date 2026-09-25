@@ -2,17 +2,17 @@ package xyz.angames.astolfoclient.client.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1268;
-import net.minecraft.class_1306;
-import net.minecraft.class_1799;
-import net.minecraft.class_1806;
-import net.minecraft.class_310;
-import net.minecraft.class_4587;
-import net.minecraft.class_4597;
-import net.minecraft.class_742;
-import net.minecraft.class_746;
-import net.minecraft.class_759;
-import net.minecraft.class_4597.class_4598;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Arm;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.FilledMapItem;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.item.HeldItemRenderer;
+import net.minecraft.client.render.VertexConsumerProvider.Immediate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,13 +24,13 @@ import xyz.angames.astolfoclient.client.module.modules.render.ShaderHand;
 import xyz.angames.astolfoclient.client.module.modules.render.SwingAnimationModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_759.class)
+@Mixin(render.item.HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
    @Inject(
       method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",
       at = @At("HEAD")
    )
-   private void onRenderFirstPersonItemsHead(float tickDelta, class_4587 matrices, class_4598 vertexConsumers, class_746 player, int light, CallbackInfo ci) {
+   private void onRenderFirstPersonItemsHead(float tickDelta, util.math.MatrixStack matrices, render.VertexConsumerProvider.Immediate vertexConsumers, client.network.ClientPlayerEntity player, int light, CallbackInfo ci) {
       SwingAnimationModule swingAnim = (SwingAnimationModule)ModuleManager.getModule(SwingAnimationModule.class);
       if (swingAnim != null) {
          swingAnim.updatePhysics(player, tickDelta);
@@ -44,19 +44,19 @@ public abstract class HeldItemRendererMixin {
    }
 
    @Shadow
-   protected abstract void method_3219(class_4587 var1, class_4597 var2, int var3, float var4, float var5, class_1306 var6);
+   protected abstract void renderArmHoldingItem(util.math.MatrixStack var1, client.render.VertexConsumerProvider var2, int var3, float var4, float var5, minecraft.util.Arm var6);
 
    @Inject(method = "renderFirstPersonItem", at = @At("HEAD"), cancellable = true)
    private void onRenderFirstPersonItem(
-      class_742 player,
+      client.network.AbstractClientPlayerEntity player,
       float tickDelta,
       float pitch,
-      class_1268 hand,
+      minecraft.util.Hand hand,
       float swingProgress,
-      class_1799 item,
+      minecraft.item.ItemStack item,
       float equipProgress,
-      class_4587 matrices,
-      class_4597 vertexConsumers,
+      util.math.MatrixStack matrices,
+      client.render.VertexConsumerProvider vertexConsumers,
       int light,
       CallbackInfo ci
    ) {
@@ -64,7 +64,7 @@ public abstract class HeldItemRendererMixin {
       HandPositionModule handMod = (HandPositionModule)ModuleManager.getModule(HandPositionModule.class);
       boolean swingEnabled = swingMod != null && swingMod.isEnabled();
       boolean handEnabled = handMod != null && handMod.isEnabled();
-      if ((swingEnabled || handEnabled) && !item.method_7960() && !(item.method_7909() instanceof class_1806)) {
+      if ((swingEnabled || handEnabled) && !item.isEmpty() && !(item.getItem() instanceof minecraft.item.FilledMapItem)) {
          ci.cancel();
          if (swingMod != null) {
             swingMod.handleRenderItem(player, tickDelta, pitch, hand, swingProgress, item, equipProgress, matrices, vertexConsumers, light);
@@ -74,15 +74,15 @@ public abstract class HeldItemRendererMixin {
 
    @Inject(method = "renderArmHoldingItem", at = @At("HEAD"))
    private void onRenderArmHoldingItemHead(
-      class_4587 matrices, class_4597 vertexConsumers, int light, float equipProgress, float swingProgress, class_1306 arm, CallbackInfo ci
+      util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, minecraft.util.Arm arm, CallbackInfo ci
    ) {
       if (!SwingAnimationModule.renderingCustomItem) {
          HandPositionModule handMod = (HandPositionModule)ModuleManager.getModule(HandPositionModule.class);
          if (handMod != null && handMod.isEnabled()) {
-            class_310 mc = class_310.method_1551();
-            boolean isMainHand = mc.field_1724 != null && arm == mc.field_1724.method_6068();
+            minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+            boolean isMainHand = mc.player != null && arm == mc.player.getMainArm();
             float[] pos = isMainHand ? handMod.getMainHandPos() : handMod.getOffHandPos();
-            matrices.method_46416(pos[0], pos[1], pos[2]);
+            matrices.translate(pos[0], pos[1], pos[2]);
          }
       }
    }
@@ -91,10 +91,10 @@ public abstract class HeldItemRendererMixin {
       method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",
       at = @At("TAIL")
    )
-   private void onRenderFirstPersonItemsTail(float tickDelta, class_4587 matrices, class_4598 vertexConsumers, class_746 player, int light, CallbackInfo ci) {
+   private void onRenderFirstPersonItemsTail(float tickDelta, util.math.MatrixStack matrices, render.VertexConsumerProvider.Immediate vertexConsumers, client.network.ClientPlayerEntity player, int light, CallbackInfo ci) {
       ShaderHand mod = ShaderHand.getInstance();
       if (mod != null && ShaderHand.rendering) {
-         vertexConsumers.method_22993();
+         vertexConsumers.draw();
          ShaderHand.rendering = false;
          mod.draw();
       }
@@ -108,11 +108,11 @@ public abstract class HeldItemRendererMixin {
       )
    )
    private void onRenderRightArm(
-      class_4587 matrices, class_4597 vertexConsumers, int light, float equipProgress, float swingProgress, class_1306 arm, CallbackInfo ci
+      util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, minecraft.util.Arm arm, CallbackInfo ci
    ) {
       SwingAnimationModule mod = (SwingAnimationModule)ModuleManager.getModule(SwingAnimationModule.class);
       if (mod != null && mod.isHoldMyItemsEnabled()) {
-         matrices.method_46416(mod.getRightX(), mod.getRightZ(), mod.getRightY());
+         matrices.translate(mod.getRightX(), mod.getRightZ(), mod.getRightY());
       }
    }
 
@@ -124,11 +124,11 @@ public abstract class HeldItemRendererMixin {
       )
    )
    private void onRenderLeftArm(
-      class_4587 matrices, class_4597 vertexConsumers, int light, float equipProgress, float swingProgress, class_1306 arm, CallbackInfo ci
+      util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, minecraft.util.Arm arm, CallbackInfo ci
    ) {
       SwingAnimationModule mod = (SwingAnimationModule)ModuleManager.getModule(SwingAnimationModule.class);
       if (mod != null && mod.isHoldMyItemsEnabled()) {
-         matrices.method_46416(mod.getLeftX(), mod.getLeftZ(), mod.getLeftY());
+         matrices.translate(mod.getLeftX(), mod.getLeftZ(), mod.getLeftY());
       }
    }
 }

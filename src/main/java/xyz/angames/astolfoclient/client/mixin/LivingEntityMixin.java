@@ -2,12 +2,12 @@ package xyz.angames.astolfoclient.client.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1291;
-import net.minecraft.class_1293;
-import net.minecraft.class_1294;
-import net.minecraft.class_1309;
-import net.minecraft.class_310;
-import net.minecraft.class_6880;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.registry.entry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,42 +20,42 @@ import xyz.angames.astolfoclient.client.module.modules.render.RagdollModule;
 import xyz.angames.astolfoclient.client.module.modules.render.SwingAnimationModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_1309.class)
+@Mixin(minecraft.entity.LivingEntity.class)
 public class LivingEntityMixin {
    @Inject(method = "jump", at = @At("HEAD"))
    private void onJump(CallbackInfo ci) {
-      class_1309 entity = (class_1309)this;
-      if (entity.equals(class_310.method_1551().field_1724) && AstolfoclientClient.moduleManager != null) {
+      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
+      if (entity.equals(minecraft.client.MinecraftClient.getInstance().player) && AstolfoclientClient.moduleManager != null) {
          Module jumpCircleModule = AstolfoclientClient.moduleManager.getModuleByName("JumpCircle");
          if (jumpCircleModule != null && jumpCircleModule.isEnabled() && AstolfoclientClient.jumpCircleManager != null) {
-            AstolfoclientClient.jumpCircleManager.addCircle(entity.method_23317(), entity.method_23318(), entity.method_23321());
+            AstolfoclientClient.jumpCircleManager.addCircle(entity.getX(), entity.getY(), entity.getZ());
          }
       }
    }
 
    @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
-   private void onHasStatusEffect(class_6880<class_1291> effect, CallbackInfoReturnable<Boolean> cir) {
-      class_1309 entity = (class_1309)this;
-      if (entity == class_310.method_1551().field_1724) {
+   private void onHasStatusEffect(registry.entry.RegistryEntry<entity.effect.StatusEffect> effect, CallbackInfoReturnable<Boolean> cir) {
+      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
+      if (entity == minecraft.client.MinecraftClient.getInstance().player) {
          NoRenderModule noRender = NoRenderModule.getInstance();
          if (noRender != null
             && noRender.isEnabled()
             && noRender.blindness.get()
-            && (effect.equals(class_1294.field_5919) || effect.equals(class_1294.field_38092))) {
+            && (effect.equals(entity.effect.StatusEffects.BLINDNESS) || effect.equals(entity.effect.StatusEffects.DARKNESS))) {
             cir.setReturnValue(false);
          }
       }
    }
 
    @Inject(method = "getStatusEffect", at = @At("HEAD"), cancellable = true)
-   private void onGetStatusEffect(class_6880<class_1291> effect, CallbackInfoReturnable<class_1293> cir) {
-      class_1309 entity = (class_1309)this;
-      if (entity == class_310.method_1551().field_1724) {
+   private void onGetStatusEffect(registry.entry.RegistryEntry<entity.effect.StatusEffect> effect, CallbackInfoReturnable<entity.effect.StatusEffectInstance> cir) {
+      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
+      if (entity == minecraft.client.MinecraftClient.getInstance().player) {
          NoRenderModule noRender = NoRenderModule.getInstance();
          if (noRender != null
             && noRender.isEnabled()
             && noRender.blindness.get()
-            && (effect.equals(class_1294.field_5919) || effect.equals(class_1294.field_38092))) {
+            && (effect.equals(entity.effect.StatusEffects.BLINDNESS) || effect.equals(entity.effect.StatusEffects.DARKNESS))) {
             cir.setReturnValue(null);
          }
       }
@@ -63,7 +63,7 @@ public class LivingEntityMixin {
 
    @Inject(method = "handleStatus(B)V", at = @At("HEAD"))
    private void onHandleStatus(byte status, CallbackInfo ci) {
-      class_1309 entity = (class_1309)this;
+      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
       if ((status == 35 || status == 3) && AstolfoclientClient.moduleManager != null) {
          Module ragdollModule = AstolfoclientClient.moduleManager.getModuleByName("Ragdoll");
          if (ragdollModule != null && ragdollModule.isEnabled()) {
@@ -85,8 +85,8 @@ public class LivingEntityMixin {
 
    @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)
    private void onGetHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
-      class_1309 entity = (class_1309)this;
-      if (entity == class_310.method_1551().field_1724 && AstolfoclientClient.moduleManager != null) {
+      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
+      if (entity == minecraft.client.MinecraftClient.getInstance().player && AstolfoclientClient.moduleManager != null) {
          SwingAnimationModule swing = (SwingAnimationModule)AstolfoclientClient.moduleManager.getModuleByName("SwingAnimation");
          if (swing != null && swing.isEnabled() && swing.slow.get()) {
             cir.setReturnValue(Double.valueOf(swing.speed.getValue()).intValue());

@@ -2,13 +2,13 @@ package xyz.angames.astolfoclient.client.render;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_10055;
-import net.minecraft.class_1921;
-import net.minecraft.class_2960;
-import net.minecraft.class_4587;
-import net.minecraft.class_4588;
-import net.minecraft.class_4597;
-import net.minecraft.class_591;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import xyz.angames.astolfoclient.client.render.models.CowModel;
 import xyz.angames.astolfoclient.client.render.models.RabbitModel;
 
@@ -16,13 +16,13 @@ import xyz.angames.astolfoclient.client.render.models.RabbitModel;
 public class CustomModelRenderer {
    private final RabbitModel rabbitModel = new RabbitModel();
    private final CowModel cowModel = new CowModel();
-   private static final class_2960 RABBIT_TEXTURE = class_2960.method_60655("astolfoclient", "textures/models/rabbit.png");
-   private static final class_2960 AMOGUS_TEXTURE = class_2960.method_60655("astolfoclient", "textures/models/amogus.png");
+   private static final minecraft.util.Identifier RABBIT_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/models/rabbit.png");
+   private static final minecraft.util.Identifier AMOGUS_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/models/amogus.png");
 
-   public void render(class_10055 state, class_4587 matrices, class_4597 vertexConsumers, int light, String mode, class_591 baseModel) {
+   public void render(entity.state.PlayerEntityRenderState state, util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, String mode, entity.model.PlayerEntityModel baseModel) {
       if (mode.equals("Rabbit")) {
          this.rabbitModel.setAngles(state, baseModel);
-         class_4588 buffer = vertexConsumers.getBuffer(class_1921.method_23580(RABBIT_TEXTURE));
+         client.render.VertexConsumer buffer = vertexConsumers.getBuffer(client.render.RenderLayer.getEntityTranslucent(RABBIT_TEXTURE));
          this.rabbitModel.render(matrices, buffer, light);
       } else if (mode.equals("Cow")) {
          this.cowModel.render(matrices, vertexConsumers, state, light);

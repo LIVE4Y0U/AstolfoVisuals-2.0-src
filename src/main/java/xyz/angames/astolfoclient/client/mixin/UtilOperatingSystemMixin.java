@@ -5,13 +5,13 @@ import java.net.URI;
 import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_156.class_158;
+import net.minecraft.util.Util.OperatingSystem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_158.class)
+@Mixin(util.Util.OperatingSystem.class)
 public class UtilOperatingSystemMixin {
    @ModifyVariable(method = "open(Ljava/io/File;)V", at = @At("HEAD"), argsOnly = true)
    private File modifyOpenParam(File file) {

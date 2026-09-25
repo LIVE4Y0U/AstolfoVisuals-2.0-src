@@ -6,21 +6,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1293;
-import net.minecraft.class_1294;
-import net.minecraft.class_2246;
-import net.minecraft.class_2338;
-import net.minecraft.class_2680;
-import net.minecraft.class_310;
-import net.minecraft.class_6089;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.block.LightBlock;
 import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.module.setting.ModeSetting;
 
 @Environment(EnvType.CLIENT)
 public class FullBrightModule extends Module {
    public final ModeSetting mode = new ModeSetting("Mode", "Potion", "Potion", "Light");
-   private final class_310 client = class_310.method_1551();
-   private final Map<class_2338, class_2680> activeLights = new HashMap<>();
+   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final Map<util.math.BlockPos, minecraft.block.BlockState> activeLights = new HashMap<>();
    private String lastMode = "";
 
    public FullBrightModule() {
@@ -31,7 +31,7 @@ public class FullBrightModule extends Module {
    @Override
    public void onEnable() {
       this.lastMode = this.mode.get();
-      if (this.client.field_1724 != null && this.client.field_1687 != null && this.lastMode.equalsIgnoreCase("Potion")) {
+      if (this.client.player != null && this.client.world != null && this.lastMode.equalsIgnoreCase("Potion")) {
          this.applyEffect();
       }
    }
@@ -45,7 +45,7 @@ public class FullBrightModule extends Module {
 
    @Override
    public void onTick() {
-      if (this.isEnabled() && this.client.field_1724 != null && this.client.field_1687 != null) {
+      if (this.isEnabled() && this.client.player != null && this.client.world != null) {
          String currentMode = this.mode.get();
          if (!currentMode.equalsIgnoreCase(this.lastMode)) {
             if (this.lastMode.equalsIgnoreCase("Potion")) {
@@ -58,7 +58,7 @@ public class FullBrightModule extends Module {
          }
 
          if (currentMode.equalsIgnoreCase("Potion")) {
-            if (!this.client.field_1724.method_6059(class_1294.field_5925)) {
+            if (!this.client.player.hasStatusEffect(entity.effect.StatusEffects.NIGHT_VISION)) {
                this.applyEffect();
             }
          } else if (currentMode.equalsIgnoreCase("Light")) {
@@ -69,15 +69,15 @@ public class FullBrightModule extends Module {
    }
 
    private void updateDynamicLight() {
-      if (this.client.field_1724 != null && this.client.field_1687 != null) {
-         class_2338 playerPos = this.client.field_1724.method_24515();
-         class_2338 centerPos = playerPos;
-         class_2680 feetState = this.client.field_1687.method_8320(playerPos);
-         if (!feetState.method_26215() && !feetState.method_27852(class_2246.field_31037)) {
-            centerPos = playerPos.method_10084();
+      if (this.client.player != null && this.client.world != null) {
+         util.math.BlockPos playerPos = this.client.player.getBlockPos();
+         util.math.BlockPos centerPos = playerPos;
+         minecraft.block.BlockState feetState = this.client.world.getBlockState(playerPos);
+         if (!feetState.isAir() && !feetState.isOf(minecraft.block.Blocks.LIGHT)) {
+            centerPos = playerPos.up();
          }
 
-         Map<class_2338, Integer> targetLights = new HashMap<>();
+         Map<util.math.BlockPos, Integer> targetLights = new HashMap<>();
          int radius = 4;
 
          for (int dx = -radius; dx <= radius; dx++) {
@@ -87,7 +87,7 @@ public class FullBrightModule extends Module {
                   if (dist <= radius) {
                      int level = 15 - (int)Math.round(dist * 3.2);
                      if (level >= 1) {
-                        class_2338 pos = centerPos.method_10069(dx, dy, dz);
+                        util.math.BlockPos pos = centerPos.add(dx, dy, dz);
                         targetLights.put(pos, level);
                      }
                   }
@@ -95,48 +95,48 @@ public class FullBrightModule extends Module {
             }
          }
 
-         Iterator<Entry<class_2338, class_2680>> iterator = this.activeLights.entrySet().iterator();
+         Iterator<Entry<util.math.BlockPos, minecraft.block.BlockState>> iterator = this.activeLights.entrySet().iterator();
 
          while (iterator.hasNext()) {
-            Entry<class_2338, class_2680> entry = iterator.next();
-            class_2338 pos = entry.getKey();
+            Entry<util.math.BlockPos, minecraft.block.BlockState> entry = iterator.next();
+            util.math.BlockPos pos = entry.getKey();
             if (!targetLights.containsKey(pos)) {
-               class_2680 current = this.client.field_1687.method_8320(pos);
-               if (current.method_27852(class_2246.field_31037)) {
-                  this.client.field_1687.method_8652(pos, entry.getValue(), 2);
+               minecraft.block.BlockState current = this.client.world.getBlockState(pos);
+               if (current.isOf(minecraft.block.Blocks.LIGHT)) {
+                  this.client.world.setBlockState(pos, entry.getValue(), 2);
                }
 
                iterator.remove();
             }
          }
 
-         for (Entry<class_2338, Integer> entry : targetLights.entrySet()) {
-            class_2338 pos = entry.getKey();
+         for (Entry<util.math.BlockPos, Integer> entry : targetLights.entrySet()) {
+            util.math.BlockPos pos = entry.getKey();
             int level = entry.getValue();
-            class_2680 current = this.client.field_1687.method_8320(pos);
+            minecraft.block.BlockState current = this.client.world.getBlockState(pos);
             if (this.activeLights.containsKey(pos)) {
-               if (current.method_27852(class_2246.field_31037)) {
-                  int currentLevel = (Integer)current.method_11654(class_6089.field_31187);
+               if (current.isOf(minecraft.block.Blocks.LIGHT)) {
+                  int currentLevel = (Integer)current.get(minecraft.block.LightBlock.LEVEL_15);
                   if (currentLevel != level) {
-                     this.client.field_1687.method_8652(pos, (class_2680)current.method_11657(class_6089.field_31187, level), 2);
+                     this.client.world.setBlockState(pos, (minecraft.block.BlockState)current.with(minecraft.block.LightBlock.LEVEL_15, level), 2);
                   }
                } else {
                   this.activeLights.remove(pos);
                }
-            } else if (current.method_26215()) {
-               this.activeLights.put(pos.method_10062(), current);
-               this.client.field_1687.method_8652(pos, (class_2680)class_2246.field_31037.method_9564().method_11657(class_6089.field_31187, level), 2);
+            } else if (current.isAir()) {
+               this.activeLights.put(pos.toImmutable(), current);
+               this.client.world.setBlockState(pos, (minecraft.block.BlockState)minecraft.block.Blocks.LIGHT.getDefaultState().with(minecraft.block.LightBlock.LEVEL_15, level), 2);
             }
          }
       }
    }
 
    private void clearLight() {
-      for (Entry<class_2338, class_2680> entry : this.activeLights.entrySet()) {
-         class_2338 pos = entry.getKey();
-         class_2680 current = this.client.field_1687.method_8320(pos);
-         if (current.method_27852(class_2246.field_31037)) {
-            this.client.field_1687.method_8652(pos, entry.getValue(), 2);
+      for (Entry<util.math.BlockPos, minecraft.block.BlockState> entry : this.activeLights.entrySet()) {
+         util.math.BlockPos pos = entry.getKey();
+         minecraft.block.BlockState current = this.client.world.getBlockState(pos);
+         if (current.isOf(minecraft.block.Blocks.LIGHT)) {
+            this.client.world.setBlockState(pos, entry.getValue(), 2);
          }
       }
 
@@ -145,13 +145,13 @@ public class FullBrightModule extends Module {
 
    private void applyEffect() {
       int longDuration = -1;
-      class_1293 nightVisionEffect = new class_1293(class_1294.field_5925, longDuration, 0, false, false, true);
-      this.client.field_1724.method_6092(nightVisionEffect);
+      entity.effect.StatusEffectInstance nightVisionEffect = new entity.effect.StatusEffectInstance(entity.effect.StatusEffects.NIGHT_VISION, longDuration, 0, false, false, true);
+      this.client.player.addStatusEffect(nightVisionEffect);
    }
 
    private void removePotionEffect() {
-      if (this.client.field_1724 != null && this.client.field_1724.method_6059(class_1294.field_5925)) {
-         this.client.field_1724.method_6016(class_1294.field_5925);
+      if (this.client.player != null && this.client.player.hasStatusEffect(entity.effect.StatusEffects.NIGHT_VISION)) {
+         this.client.player.removeStatusEffect(entity.effect.StatusEffects.NIGHT_VISION);
       }
    }
 }

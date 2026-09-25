@@ -5,14 +5,14 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1011;
-import net.minecraft.class_1043;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
 
 @Environment(EnvType.CLIENT)
 public class DiscordAvatarManager {
-   private static class_2960 avatarTexture = null;
+   private static minecraft.util.Identifier avatarTexture = null;
    private static volatile String lastAvatarUrl = "";
    private static volatile boolean isDownloading = false;
 
@@ -44,11 +44,11 @@ public class DiscordAvatarManager {
                conn.connect();
                if (conn.getResponseCode() == 200) {
                   try (InputStream in = conn.getInputStream()) {
-                     class_1011 img = class_1011.method_4309(in);
+                     client.texture.NativeImage img = client.texture.NativeImage.read(in);
                      if (img != null) {
-                        class_310.method_1551().execute(() -> {
-                           class_2960 id = class_2960.method_60655("astolfoclient", "discord_avatar_" + System.currentTimeMillis());
-                           class_310.method_1551().method_1531().method_4616(id, new class_1043(img));
+                        minecraft.client.MinecraftClient.getInstance().execute(() -> {
+                           minecraft.util.Identifier id = minecraft.util.Identifier.of("astolfoclient", "discord_avatar_" + System.currentTimeMillis());
+                           minecraft.client.MinecraftClient.getInstance().getTextureManager().registerTexture(id, new client.texture.NativeImageBackedTexture(img));
                            avatarTexture = id;
                         });
                      }
@@ -64,7 +64,7 @@ public class DiscordAvatarManager {
       }
    }
 
-   public static class_2960 getAvatarTexture() {
+   public static minecraft.util.Identifier getAvatarTexture() {
       return avatarTexture;
    }
 }

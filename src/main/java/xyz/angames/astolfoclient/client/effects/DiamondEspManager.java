@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1297;
+import net.minecraft.entity.Entity;
 import xyz.angames.astolfoclient.client.util.TargetUtils;
 
 @Environment(EnvType.CLIENT)
 public class DiamondEspManager {
    public static final long LIFESPAN = 450L;
-   private final Map<class_1297, DiamondEspManager.DiamondEffect> effects = new ConcurrentHashMap<>();
+   private final Map<minecraft.entity.Entity, DiamondEspManager.DiamondEffect> effects = new ConcurrentHashMap<>();
 
-   public void addEffect(class_1297 target) {
+   public void addEffect(minecraft.entity.Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          this.effects.compute(target, (k, existing) -> {
             if (existing == null) {
@@ -25,7 +25,7 @@ public class DiamondEspManager {
       }
    }
 
-   public void addAttack(class_1297 target) {
+   public void addAttack(minecraft.entity.Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          DiamondEspManager.DiamondEffect effect = this.effects.get(target);
          if (effect != null) {
@@ -36,10 +36,10 @@ public class DiamondEspManager {
 
    public void tick() {
       long now = System.currentTimeMillis();
-      this.effects.values().removeIf(effect -> now - effect.lastHitTime > 450L || !effect.target.method_5805() || TargetUtils.isInvisible(effect.target));
+      this.effects.values().removeIf(effect -> now - effect.lastHitTime > 450L || !effect.target.isAlive() || TargetUtils.isInvisible(effect.target));
    }
 
-   public Map<class_1297, DiamondEspManager.DiamondEffect> getEffects() {
+   public Map<minecraft.entity.Entity, DiamondEspManager.DiamondEffect> getEffects() {
       return this.effects;
    }
 
@@ -48,9 +48,9 @@ public class DiamondEspManager {
       public final long startTime;
       public long lastHitTime;
       public long lastAttackTime;
-      public final class_1297 target;
+      public final minecraft.entity.Entity target;
 
-      public DiamondEffect(class_1297 target) {
+      public DiamondEffect(minecraft.entity.Entity target) {
          this.target = target;
          this.startTime = System.currentTimeMillis();
          this.lastHitTime = this.startTime;

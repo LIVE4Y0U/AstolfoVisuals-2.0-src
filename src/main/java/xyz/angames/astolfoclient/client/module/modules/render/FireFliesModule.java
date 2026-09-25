@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.module.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,19 +9,19 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.class_10142;
-import net.minecraft.class_238;
-import net.minecraft.class_243;
-import net.minecraft.class_265;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
-import net.minecraft.class_3532;
-import net.minecraft.class_4587;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -31,14 +31,14 @@ import xyz.angames.astolfoclient.client.module.setting.NumberSetting;
 
 @Environment(EnvType.CLIENT)
 public class FireFliesModule extends Module {
-   private final class_310 mc = class_310.method_1551();
+   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
    public final BooleanSetting darkImprint = new BooleanSetting("DarkImprint", false);
    public final BooleanSetting lighting = new BooleanSetting("Lighting", false);
    public final NumberSetting spawnDelay = new NumberSetting("SpawnDelay", 3.0, 1.0, 10.0, 0.5);
    private static final int MAX_FIREFLIES = 20;
    private static final long MAX_PART_ALIVE_TIME = 6000L;
    private final List<FireFliesModule.FirePart> partList = new ArrayList<>();
-   private static final class_2960 ICON_TEXTURE = class_2960.method_60655("astolfoclient", "textures/effects/bloom.png");
+   private static final minecraft.util.Identifier ICON_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
 
    public FireFliesModule() {
       super("FireFlies", "Renders beautiful glowing fireflies around you", Module.Category.RENDER);
@@ -53,8 +53,8 @@ public class FireFliesModule extends Module {
 
    @Override
    public void onTick() {
-      if (this.isEnabled() && this.mc.field_1724 != null && this.mc.field_1687 != null) {
-         if (this.mc.field_1724.field_6012 == 1) {
+      if (this.isEnabled() && this.mc.player != null && this.mc.world != null) {
+         if (this.mc.player.age == 1) {
             for (FireFliesModule.FirePart part : this.partList) {
                part.setToRemove();
             }
@@ -72,7 +72,7 @@ public class FireFliesModule extends Module {
             this.partList.remove(0);
          }
 
-         if (this.partList.size() < 20 && this.mc.field_1724.field_6012 % ((int)this.spawnDelay.get() + 1) == 0) {
+         if (this.partList.size() < 20 && this.mc.player.age % ((int)this.spawnDelay.get() + 1) == 0) {
             this.partList.add(new FireFliesModule.FirePart(this.generateVecForPart(this.mc, 10.0, 4.0), 6000.0F));
             this.partList.add(new FireFliesModule.FirePart(this.generateVecForPart(this.mc, 6.0, 5.0), 6000.0F));
          }
@@ -81,11 +81,11 @@ public class FireFliesModule extends Module {
       }
    }
 
-   private class_243 generateVecForPart(class_310 mc, double rangeXZ, double rangeY) {
-      class_243 pos = mc.field_1724.method_19538().method_1031(getRandom(-rangeXZ, rangeXZ), getRandom(-rangeY / 2.0, rangeY), getRandom(-rangeXZ, rangeXZ));
+   private util.math.Vec3d generateVecForPart(minecraft.client.MinecraftClient mc, double rangeXZ, double rangeY) {
+      util.math.Vec3d pos = mc.player.getPos().add(getRandom(-rangeXZ, rangeXZ), getRandom(-rangeY / 2.0, rangeY), getRandom(-rangeXZ, rangeXZ));
 
       for (int i = 0; i < 30; i++) {
-         pos = mc.field_1724.method_19538().method_1031(getRandom(-rangeXZ, rangeXZ), getRandom(-rangeY / 2.0, rangeY), getRandom(-rangeXZ, rangeXZ));
+         pos = mc.player.getPos().add(getRandom(-rangeXZ, rangeXZ), getRandom(-rangeY / 2.0, rangeY), getRandom(-rangeXZ, rangeXZ));
       }
 
       return pos;
@@ -100,11 +100,11 @@ public class FireFliesModule extends Module {
    }
 
    private void render3D(WorldRenderContext context) {
-      if (this.isEnabled() && !this.partList.isEmpty() && this.mc.field_1724 != null && this.mc.field_1687 != null) {
-         class_4587 matrixStack = context.matrixStack();
-         float tickDelta = context.tickCounter().method_60637(true);
-         class_243 cameraPos = context.camera().method_19326();
-         Quaternionf cameraRot = context.camera().method_23767();
+      if (this.isEnabled() && !this.partList.isEmpty() && this.mc.player != null && this.mc.world != null) {
+         util.math.MatrixStack matrixStack = context.matrixStack();
+         float tickDelta = context.tickCounter().getTickDelta(true);
+         util.math.Vec3d cameraPos = context.camera().getPos();
+         Quaternionf cameraRot = context.camera().getRotation();
          RenderSystem.enableBlend();
          RenderSystem.disableCull();
          RenderSystem.disableDepthTest();
@@ -116,52 +116,52 @@ public class FireFliesModule extends Module {
          if (this.darkImprint.get()) {
             RenderSystem.defaultBlendFunc();
          } else {
-            RenderSystem.blendFunc(class_4535.SRC_ALPHA, class_4534.ONE);
+            RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
          }
 
-         class_289 tessellator = class_289.method_1348();
-         RenderSystem.setShader(class_10142.field_53876);
-         class_287 sparkBuffer = tessellator.method_60827(class_5596.field_27382, class_290.field_1576);
+         client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+         RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+         client.render.BufferBuilder sparkBuffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
          boolean hasSparks = false;
 
          for (FireFliesModule.FirePart part : this.partList) {
             float partAlpha = part.getAlphaPC();
             if (!part.sparkParts.isEmpty()) {
                for (FireFliesModule.SparkPart spark : part.sparkParts) {
-                  double sparkX = spark.prevPosX + (spark.posX - spark.prevPosX) * tickDelta - cameraPos.field_1352;
-                  double sparkY = spark.prevPosY + (spark.posY - spark.prevPosY) * tickDelta - cameraPos.field_1351;
-                  double sparkZ = spark.prevPosZ + (spark.posZ - spark.prevPosZ) * tickDelta - cameraPos.field_1350;
-                  matrixStack.method_22903();
-                  matrixStack.method_22904(sparkX, sparkY, sparkZ);
-                  matrixStack.method_22907(cameraRot);
+                  double sparkX = spark.prevPosX + (spark.posX - spark.prevPosX) * tickDelta - cameraPos.x;
+                  double sparkY = spark.prevPosY + (spark.posY - spark.prevPosY) * tickDelta - cameraPos.y;
+                  double sparkZ = spark.prevPosZ + (spark.posZ - spark.prevPosZ) * tickDelta - cameraPos.z;
+                  matrixStack.push();
+                  matrixStack.translate(sparkX, sparkY, sparkZ);
+                  matrixStack.multiply(cameraRot);
                   float sparkSize = 0.02F;
-                  matrixStack.method_22905(sparkSize, sparkSize, sparkSize);
-                  Matrix4f sm = matrixStack.method_23760().method_23761();
+                  matrixStack.scale(sparkSize, sparkSize, sparkSize);
+                  Matrix4f sm = matrixStack.peek().getPositionMatrix();
                   float sparkAlpha = partAlpha * (1.0F - (float)spark.timePC());
-                  sparkBuffer.method_22918(sm, -0.5F, -0.5F, 0.0F).method_22915(r, g, b, sparkAlpha);
-                  sparkBuffer.method_22918(sm, 0.5F, -0.5F, 0.0F).method_22915(r, g, b, sparkAlpha);
-                  sparkBuffer.method_22918(sm, 0.5F, 0.5F, 0.0F).method_22915(r, g, b, sparkAlpha);
-                  sparkBuffer.method_22918(sm, -0.5F, 0.5F, 0.0F).method_22915(r, g, b, sparkAlpha);
-                  matrixStack.method_22909();
+                  sparkBuffer.vertex(sm, -0.5F, -0.5F, 0.0F).color(r, g, b, sparkAlpha);
+                  sparkBuffer.vertex(sm, 0.5F, -0.5F, 0.0F).color(r, g, b, sparkAlpha);
+                  sparkBuffer.vertex(sm, 0.5F, 0.5F, 0.0F).color(r, g, b, sparkAlpha);
+                  sparkBuffer.vertex(sm, -0.5F, 0.5F, 0.0F).color(r, g, b, sparkAlpha);
+                  matrixStack.pop();
                   hasSparks = true;
                }
             }
          }
 
          if (hasSparks) {
-            class_286.method_43433(sparkBuffer.method_60800());
+            client.render.BufferRenderer.drawWithGlobalProgram(sparkBuffer.end());
          }
 
          for (FireFliesModule.FirePart part : this.partList) {
             if (part.trailParts.size() >= 2) {
                float partAlpha = part.getAlphaPC();
-               double dist = cameraPos.method_1022(part.posVec);
-               float width = 1.0E-5F + 8.0F * class_3532.method_15363(1.0F - ((float)dist - 3.0F) / 20.0F, 0.0F, 1.0F);
+               double dist = cameraPos.distanceTo(part.posVec);
+               float width = 1.0E-5F + 8.0F * util.math.MathHelper.clamp(1.0F - ((float)dist - 3.0F) / 20.0F, 0.0F, 1.0F);
                RenderSystem.lineWidth(width);
-               class_287 lineBuffer = tessellator.method_60827(class_5596.field_29345, class_290.field_1576);
-               matrixStack.method_22903();
-               matrixStack.method_22904(-cameraPos.field_1352, -cameraPos.field_1351, -cameraPos.field_1350);
-               Matrix4f lm = matrixStack.method_23760().method_23761();
+               client.render.BufferBuilder lineBuffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+               matrixStack.push();
+               matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+               Matrix4f lm = matrixStack.peek().getPositionMatrix();
 
                for (int i = 0; i < part.trailParts.size(); i++) {
                   FireFliesModule.TrailPart trail = part.trailParts.get(i);
@@ -172,54 +172,54 @@ public class FireFliesModule extends Module {
 
                   sizePC *= 2.0F;
                   float trailAlpha = partAlpha * sizePC;
-                  lineBuffer.method_22918(lm, (float)trail.x, (float)trail.y, (float)trail.z).method_22915(r, g, b, trailAlpha);
+                  lineBuffer.vertex(lm, (float)trail.x, (float)trail.y, (float)trail.z).color(r, g, b, trailAlpha);
                }
 
-               class_286.method_43433(lineBuffer.method_60800());
-               matrixStack.method_22909();
+               client.render.BufferRenderer.drawWithGlobalProgram(lineBuffer.end());
+               matrixStack.pop();
             }
          }
 
          RenderSystem.lineWidth(1.0F);
          RenderSystem.setShaderTexture(0, ICON_TEXTURE);
-         RenderSystem.setShader(class_10142.field_53880);
-         class_287 textureBuffer = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+         RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+         client.render.BufferBuilder textureBuffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
          boolean hasTexture = false;
 
          for (FireFliesModule.FirePart part : this.partList) {
             float partAlpha = part.getAlphaPC();
-            double x = part.prevPos.field_1352 + (part.posVec.field_1352 - part.prevPos.field_1352) * tickDelta - cameraPos.field_1352;
-            double y = part.prevPos.field_1351 + (part.posVec.field_1351 - part.prevPos.field_1351) * tickDelta - cameraPos.field_1351;
-            double z = part.prevPos.field_1350 + (part.posVec.field_1350 - part.prevPos.field_1350) * tickDelta - cameraPos.field_1350;
-            matrixStack.method_22903();
-            matrixStack.method_22904(x, y, z);
-            matrixStack.method_22907(cameraRot);
+            double x = part.prevPos.x + (part.posVec.x - part.prevPos.x) * tickDelta - cameraPos.x;
+            double y = part.prevPos.y + (part.posVec.y - part.prevPos.y) * tickDelta - cameraPos.y;
+            double z = part.prevPos.z + (part.posVec.z - part.prevPos.z) * tickDelta - cameraPos.z;
+            matrixStack.push();
+            matrixStack.translate(x, y, z);
+            matrixStack.multiply(cameraRot);
             float scale = 0.08F;
-            matrixStack.method_22905(scale, scale, scale);
-            Matrix4f m = matrixStack.method_23760().method_23761();
-            textureBuffer.method_22918(m, -0.5F, -0.5F, 0.0F).method_22913(0.0F, 1.0F).method_22915(r, g, b, partAlpha);
-            textureBuffer.method_22918(m, 0.5F, -0.5F, 0.0F).method_22913(1.0F, 1.0F).method_22915(r, g, b, partAlpha);
-            textureBuffer.method_22918(m, 0.5F, 0.5F, 0.0F).method_22913(1.0F, 0.0F).method_22915(r, g, b, partAlpha);
-            textureBuffer.method_22918(m, -0.5F, 0.5F, 0.0F).method_22913(0.0F, 0.0F).method_22915(r, g, b, partAlpha);
+            matrixStack.scale(scale, scale, scale);
+            Matrix4f m = matrixStack.peek().getPositionMatrix();
+            textureBuffer.vertex(m, -0.5F, -0.5F, 0.0F).texture(0.0F, 1.0F).color(r, g, b, partAlpha);
+            textureBuffer.vertex(m, 0.5F, -0.5F, 0.0F).texture(1.0F, 1.0F).color(r, g, b, partAlpha);
+            textureBuffer.vertex(m, 0.5F, 0.5F, 0.0F).texture(1.0F, 0.0F).color(r, g, b, partAlpha);
+            textureBuffer.vertex(m, -0.5F, 0.5F, 0.0F).texture(0.0F, 0.0F).color(r, g, b, partAlpha);
             if (this.lighting.get()) {
-               matrixStack.method_22905(3.0F, 3.0F, 3.0F);
-               Matrix4f mGlow = matrixStack.method_23760().method_23761();
+               matrixStack.scale(3.0F, 3.0F, 3.0F);
+               Matrix4f mGlow = matrixStack.peek().getPositionMatrix();
                float glowR = r * 0.4F;
                float glowG = g * 0.4F;
                float glowB = b * 0.4F;
                float glowAlpha = partAlpha / 5.0F;
-               textureBuffer.method_22918(mGlow, -0.5F, -0.5F, 0.0F).method_22913(0.0F, 1.0F).method_22915(glowR, glowG, glowB, glowAlpha);
-               textureBuffer.method_22918(mGlow, 0.5F, -0.5F, 0.0F).method_22913(1.0F, 1.0F).method_22915(glowR, glowG, glowB, glowAlpha);
-               textureBuffer.method_22918(mGlow, 0.5F, 0.5F, 0.0F).method_22913(1.0F, 0.0F).method_22915(glowR, glowG, glowB, glowAlpha);
-               textureBuffer.method_22918(mGlow, -0.5F, 0.5F, 0.0F).method_22913(0.0F, 0.0F).method_22915(glowR, glowG, glowB, glowAlpha);
+               textureBuffer.vertex(mGlow, -0.5F, -0.5F, 0.0F).texture(0.0F, 1.0F).color(glowR, glowG, glowB, glowAlpha);
+               textureBuffer.vertex(mGlow, 0.5F, -0.5F, 0.0F).texture(1.0F, 1.0F).color(glowR, glowG, glowB, glowAlpha);
+               textureBuffer.vertex(mGlow, 0.5F, 0.5F, 0.0F).texture(1.0F, 0.0F).color(glowR, glowG, glowB, glowAlpha);
+               textureBuffer.vertex(mGlow, -0.5F, 0.5F, 0.0F).texture(0.0F, 0.0F).color(glowR, glowG, glowB, glowAlpha);
             }
 
-            matrixStack.method_22909();
+            matrixStack.pop();
             hasTexture = true;
          }
 
          if (hasTexture) {
-            class_286.method_43433(textureBuffer.method_60800());
+            client.render.BufferRenderer.drawWithGlobalProgram(textureBuffer.end());
          }
 
          RenderSystem.enableDepthTest();
@@ -232,8 +232,8 @@ public class FireFliesModule extends Module {
 
    @Environment(EnvType.CLIENT)
    private static class FirePart {
-      class_243 posVec;
-      class_243 prevPos;
+      util.math.Vec3d posVec;
+      util.math.Vec3d prevPos;
       final List<FireFliesModule.TrailPart> trailParts = new ArrayList<>();
       final List<FireFliesModule.SparkPart> sparkParts = new ArrayList<>();
       float anim = 0.0F;
@@ -249,7 +249,7 @@ public class FireFliesModule extends Module {
       long rateTimer;
       boolean toRemove = false;
 
-      public FirePart(class_243 posVec, float maxAlive) {
+      public FirePart(util.math.Vec3d posVec, float maxAlive) {
          this.posVec = posVec;
          this.prevPos = posVec;
          this.maxAlive = maxAlive;
@@ -263,7 +263,7 @@ public class FireFliesModule extends Module {
       }
 
       public float getTimePC() {
-         return class_3532.method_15363((float)(System.currentTimeMillis() - this.startTime) / this.maxAlive, 0.0F, 1.0F);
+         return util.math.MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / this.maxAlive, 0.0F, 1.0F);
       }
 
       public void setAlphaPCTo(float to) {
@@ -274,9 +274,9 @@ public class FireFliesModule extends Module {
          return this.anim;
       }
 
-      public void updatePart(class_310 mc) {
+      public void updatePart(minecraft.client.MinecraftClient mc) {
          this.anim = this.anim + (this.animTo - this.anim) * this.animSpeed;
-         this.anim = class_3532.method_15363(this.anim, 0.0F, 1.0F);
+         this.anim = util.math.MathHelper.clamp(this.anim, 0.0F, 1.0F);
          if (System.currentTimeMillis() - this.rateTimer >= this.msChangeSideRate) {
             this.msChangeSideRate = this.calculateMsChangeSideRate();
             this.rateTimer = System.currentTimeMillis();
@@ -290,16 +290,16 @@ public class FireFliesModule extends Module {
          this.prevPos = this.posVec;
          double scaleBox = 0.1;
          boolean collides = false;
-         if (mc.field_1687 != null) {
-            class_238 box = new class_238(
-               this.posVec.field_1352 - scaleBox / 2.0,
-               this.posVec.field_1351,
-               this.posVec.field_1350 - scaleBox / 2.0,
-               this.posVec.field_1352 + scaleBox / 2.0,
-               this.posVec.field_1351 + scaleBox,
-               this.posVec.field_1350 + scaleBox / 2.0
+         if (mc.world != null) {
+            util.math.Box box = new util.math.Box(
+               this.posVec.x - scaleBox / 2.0,
+               this.posVec.y,
+               this.posVec.z - scaleBox / 2.0,
+               this.posVec.x + scaleBox / 2.0,
+               this.posVec.y + scaleBox,
+               this.posVec.z + scaleBox / 2.0
             );
-            Iterable<class_265> collisions = mc.field_1687.method_20812(null, box);
+            Iterable<util.shape.VoxelShape> collisions = mc.world.getBlockCollisions(null, box);
             if (collisions.iterator().hasNext()) {
                collides = true;
             }
@@ -307,7 +307,7 @@ public class FireFliesModule extends Module {
 
          float delente = collides ? 0.3F : 1.0F;
          this.yMotion /= 1.02F;
-         this.posVec = this.posVec.method_1031(motionX / delente, this.yMotion / delente, motionZ / delente);
+         this.posVec = this.posVec.add(motionX / delente, this.yMotion / delente, motionZ / delente);
          if (this.getTimePC() >= 1.0F) {
             this.setAlphaPCTo(0.0F);
             if (this.getAlphaPC() < 0.003921569F) {
@@ -353,9 +353,9 @@ public class FireFliesModule extends Module {
       int maxTime;
 
       public SparkPart(FireFliesModule.FirePart part, int maxTime) {
-         this.posX = part.posVec.field_1352;
-         this.posY = part.posVec.field_1351;
-         this.posZ = part.posVec.field_1350;
+         this.posX = part.posVec.x;
+         this.posY = part.posVec.y;
+         this.posZ = part.posVec.z;
          this.prevPosX = this.posX;
          this.prevPosY = this.posY;
          this.prevPosZ = this.posZ;
@@ -367,7 +367,7 @@ public class FireFliesModule extends Module {
       }
 
       public double timePC() {
-         return class_3532.method_15363((float)(System.currentTimeMillis() - this.startTime) / this.maxTime, 0.0F, 1.0F);
+         return util.math.MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / this.maxTime, 0.0F, 1.0F);
       }
 
       public boolean toRemove() {
@@ -394,15 +394,15 @@ public class FireFliesModule extends Module {
       int maxTime;
 
       public TrailPart(FireFliesModule.FirePart part, int maxTime) {
-         this.x = part.posVec.field_1352;
-         this.y = part.posVec.field_1351;
-         this.z = part.posVec.field_1350;
+         this.x = part.posVec.x;
+         this.y = part.posVec.y;
+         this.z = part.posVec.z;
          this.startTime = System.currentTimeMillis();
          this.maxTime = maxTime;
       }
 
       public float getTimePC() {
-         return class_3532.method_15363((float)(System.currentTimeMillis() - this.startTime) / this.maxTime, 0.0F, 1.0F);
+         return util.math.MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / this.maxTime, 0.0F, 1.0F);
       }
 
       public boolean toRemove() {

@@ -3,8 +3,8 @@ package xyz.angames.astolfoclient.client.mixin;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_243;
-import net.minecraft.class_638;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,10 +14,10 @@ import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_638.class)
+@Mixin(client.world.ClientWorld.class)
 public class ClientWorldMixin {
    @Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
-   private void onGetSkyColor(class_243 cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
+   private void onGetSkyColor(util.math.Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
       if (AstolfoclientClient.moduleManager != null) {
          AmbientsModule ambients = (AmbientsModule)AstolfoclientClient.moduleManager.getModuleByName("Ambients");
          if (ambients != null && ambients.isEnabled() && ambients.customSkybox.get()) {

@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_124;
-import net.minecraft.class_2561;
-import net.minecraft.class_310;
+import net.minecraft.util.Formatting;
+import net.minecraft.text.Text;
+import net.minecraft.client.MinecraftClient;
 
 @Environment(EnvType.CLIENT)
 public abstract class Command {
@@ -14,7 +14,7 @@ public abstract class Command {
    private final String description;
    private final String syntax;
    private final String[] aliases;
-   protected final class_310 mc = class_310.method_1551();
+   protected final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
 
    public Command(String name, String description, String syntax, String... aliases) {
       this.name = name;
@@ -46,17 +46,17 @@ public abstract class Command {
    }
 
    public static void sendMessage(String message) {
-      class_310 mc = class_310.method_1551();
-      if (mc.field_1705 != null && mc.field_1705.method_1743() != null) {
-         mc.field_1705.method_1743().method_1812(class_2561.method_43470("§d[Astolfo] §7" + message));
+      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      if (mc.inGameHud != null && mc.inGameHud.getChatHud() != null) {
+         mc.inGameHud.getChatHud().addMessage(minecraft.text.Text.literal("§d[Astolfo] §7" + message));
       }
    }
 
    protected void sendError(String message) {
-      sendMessage(class_124.field_1061 + message);
+      sendMessage(minecraft.util.Formatting.RED + message);
    }
 
    protected void sendSyntax() {
-      sendMessage(class_124.field_1061 + "Usage: " + this.getSyntax());
+      sendMessage(minecraft.util.Formatting.RED + "Usage: " + this.getSyntax());
    }
 }

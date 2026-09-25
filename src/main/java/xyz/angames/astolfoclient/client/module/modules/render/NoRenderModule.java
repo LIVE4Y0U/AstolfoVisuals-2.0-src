@@ -2,10 +2,10 @@ package xyz.angames.astolfoclient.client.module.modules.render;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2246;
-import net.minecraft.class_2248;
-import net.minecraft.class_2680;
-import net.minecraft.class_310;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.module.setting.BooleanSetting;
 
@@ -70,28 +70,28 @@ public class NoRenderModule extends Module {
    }
 
    private void reloadWorldRenderer() {
-      class_310 mc = class_310.method_1551();
-      if (mc.field_1769 != null) {
-         mc.field_1769.method_3279();
+      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      if (mc.worldRenderer != null) {
+         mc.worldRenderer.reload();
       }
    }
 
-   public static boolean isGrass(class_2680 state) {
+   public static boolean isGrass(minecraft.block.BlockState state) {
       if (state == null) {
          return false;
       }
 
-      class_2248 block = state.method_26204();
-      return block == class_2246.field_10479
-         || block == class_2246.field_10214
-         || block == class_2246.field_10112
-         || block == class_2246.field_10313
-         || block == class_2246.field_10376
-         || block == class_2246.field_10238
-         || block == class_2246.field_10428
-         || block == class_2246.field_28686
-         || block == class_2246.field_22117
-         || block == class_2246.field_22125
-         || block == class_2246.field_22116;
+      minecraft.block.Block block = state.getBlock();
+      return block == minecraft.block.Blocks.SHORT_GRASS
+         || block == minecraft.block.Blocks.TALL_GRASS
+         || block == minecraft.block.Blocks.FERN
+         || block == minecraft.block.Blocks.LARGE_FERN
+         || block == minecraft.block.Blocks.SEAGRASS
+         || block == minecraft.block.Blocks.TALL_SEAGRASS
+         || block == minecraft.block.Blocks.DEAD_BUSH
+         || block == minecraft.block.Blocks.HANGING_ROOTS
+         || block == minecraft.block.Blocks.NETHER_SPROUTS
+         || block == minecraft.block.Blocks.CRIMSON_ROOTS
+         || block == minecraft.block.Blocks.WARPED_ROOTS;
    }
 }

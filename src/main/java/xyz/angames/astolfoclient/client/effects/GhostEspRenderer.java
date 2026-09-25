@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,14 +9,14 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.class_10142;
-import net.minecraft.class_1297;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_4587;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.entity.Entity;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -36,13 +36,13 @@ public class GhostEspRenderer {
       Module targetEspModule = AstolfoclientClient.moduleManager.getModuleByName("TargetESP");
       if (targetEspModule != null && targetEspModule.isEnabled()) {
          if (!(targetEspModule instanceof TargetEspModule tem && !tem.mode.is("Ghost"))) {
-            Map<class_1297, GhostEspEffect> allEffects = this.manager.getEffects();
+            Map<minecraft.entity.Entity, GhostEspEffect> allEffects = this.manager.getEffects();
             if (!allEffects.isEmpty()) {
                List<GhostEspEffect> validEffects = new ArrayList<>();
                long currentTime = System.currentTimeMillis();
 
                for (GhostEspEffect effect : allEffects.values()) {
-                  if (effect.target != null && effect.target.method_5805() && !TargetUtils.isInvisible(effect.target)) {
+                  if (effect.target != null && effect.target.isAlive() && !TargetUtils.isInvisible(effect.target)) {
                      long age = currentTime - effect.lastHitTime;
                      if (age <= 450L) {
                         validEffects.add(effect);
@@ -56,9 +56,9 @@ public class GhostEspRenderer {
                   RenderSystem.enableDepthTest();
                   RenderSystem.depthFunc(515);
                   RenderSystem.depthMask(false);
-                  RenderSystem.blendFunc(class_4535.SRC_ALPHA, class_4534.ONE);
-                  RenderSystem.setShader(class_10142.field_53876);
-                  class_289 tessellator = class_289.method_1348();
+                  RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+                  RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+                  client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
                   double safeTime = currentTime % 1000000L;
                   float speed = 0.006F;
                   int trailLength = 22;
@@ -67,8 +67,8 @@ public class GhostEspRenderer {
                   float trailSegmentSpacing = 10.0F;
 
                   for (GhostEspEffect effect : validEffects) {
-                     class_1297 target = effect.target;
-                     if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+                     minecraft.entity.Entity target = effect.target;
+                     if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long age = currentTime - effect.lastHitTime;
                         float lifeProgress = (float)age / 450.0F;
                         float baseAlpha = 1.0F - Math.max(0.0F, (lifeProgress - 0.5F) * 2.0F);
@@ -85,19 +85,19 @@ public class GhostEspRenderer {
                            float cr = 1.0F;
                            float cg = 1.0F - hitColorFactor;
                            float cb = 1.0F - hitColorFactor;
-                           float baseRadius = target.method_17681() * baseDistanceMultiplier;
+                           float baseRadius = target.getWidth() * baseDistanceMultiplier;
                            if (age > 400L) {
                               float endProgress = (float)(age - 400L) / 200.0F;
                               baseRadius *= Math.max(0.0F, 1.0F - endProgress);
                            }
 
-                           float tickDelta = context.tickCounter().method_60637(true);
-                           double tX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                           double tY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                           double tZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                           double camX = context.camera().method_19326().field_1352;
-                           double camY = context.camera().method_19326().field_1351;
-                           double camZ = context.camera().method_19326().field_1350;
+                           float tickDelta = context.tickCounter().getTickDelta(true);
+                           double tX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                           double tY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                           double tZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                           double camX = context.camera().getPos().x;
+                           double camY = context.camera().getPos().y;
+                           double camZ = context.camera().getPos().z;
 
                            for (int j = 0; j < 3; j++) {
                               float breathing = (float)Math.sin(safeTime * 0.002 + j * 1.5);
@@ -117,16 +117,16 @@ public class GhostEspRenderer {
                                     float histAnimTime = histSafeTime / 1000.0F;
                                     float scanSpeed = 2.0F;
                                     float phase = (float)Math.sin(histAnimTime * scanSpeed);
-                                    float scanY = (phase + 1.0F) / 2.0F * target.method_17682();
-                                    class_4587 matrices = context.matrixStack();
-                                    matrices.method_22903();
-                                    matrices.method_22904(tX + localX - camX, tY + scanY + localY - camY, tZ + localZ - camZ);
-                                    matrices.method_22907(context.camera().method_23767());
-                                    matrices.method_22905(scale, scale, scale);
-                                    class_287 buffer = tessellator.method_60827(class_5596.field_27381, class_290.field_1576);
-                                    this.drawGlowingDot(matrices.method_23760().method_23761(), buffer, r, g, b, cr, cg, cb, alpha);
-                                    class_286.method_43433(buffer.method_60800());
-                                    matrices.method_22909();
+                                    float scanY = (phase + 1.0F) / 2.0F * target.getHeight();
+                                    util.math.MatrixStack matrices = context.matrixStack();
+                                    matrices.push();
+                                    matrices.translate(tX + localX - camX, tY + scanY + localY - camY, tZ + localZ - camZ);
+                                    matrices.multiply(context.camera().getRotation());
+                                    matrices.scale(scale, scale, scale);
+                                    client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.TRIANGLE_FAN, client.render.VertexFormats.POSITION_COLOR);
+                                    this.drawGlowingDot(matrices.peek().getPositionMatrix(), buffer, r, g, b, cr, cg, cb, alpha);
+                                    client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+                                    matrices.pop();
                                  }
                               }
                            }
@@ -145,14 +145,14 @@ public class GhostEspRenderer {
       }
    }
 
-   private void drawGlowingDot(Matrix4f matrix, class_287 buffer, float r, float g, float b, float cr, float cg, float cb, float alpha) {
-      buffer.method_22918(matrix, 0.0F, 0.0F, 0.0F).method_22915(cr, cg, cb, alpha);
+   private void drawGlowingDot(Matrix4f matrix, client.render.BufferBuilder buffer, float r, float g, float b, float cr, float cg, float cb, float alpha) {
+      buffer.vertex(matrix, 0.0F, 0.0F, 0.0F).color(cr, cg, cb, alpha);
 
       for (int i = 0; i <= 360; i += 20) {
          double rad = Math.toRadians(i);
          float px = (float)Math.cos(rad);
          float py = (float)Math.sin(rad);
-         buffer.method_22918(matrix, px, py, 0.0F).method_22915(r, g, b, 0.0F);
+         buffer.vertex(matrix, px, py, 0.0F).color(r, g, b, 0.0F);
       }
    }
 }

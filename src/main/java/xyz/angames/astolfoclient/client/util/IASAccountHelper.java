@@ -8,19 +8,19 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2561;
-import net.minecraft.class_339;
-import net.minecraft.class_342;
-import net.minecraft.class_364;
-import net.minecraft.class_4185;
-import net.minecraft.class_437;
+import net.minecraft.text.Text;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.screen.Screen;
 import ru.vidtu.ias.IAS;
 import ru.vidtu.ias.account.OfflineAccount;
 import ru.vidtu.ias.config.IASStorage;
 
 @Environment(EnvType.CLIENT)
 public class IASAccountHelper {
-   public static void onScreenInit(class_437 screen, Consumer<class_4185> buttonAdder) {
+   public static void onScreenInit(gui.screen.Screen screen, Consumer<gui.widget.ButtonWidget> buttonAdder) {
       if (screen != null && buttonAdder != null) {
          String className = screen.getClass().getName();
          if (className.contains("ias") && (className.contains("Account") || className.contains("Switcher"))) {
@@ -29,48 +29,48 @@ public class IASAccountHelper {
       }
    }
 
-   private static void rebalanceAndAddRandomButton(class_437 screen, Consumer<class_4185> buttonAdder) {
-      int targetRowY = screen.field_22790 - 48;
+   private static void rebalanceAndAddRandomButton(gui.screen.Screen screen, Consumer<gui.widget.ButtonWidget> buttonAdder) {
+      int targetRowY = screen.height - 48;
       int btnHeight = 20;
       int btnWidth = 74;
       int gap = 4;
-      int startX = screen.field_22789 / 2 - 154;
-      List<class_339> topRowWidgets = new ArrayList<>();
+      int startX = screen.width / 2 - 154;
+      List<gui.widget.ClickableWidget> topRowWidgets = new ArrayList<>();
 
       try {
-         for (class_364 child : screen.method_25396()) {
-            if (child instanceof class_339 widget && widget.method_46427() >= screen.field_22790 - 60 && widget.method_46427() <= screen.field_22790 - 35) {
+         for (client.gui.Element child : screen.children()) {
+            if (child instanceof gui.widget.ClickableWidget widget && widget.getY() >= screen.height - 60 && widget.getY() <= screen.height - 35) {
                topRowWidgets.add(widget);
             }
          }
       } catch (Throwable var11) {
       }
 
-      topRowWidgets.sort(Comparator.comparingInt(class_339::method_46426));
+      topRowWidgets.sort(Comparator.comparingInt(gui.widget.ClickableWidget::getX));
       if (topRowWidgets.size() >= 3) {
-         class_339 btn0 = topRowWidgets.get(0);
-         btn0.method_46421(startX);
-         btn0.method_46419(targetRowY);
-         btn0.method_25358(btnWidth);
-         class_339 btn1 = topRowWidgets.get(1);
-         btn1.method_46421(startX + btnWidth + gap);
-         btn1.method_46419(targetRowY);
-         btn1.method_25358(btnWidth);
-         class_339 btn2 = topRowWidgets.get(2);
-         btn2.method_46421(startX + (btnWidth + gap) * 2);
-         btn2.method_46419(targetRowY);
-         btn2.method_25358(btnWidth);
+         gui.widget.ClickableWidget btn0 = topRowWidgets.get(0);
+         btn0.setX(startX);
+         btn0.setY(targetRowY);
+         btn0.setWidth(btnWidth);
+         gui.widget.ClickableWidget btn1 = topRowWidgets.get(1);
+         btn1.setX(startX + btnWidth + gap);
+         btn1.setY(targetRowY);
+         btn1.setWidth(btnWidth);
+         gui.widget.ClickableWidget btn2 = topRowWidgets.get(2);
+         btn2.setX(startX + (btnWidth + gap) * 2);
+         btn2.setY(targetRowY);
+         btn2.setWidth(btnWidth);
       }
 
       int randomBtnX = startX + (btnWidth + gap) * 3;
       int randomBtnY = targetRowY;
-      class_4185 randomBtn = class_4185.method_46430(class_2561.method_43470("Random"), btn -> addRandomOfflineAccount(screen))
-         .method_46434(randomBtnX, randomBtnY, btnWidth, btnHeight)
-         .method_46431();
+      gui.widget.ButtonWidget randomBtn = gui.widget.ButtonWidget.builder(minecraft.text.Text.literal("Random"), btn -> addRandomOfflineAccount(screen))
+         .dimensions(randomBtnX, randomBtnY, btnWidth, btnHeight)
+         .build();
       buttonAdder.accept(randomBtn);
    }
 
-   public static void addRandomOfflineAccount(class_437 screen) {
+   public static void addRandomOfflineAccount(gui.screen.Screen screen) {
       try {
          String randomName = RandomNameGenerator.generateUniqueName();
          OfflineAccount account = new OfflineAccount(randomName, null);
@@ -88,11 +88,11 @@ public class IASAccountHelper {
                   String searchText = "";
 
                   for (Field sField : screen.getClass().getDeclaredFields()) {
-                     if (class_342.class.isAssignableFrom(sField.getType())) {
+                     if (gui.widget.TextFieldWidget.class.isAssignableFrom(sField.getType())) {
                         sField.setAccessible(true);
-                        class_342 tf = (class_342)sField.get(screen);
+                        gui.widget.TextFieldWidget tf = (gui.widget.TextFieldWidget)sField.get(screen);
                         if (tf != null) {
-                           searchText = tf.method_1882();
+                           searchText = tf.getText();
                            break;
                         }
                      }

@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2561;
-import net.minecraft.class_266;
-import net.minecraft.class_268;
-import net.minecraft.class_269;
-import net.minecraft.class_310;
-import net.minecraft.class_332;
-import net.minecraft.class_8646;
-import net.minecraft.class_9011;
+import net.minecraft.text.Text;
+import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.scoreboard.Team;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.scoreboard.ScoreboardDisplaySlot;
+import net.minecraft.scoreboard.ScoreboardEntry;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -31,30 +31,30 @@ import xyz.angames.astolfoclient.client.module.Module;
 public class ScoreboardManager {
    public float x = 0.0F;
    public float y = 0.0F;
-   private final class_310 client = class_310.method_1551();
+   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
    private static final Supplier<MsdfFont> BOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("bold").data("bold").build());
    private static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
    private static final Supplier<MsdfFont> MEDIUM_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("medium").data("medium").build());
 
-   public void render(class_332 context) {
+   public void render(client.gui.DrawContext context) {
       Module module = AstolfoclientClient.moduleManager.getModuleByName("Scoreboard");
       if (module != null && module.isEnabled()) {
-         if (this.client.field_1687 != null && this.client.field_1724 != null) {
-            class_269 scoreboard = this.client.field_1687.method_8428();
-            class_266 objective = scoreboard.method_1189(class_8646.field_45157);
+         if (this.client.world != null && this.client.player != null) {
+            minecraft.scoreboard.Scoreboard scoreboard = this.client.world.getScoreboard();
+            minecraft.scoreboard.ScoreboardObjective objective = scoreboard.getObjectiveForSlot(minecraft.scoreboard.ScoreboardDisplaySlot.SIDEBAR);
             if (objective != null) {
                List<String> lines = new ArrayList<>();
-               Collection<class_9011> scores = scoreboard.method_1184(objective);
-               List<class_9011> list = scores.stream()
+               Collection<minecraft.scoreboard.ScoreboardEntry> scores = scoreboard.getScoreboardEntries(objective);
+               List<minecraft.scoreboard.ScoreboardEntry> list = scores.stream()
                   .filter(score -> score.comp_2127() != null && !score.comp_2127().startsWith("#"))
                   .sorted((s1, s2) -> Integer.compare(s2.comp_2128(), s1.comp_2128()))
                   .limit(15L)
                   .collect(Collectors.toList());
-               String title = objective.method_1114().getString();
+               String title = objective.getDisplayName().getString();
 
-               for (class_9011 score : list) {
-                  class_268 team = scoreboard.method_1164(score.comp_2127());
-                  class_2561 text = class_268.method_1142(team, class_2561.method_43470(score.comp_2127()));
+               for (minecraft.scoreboard.ScoreboardEntry score : list) {
+                  minecraft.scoreboard.Team team = scoreboard.getScoreHolderTeam(score.comp_2127());
+                  minecraft.text.Text text = minecraft.scoreboard.Team.decorateName(team, minecraft.text.Text.literal(score.comp_2127()));
                   lines.add(text.getString());
                }
 
@@ -76,19 +76,19 @@ public class ScoreboardManager {
                float headerHeight = 18.0F;
                float lineHeight = 11.0F;
                float totalHeight = headerHeight + lines.size() * lineHeight + 6.0F;
-               double currentGuiScale = this.client.method_22683().method_4495();
+               double currentGuiScale = this.client.getWindow().getScaleFactor();
                if (currentGuiScale <= 0.0) {
                   currentGuiScale = 2.0;
                }
 
                float scaleModifier = (float)(2.0 / currentGuiScale);
-               this.x = this.client.method_22683().method_4486() - width * scaleModifier - 6.0F;
-               this.y = (this.client.method_22683().method_4502() - totalHeight * scaleModifier) / 2.0F;
-               context.method_51448().method_22903();
-               context.method_51448().method_46416(this.x, this.y, 0.0F);
-               context.method_51448().method_22905(scaleModifier, scaleModifier, 1.0F);
-               context.method_51448().method_46416(-this.x, -this.y, 0.0F);
-               Matrix4f matrix = context.method_51448().method_23760().method_23761();
+               this.x = this.client.getWindow().getScaledWidth() - width * scaleModifier - 6.0F;
+               this.y = (this.client.getWindow().getScaledHeight() - totalHeight * scaleModifier) / 2.0F;
+               context.getMatrices().push();
+               context.getMatrices().translate(this.x, this.y, 0.0F);
+               context.getMatrices().scale(scaleModifier, scaleModifier, 1.0F);
+               context.getMatrices().translate(-this.x, -this.y, 0.0F);
+               Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
                long now = System.currentTimeMillis();
                new Color(ThemeManager.getThemedColor(now / 10L));
                this.renderShadow(matrix, this.x, this.y, width, totalHeight, 6.5F, 1.0F);
@@ -118,7 +118,7 @@ public class ScoreboardManager {
                   currentY += lineHeight;
                }
 
-               context.method_51448().method_22909();
+               context.getMatrices().pop();
             }
          }
       }

@@ -7,13 +7,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2561;
-import net.minecraft.class_2588;
-import net.minecraft.class_332;
-import net.minecraft.class_342;
-import net.minecraft.class_5250;
-import net.minecraft.class_7417;
-import net.minecraft.class_8828.class_2585;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TextContent;
+import net.minecraft.text.PlainTextContent.Literal;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.module.setting.BooleanSetting;
@@ -89,18 +89,18 @@ public class PasswordHiderModule extends Module {
       return sb.toString();
    }
 
-   public static void setupChatField(class_342 chatField) {
+   public static void setupChatField(gui.widget.TextFieldWidget chatField) {
       if (chatField != null) {
-         chatField.method_1854((originalStr, firstCharacterIndex) -> {
+         chatField.setRenderTextProvider((originalStr, firstCharacterIndex) -> {
             if (AstolfoclientClient.moduleManager == null) {
-               return class_2561.method_43470(originalStr).method_30937();
+               return minecraft.text.Text.literal(originalStr).asOrderedText();
             }
 
             Module mod = AstolfoclientClient.moduleManager.getModuleByName("PasswordHider");
             if (mod != null && mod.isEnabled()) {
-               String fullText = chatField.method_1882();
+               String fullText = chatField.getText();
                if (!isPasswordCommand(fullText)) {
-                  return class_2561.method_43470(originalStr).method_30937();
+                  return minecraft.text.Text.literal(originalStr).asOrderedText();
                }
 
                int firstSpace = fullText.indexOf(32);
@@ -117,18 +117,18 @@ public class PasswordHiderModule extends Module {
                   }
                }
 
-               return class_2561.method_43470(sb.toString()).method_30937();
+               return minecraft.text.Text.literal(sb.toString()).asOrderedText();
             } else {
-               return class_2561.method_43470(originalStr).method_30937();
+               return minecraft.text.Text.literal(originalStr).asOrderedText();
             }
          });
       }
    }
 
-   public static void renderChatFieldOverlay(class_332 context, class_342 chatField) {
+   public static void renderChatFieldOverlay(client.gui.DrawContext context, gui.widget.TextFieldWidget chatField) {
    }
 
-   public static class_2561 getProtectedChat(class_2561 message) {
+   public static minecraft.text.Text getProtectedChat(minecraft.text.Text message) {
       if (message == null) {
          return null;
       }
@@ -154,30 +154,30 @@ public class PasswordHiderModule extends Module {
       }
    }
 
-   private static class_2561 protectChatTree(class_2561 text) {
+   private static minecraft.text.Text protectChatTree(minecraft.text.Text text) {
       if (text == null) {
          return null;
       }
 
-      class_7417 content = text.method_10851();
-      class_7417 newContent = content;
+      minecraft.text.TextContent content = text.getContent();
+      minecraft.text.TextContent newContent = content;
       boolean contentChanged = false;
-      if (content instanceof class_2585 literal) {
+      if (content instanceof text.PlainTextContent.Literal literal) {
          String str = literal.comp_737();
          String masked = maskChatString(str);
          if (!masked.equals(str)) {
-            newContent = class_2561.method_43470(masked).method_10851();
+            newContent = minecraft.text.Text.literal(masked).getContent();
             contentChanged = true;
          }
-      } else if (content instanceof class_2588 trans) {
-         Object[] args = trans.method_11023();
+      } else if (content instanceof minecraft.text.TranslatableTextContent trans) {
+         Object[] args = trans.getArgs();
          Object[] newArgs = new Object[args.length];
          boolean argsChanged = false;
 
          for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            if (arg instanceof class_2561 argText) {
-               class_2561 protectedArg = protectChatTree(argText);
+            if (arg instanceof minecraft.text.Text argText) {
+               minecraft.text.Text protectedArg = protectChatTree(argText);
                newArgs[i] = protectedArg;
                if (protectedArg != argText) {
                   argsChanged = true;
@@ -194,17 +194,17 @@ public class PasswordHiderModule extends Module {
          }
 
          if (argsChanged) {
-            newContent = new class_2588(trans.method_11022(), trans.method_48323(), newArgs);
+            newContent = new minecraft.text.TranslatableTextContent(trans.getKey(), trans.getFallback(), newArgs);
             contentChanged = true;
          }
       }
 
-      List<class_2561> siblings = text.method_10855();
-      List<class_2561> newSiblings = new ArrayList<>(siblings.size());
+      List<minecraft.text.Text> siblings = text.getSiblings();
+      List<minecraft.text.Text> newSiblings = new ArrayList<>(siblings.size());
       boolean siblingsChanged = false;
 
-      for (class_2561 sibling : siblings) {
-         class_2561 protectedSibling = protectChatTree(sibling);
+      for (minecraft.text.Text sibling : siblings) {
+         minecraft.text.Text protectedSibling = protectChatTree(sibling);
          newSiblings.add(protectedSibling);
          if (protectedSibling != sibling) {
             siblingsChanged = true;
@@ -215,10 +215,10 @@ public class PasswordHiderModule extends Module {
          return text;
       }
 
-      class_5250 result = class_5250.method_43477(newContent).method_10862(text.method_10866());
+      minecraft.text.MutableText result = minecraft.text.MutableText.of(newContent).setStyle(text.getStyle());
 
-      for (class_2561 sibling : newSiblings) {
-         result.method_10852(sibling);
+      for (minecraft.text.Text sibling : newSiblings) {
+         result.append(sibling);
       }
 
       return result;

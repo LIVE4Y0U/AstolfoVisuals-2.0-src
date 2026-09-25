@@ -2,36 +2,36 @@ package xyz.angames.astolfoclient.client.util;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1109;
-import net.minecraft.class_2378;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
-import net.minecraft.class_3414;
-import net.minecraft.class_7923;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.registry.Registries;
 import xyz.angames.astolfoclient.client.config.SoundSettings;
 
 @Environment(EnvType.CLIENT)
 public class ModSounds {
-   public static final class_2960 ENABLE_ID = class_2960.method_60655("astolfoclient", "module_enable");
-   public static final class_3414 ENABLE_SOUND = class_3414.method_47908(ENABLE_ID);
-   public static final class_2960 DISABLE_ID = class_2960.method_60655("astolfoclient", "module_disable");
-   public static final class_3414 DISABLE_SOUND = class_3414.method_47908(DISABLE_ID);
-   public static final class_2960 CRASH_DETECTION_ID = class_2960.method_60655("astolfoclient", "crash_detection");
-   public static final class_3414 CRASH_DETECTION_SOUND = class_3414.method_47908(CRASH_DETECTION_ID);
-   public static final class_2960 CRASH_DETECTION_HYPHEN_ID = class_2960.method_60655("astolfoclient", "crash-detection");
-   public static final class_3414 CRASH_DETECTION_HYPHEN_SOUND = class_3414.method_47908(CRASH_DETECTION_HYPHEN_ID);
-   public static final class_2960 GUI_OPEN_ID = class_2960.method_60655("astolfoclient", "clickgui_open");
-   public static final class_3414 GUI_OPEN_SOUND = class_3414.method_47908(GUI_OPEN_ID);
-   public static final class_2960 CATEGORY_ID = class_2960.method_60655("astolfoclient", "clickgui_category");
-   public static final class_3414 CATEGORY_SOUND = class_3414.method_47908(CATEGORY_ID);
-   public static final class_2960 MODULE_SELECT_ID = class_2960.method_60655("astolfoclient", "clickgui_module");
-   public static final class_3414 MODULE_SELECT_SOUND = class_3414.method_47908(MODULE_SELECT_ID);
-   public static final class_2960 SLIDER_MOVING_ID = class_2960.method_60655("astolfoclient", "clickgui_slider");
-   public static final class_3414 SLIDER_MOVING_SOUND = class_3414.method_47908(SLIDER_MOVING_ID);
-   public static final class_2960 SEARCH_CLICK_ID = class_2960.method_60655("astolfoclient", "clickgui_search");
-   public static final class_3414 SEARCH_CLICK_SOUND = class_3414.method_47908(SEARCH_CLICK_ID);
-   public static final class_2960 MODE_OPEN_ID = class_2960.method_60655("astolfoclient", "clickgui_mode_open");
-   public static final class_3414 MODE_OPEN_SOUND = class_3414.method_47908(MODE_OPEN_ID);
+   public static final minecraft.util.Identifier ENABLE_ID = minecraft.util.Identifier.of("astolfoclient", "module_enable");
+   public static final minecraft.sound.SoundEvent ENABLE_SOUND = minecraft.sound.SoundEvent.of(ENABLE_ID);
+   public static final minecraft.util.Identifier DISABLE_ID = minecraft.util.Identifier.of("astolfoclient", "module_disable");
+   public static final minecraft.sound.SoundEvent DISABLE_SOUND = minecraft.sound.SoundEvent.of(DISABLE_ID);
+   public static final minecraft.util.Identifier CRASH_DETECTION_ID = minecraft.util.Identifier.of("astolfoclient", "crash_detection");
+   public static final minecraft.sound.SoundEvent CRASH_DETECTION_SOUND = minecraft.sound.SoundEvent.of(CRASH_DETECTION_ID);
+   public static final minecraft.util.Identifier CRASH_DETECTION_HYPHEN_ID = minecraft.util.Identifier.of("astolfoclient", "crash-detection");
+   public static final minecraft.sound.SoundEvent CRASH_DETECTION_HYPHEN_SOUND = minecraft.sound.SoundEvent.of(CRASH_DETECTION_HYPHEN_ID);
+   public static final minecraft.util.Identifier GUI_OPEN_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_open");
+   public static final minecraft.sound.SoundEvent GUI_OPEN_SOUND = minecraft.sound.SoundEvent.of(GUI_OPEN_ID);
+   public static final minecraft.util.Identifier CATEGORY_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_category");
+   public static final minecraft.sound.SoundEvent CATEGORY_SOUND = minecraft.sound.SoundEvent.of(CATEGORY_ID);
+   public static final minecraft.util.Identifier MODULE_SELECT_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_module");
+   public static final minecraft.sound.SoundEvent MODULE_SELECT_SOUND = minecraft.sound.SoundEvent.of(MODULE_SELECT_ID);
+   public static final minecraft.util.Identifier SLIDER_MOVING_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_slider");
+   public static final minecraft.sound.SoundEvent SLIDER_MOVING_SOUND = minecraft.sound.SoundEvent.of(SLIDER_MOVING_ID);
+   public static final minecraft.util.Identifier SEARCH_CLICK_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_search");
+   public static final minecraft.sound.SoundEvent SEARCH_CLICK_SOUND = minecraft.sound.SoundEvent.of(SEARCH_CLICK_ID);
+   public static final minecraft.util.Identifier MODE_OPEN_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_mode_open");
+   public static final minecraft.sound.SoundEvent MODE_OPEN_SOUND = minecraft.sound.SoundEvent.of(MODE_OPEN_ID);
    private static long lastSliderSoundTime = 0L;
 
    public static void register() {
@@ -47,23 +47,23 @@ public class ModSounds {
       registerSound(MODE_OPEN_ID, MODE_OPEN_SOUND);
    }
 
-   private static void registerSound(class_2960 id, class_3414 sound) {
-      if (!class_7923.field_41172.method_10250(id)) {
-         class_2378.method_10230(class_7923.field_41172, id, sound);
+   private static void registerSound(minecraft.util.Identifier id, minecraft.sound.SoundEvent sound) {
+      if (!minecraft.registry.Registries.SOUND_EVENT.containsId(id)) {
+         minecraft.registry.Registry.register(minecraft.registry.Registries.SOUND_EVENT, id, sound);
       }
    }
 
-   public static void playSound(class_3414 sound, float volume) {
+   public static void playSound(minecraft.sound.SoundEvent sound, float volume) {
       if (SoundSettings.isSoundEnabled()) {
          float master = SoundSettings.getMasterVolume() / 100.0F;
          float vol = volume / 100.0F * master;
          if (!(vol <= 0.001F)) {
-            class_310 mc = class_310.method_1551();
+            minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
             if (mc != null) {
                mc.execute(() -> {
                   try {
-                     if (mc.method_1483() != null) {
-                        mc.method_1483().method_4873(class_1109.method_4757(sound, 1.0F, vol));
+                     if (mc.getSoundManager() != null) {
+                        mc.getSoundManager().play(client.sound.PositionedSoundInstance.master(sound, 1.0F, vol));
                      }
                   } catch (Exception var4x) {
                   }

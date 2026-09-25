@@ -5,8 +5,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1011;
-import net.minecraft.class_765;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.render.LightmapTextureManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,10 +17,10 @@ import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_765.class)
+@Mixin(client.render.LightmapTextureManager.class)
 public class LightmapTextureManagerMixin {
    @Unique
-   private class_1011 astolfo$image = null;
+   private client.texture.NativeImage astolfo$image = null;
    @Unique
    private Object astolfo$texture = null;
    @Unique
@@ -31,13 +31,13 @@ public class LightmapTextureManagerMixin {
       if (AstolfoclientClient.moduleManager != null) {
          AmbientsModule ambients = (AmbientsModule)AstolfoclientClient.moduleManager.getModuleByName("Ambients");
          if (this.astolfo$image == null || this.astolfo$texture == null) {
-            for (Field field : class_765.class.getDeclaredFields()) {
+            for (Field field : client.render.LightmapTextureManager.class.getDeclaredFields()) {
                field.setAccessible(true);
 
                try {
                   Object value = field.get(this);
-                  if (value instanceof class_1011) {
-                     this.astolfo$image = (class_1011)value;
+                  if (value instanceof client.texture.NativeImage) {
+                     this.astolfo$image = (client.texture.NativeImage)value;
                   } else if (value != null) {
                      String className = value.getClass().getSimpleName();
                      if (className.equals("DynamicTexture") || className.equals("NativeImageBackedTexture")) {
@@ -64,7 +64,7 @@ public class LightmapTextureManagerMixin {
 
             for (int x = 0; x < 16; x++) {
                for (int y = 0; y < 16; y++) {
-                  int color = this.astolfo$image.method_61940(x, y);
+                  int color = this.astolfo$image.getColorArgb(x, y);
                   int a = color >> 24 & 0xFF;
                   int r = color >> 16 & 0xFF;
                   int g = color >> 8 & 0xFF;
@@ -73,7 +73,7 @@ public class LightmapTextureManagerMixin {
                   g = Math.min(255, Math.max(0, g));
                   b = Math.min(255, Math.max(0, b));
                   int newColor = a << 24 | r << 16 | g << 8 | b;
-                  this.astolfo$image.method_61941(x, y, newColor);
+                  this.astolfo$image.setColorArgb(x, y, newColor);
                }
             }
 

@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2172;
-import net.minecraft.class_310;
-import net.minecraft.class_342;
-import net.minecraft.class_4717;
+import net.minecraft.command.CommandSource;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,23 +23,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_4717.class)
+@Mixin(gui.screen.ChatInputSuggestor.class)
 public abstract class ChatInputSuggestorMixin {
    @Shadow
-   private class_342 field_21599;
+   private gui.widget.TextFieldWidget textField;
    @Shadow
-   private CompletableFuture<Suggestions> field_21611;
+   private CompletableFuture<Suggestions> pendingSuggestions;
    @Shadow
-   private ParseResults<class_2172> field_21610;
+   private ParseResults<minecraft.command.CommandSource> parse;
 
    @Shadow
-   public abstract void method_23937();
+   public abstract void showCommandSuggestions();
 
    @Inject(method = "refresh", at = @At("HEAD"), cancellable = true)
    public void onRefresh(CallbackInfo ci) {
-      String text = this.field_21599.method_1882();
+      String text = this.textField.getText();
       if (text.startsWith("$")) {
-         int cursor = this.field_21599.method_1881();
+         int cursor = this.textField.getCursor();
          int lastSpace = text.lastIndexOf(32, cursor - 1);
          int start = lastSpace == -1 ? 1 : lastSpace + 1;
          List<String> suggestionsList = AstolfoclientClient.commandManager.getSuggestions(text);
@@ -49,19 +49,19 @@ public abstract class ChatInputSuggestorMixin {
             builder.suggest(s);
          }
 
-         this.field_21611 = builder.buildFuture();
-         class_310 client = class_310.method_1551();
-         if (client.field_1724 != null && client.field_1724.field_3944 != null) {
-            CommandDispatcher<class_2172> dummyDispatcher = new CommandDispatcher();
+         this.pendingSuggestions = builder.buildFuture();
+         minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+         if (client.player != null && client.player.networkHandler != null) {
+            CommandDispatcher<minecraft.command.CommandSource> dummyDispatcher = new CommandDispatcher();
             StringReader reader = new StringReader(text);
             reader.setCursor(text.length());
-            CommandContextBuilder<class_2172> contextBuilder = new CommandContextBuilder(
-               dummyDispatcher, client.field_1724.field_3944.method_2875(), dummyDispatcher.getRoot(), 0
+            CommandContextBuilder<minecraft.command.CommandSource> contextBuilder = new CommandContextBuilder(
+               dummyDispatcher, client.player.networkHandler.getCommandSource(), dummyDispatcher.getRoot(), 0
             );
-            this.field_21610 = new ParseResults(contextBuilder, reader, Collections.emptyMap());
+            this.parse = new ParseResults(contextBuilder, reader, Collections.emptyMap());
          }
 
-         this.method_23937();
+         this.showCommandSuggestions();
          ci.cancel();
       }
    }

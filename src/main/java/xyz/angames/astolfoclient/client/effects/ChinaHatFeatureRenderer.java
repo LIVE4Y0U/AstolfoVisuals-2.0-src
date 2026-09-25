@@ -1,55 +1,55 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_10055;
-import net.minecraft.class_10142;
-import net.minecraft.class_1657;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
-import net.minecraft.class_3532;
-import net.minecraft.class_3883;
-import net.minecraft.class_3887;
-import net.minecraft.class_4587;
-import net.minecraft.class_4597;
-import net.minecraft.class_591;
-import net.minecraft.class_5944;
-import net.minecraft.class_7833;
-import net.minecraft.class_293.class_5596;
-import net.minecraft.class_4597.class_4598;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.render.entity.feature.FeatureRendererContext;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.render.VertexFormat.DrawMode;
+import net.minecraft.client.render.VertexConsumerProvider.Immediate;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> {
-   public static class_1657 currentlyRenderingPlayer;
+public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<entity.state.PlayerEntityRenderState, entity.model.PlayerEntityModel> {
+   public static entity.player.PlayerEntity currentlyRenderingPlayer;
    private static final float RADIUS = 0.65F;
    private static final float HEIGHT = 0.28F;
    private static final int SEGMENTS = 40;
-   private static final class_2960 BLOOM_TEXTURE = class_2960.method_60655("astolfoclient", "textures/effects/dashtrail/dashbloom.png");
+   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/dashtrail/dashbloom.png");
    private float spinAngle = 0.0F;
    private long lastRenderTime = 0L;
 
-   public ChinaHatFeatureRenderer(class_3883<class_10055, class_591> context) {
+   public ChinaHatFeatureRenderer(entity.feature.FeatureRendererContext<entity.state.PlayerEntityRenderState, entity.model.PlayerEntityModel> context) {
       super(context);
    }
 
-   public void render(class_4587 matrices, class_4597 vertexConsumers, int light, class_10055 state, float limbAngle, float limbDistance) {
-      class_310 mc = class_310.method_1551();
+   public void render(util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, entity.state.PlayerEntityRenderState state, float limbAngle, float limbDistance) {
+      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
       Module module = AstolfoclientClient.moduleManager.getModuleByName("ChinaHat");
-      if (module != null && module.isEnabled() && mc.field_1724 != null) {
-         if (currentlyRenderingPlayer != null && currentlyRenderingPlayer.method_5628() == mc.field_1724.method_5628()) {
-            if (!state.field_53333) {
+      if (module != null && module.isEnabled() && mc.player != null) {
+         if (currentlyRenderingPlayer != null && currentlyRenderingPlayer.getId() == mc.player.getId()) {
+            if (!state.invisible) {
                long now = System.currentTimeMillis();
                if (this.lastRenderTime != 0L) {
                   this.spinAngle = this.spinAngle + (float)(now - this.lastRenderTime) / 1000.0F * 80.0F;
@@ -59,46 +59,46 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
                }
 
                this.lastRenderTime = now;
-               matrices.method_22903();
-               ((class_591)this.method_17165()).field_3398.method_22703(matrices);
-               matrices.method_46416(0.0F, -0.4F, 0.0F);
-               matrices.method_22905(1.0F, -1.0F, 1.0F);
-               matrices.method_22907(class_7833.field_40716.rotationDegrees(this.spinAngle));
-               Matrix4f matrix = matrices.method_23760().method_23761();
-               class_289 tessellator = class_289.method_1348();
-               if (vertexConsumers instanceof class_4598 immediate) {
-                  immediate.method_22993();
+               matrices.push();
+               ((entity.model.PlayerEntityModel)this.getContextModel()).head.rotate(matrices);
+               matrices.translate(0.0F, -0.4F, 0.0F);
+               matrices.scale(1.0F, -1.0F, 1.0F);
+               matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(this.spinAngle));
+               Matrix4f matrix = matrices.peek().getPositionMatrix();
+               client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+               if (vertexConsumers instanceof render.VertexConsumerProvider.Immediate immediate) {
+                  immediate.draw();
                }
 
                RenderSystem.enableBlend();
                RenderSystem.disableCull();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(true);
-               RenderSystem.blendFuncSeparate(class_4535.SRC_ALPHA, class_4534.ONE_MINUS_SRC_ALPHA, class_4535.ONE, class_4534.ZERO);
-               class_5944 shader = RenderSystem.setShader(AstolfoclientClient.CHINA_HAT_SHADER);
+               RenderSystem.blendFuncSeparate(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, platform.GlStateManager.SrcFactor.ONE, platform.GlStateManager.DstFactor.ZERO);
+               client.gl.ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.CHINA_HAT_SHADER);
                if (shader != null) {
                   float timeSecs = (float)(System.currentTimeMillis() % 1000000L) / 1000.0F;
-                  if (shader.method_34582("uTime") != null) {
-                     shader.method_34582("uTime").method_1251(timeSecs);
+                  if (shader.getUniform("uTime") != null) {
+                     shader.getUniform("uTime").set(timeSecs);
                   }
 
-                  if (shader.method_34582("uResolution") != null) {
-                     shader.method_34582("uResolution").method_1255(1.0F, 1.0F);
+                  if (shader.getUniform("uResolution") != null) {
+                     shader.getUniform("uResolution").set(1.0F, 1.0F);
                   }
 
                   int themeRgb = ThemeManager.getThemedColor((int)(now / 10L));
                   float tr = (themeRgb >> 16 & 0xFF) / 255.0F;
                   float tg = (themeRgb >> 8 & 0xFF) / 255.0F;
                   float tb = (themeRgb & 0xFF) / 255.0F;
-                  if (shader.method_34582("uThemeColor") != null) {
-                     shader.method_34582("uThemeColor").method_1249(tr, tg, tb);
+                  if (shader.getUniform("uThemeColor") != null) {
+                     shader.getUniform("uThemeColor").set(tr, tg, tb);
                   }
                }
 
                Color cInner = new Color(ThemeManager.getThemedColor((int)(now / 10L)));
                Color cOuter = new Color(ThemeManager.getThemedColor((int)(now / 10L) + 60));
                int optimizedLayers = 16;
-               class_287 bufBody = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+               client.render.BufferBuilder bufBody = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
 
                for (int layer = 1; layer < optimizedLayers; layer++) {
                   float t0 = (float)(layer - 1) / (optimizedLayers - 1);
@@ -126,22 +126,22 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
                      float v1_1 = (float)Math.sin(ang1) * t1 * 0.5F + 0.5F;
                      float u0_1 = (float)Math.cos(ang0) * t1 * 0.5F + 0.5F;
                      float v0_1 = (float)Math.sin(ang0) * t1 * 0.5F + 0.5F;
-                     bufBody.method_22918(matrix, (float)Math.cos(ang0) * r0, h0, (float)Math.sin(ang0) * r0)
-                        .method_22913(u0_0, v0_0)
-                        .method_22915(sc0.getRed() / 255.0F, sc0.getGreen() / 255.0F, sc0.getBlue() / 255.0F, a0);
-                     bufBody.method_22918(matrix, (float)Math.cos(ang1) * r0, h0, (float)Math.sin(ang1) * r0)
-                        .method_22913(u1_0, v1_0)
-                        .method_22915(sc0.getRed() / 255.0F, sc0.getGreen() / 255.0F, sc0.getBlue() / 255.0F, a0);
-                     bufBody.method_22918(matrix, (float)Math.cos(ang1) * r1, h1, (float)Math.sin(ang1) * r1)
-                        .method_22913(u1_1, v1_1)
-                        .method_22915(sc1.getRed() / 255.0F, sc1.getGreen() / 255.0F, sc1.getBlue() / 255.0F, a1);
-                     bufBody.method_22918(matrix, (float)Math.cos(ang0) * r1, h1, (float)Math.sin(ang0) * r1)
-                        .method_22913(u0_1, v0_1)
-                        .method_22915(sc1.getRed() / 255.0F, sc1.getGreen() / 255.0F, sc1.getBlue() / 255.0F, a1);
+                     bufBody.vertex(matrix, (float)Math.cos(ang0) * r0, h0, (float)Math.sin(ang0) * r0)
+                        .texture(u0_0, v0_0)
+                        .color(sc0.getRed() / 255.0F, sc0.getGreen() / 255.0F, sc0.getBlue() / 255.0F, a0);
+                     bufBody.vertex(matrix, (float)Math.cos(ang1) * r0, h0, (float)Math.sin(ang1) * r0)
+                        .texture(u1_0, v1_0)
+                        .color(sc0.getRed() / 255.0F, sc0.getGreen() / 255.0F, sc0.getBlue() / 255.0F, a0);
+                     bufBody.vertex(matrix, (float)Math.cos(ang1) * r1, h1, (float)Math.sin(ang1) * r1)
+                        .texture(u1_1, v1_1)
+                        .color(sc1.getRed() / 255.0F, sc1.getGreen() / 255.0F, sc1.getBlue() / 255.0F, a1);
+                     bufBody.vertex(matrix, (float)Math.cos(ang0) * r1, h1, (float)Math.sin(ang0) * r1)
+                        .texture(u0_1, v0_1)
+                        .color(sc1.getRed() / 255.0F, sc1.getGreen() / 255.0F, sc1.getBlue() / 255.0F, a1);
                   }
                }
 
-               class_286.method_43433(bufBody.method_60800());
+               client.render.BufferRenderer.drawWithGlobalProgram(bufBody.end());
                float r = cOuter.getRed() / 255.0F;
                float g = cOuter.getGreen() / 255.0F;
                float b = cOuter.getBlue() / 255.0F;
@@ -149,7 +149,7 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
                float innerR = 0.65F - rimW;
                float innerH = 0.28F * (rimW / 0.65F);
                float innerT = (0.65F - rimW) / 0.65F;
-               class_287 bufRim = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+               client.render.BufferBuilder bufRim = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
 
                for (int i = 0; i < 40; i++) {
                   double a0 = (Math.PI * 2) * i / 40.0;
@@ -162,31 +162,31 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
                   float v1_out = (float)Math.sin(a1) * 0.5F + 0.5F;
                   float u0_out = (float)Math.cos(a0) * 0.5F + 0.5F;
                   float v0_out = (float)Math.sin(a0) * 0.5F + 0.5F;
-                  bufRim.method_22918(matrix, (float)Math.cos(a0) * innerR, innerH, (float)Math.sin(a0) * innerR)
-                     .method_22913(u0_in, v0_in)
-                     .method_22915(r, g, b, 1.0F);
-                  bufRim.method_22918(matrix, (float)Math.cos(a1) * innerR, innerH, (float)Math.sin(a1) * innerR)
-                     .method_22913(u1_in, v1_in)
-                     .method_22915(r, g, b, 1.0F);
-                  bufRim.method_22918(matrix, (float)Math.cos(a1) * 0.65F, 0.0F, (float)Math.sin(a1) * 0.65F)
-                     .method_22913(u1_out, v1_out)
-                     .method_22915(r, g, b, 1.0F);
-                  bufRim.method_22918(matrix, (float)Math.cos(a0) * 0.65F, 0.0F, (float)Math.sin(a0) * 0.65F)
-                     .method_22913(u0_out, v0_out)
-                     .method_22915(r, g, b, 1.0F);
+                  bufRim.vertex(matrix, (float)Math.cos(a0) * innerR, innerH, (float)Math.sin(a0) * innerR)
+                     .texture(u0_in, v0_in)
+                     .color(r, g, b, 1.0F);
+                  bufRim.vertex(matrix, (float)Math.cos(a1) * innerR, innerH, (float)Math.sin(a1) * innerR)
+                     .texture(u1_in, v1_in)
+                     .color(r, g, b, 1.0F);
+                  bufRim.vertex(matrix, (float)Math.cos(a1) * 0.65F, 0.0F, (float)Math.sin(a1) * 0.65F)
+                     .texture(u1_out, v1_out)
+                     .color(r, g, b, 1.0F);
+                  bufRim.vertex(matrix, (float)Math.cos(a0) * 0.65F, 0.0F, (float)Math.sin(a0) * 0.65F)
+                     .texture(u0_out, v0_out)
+                     .color(r, g, b, 1.0F);
                }
 
-               class_286.method_43433(bufRim.method_60800());
+               client.render.BufferRenderer.drawWithGlobalProgram(bufRim.end());
                RenderSystem.enableBlend();
-               RenderSystem.blendFunc(class_4535.SRC_ALPHA, class_4534.ONE);
+               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
                RenderSystem.disableCull();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(false);
                r = cOuter.getRed() / 255.0F;
                g = cOuter.getGreen() / 255.0F;
                b = cOuter.getBlue() / 255.0F;
-               RenderSystem.setShader(class_10142.field_53876);
-               class_287 glowRimBuf = tessellator.method_60827(class_5596.field_27382, class_290.field_1576);
+               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+               client.render.BufferBuilder glowRimBuf = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
                innerR = 0.598F;
                innerH = 0.68899995F;
                innerT = 0.7F;
@@ -203,23 +203,23 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
                   float z0_out = (float)Math.sin(a0) * innerH;
                   float x1_out = (float)Math.cos(a1) * innerH;
                   float z1_out = (float)Math.sin(a1) * innerH;
-                  glowRimBuf.method_22918(matrix, x0_in, 0.005F, z0_in).method_22915(r, g, b, innerT);
-                  glowRimBuf.method_22918(matrix, x1_in, 0.005F, z1_in).method_22915(r, g, b, innerT);
-                  glowRimBuf.method_22918(matrix, x1_out, 0.001F, z1_out).method_22915(r, g, b, outerAlpha);
-                  glowRimBuf.method_22918(matrix, x0_out, 0.001F, z0_out).method_22915(r, g, b, outerAlpha);
+                  glowRimBuf.vertex(matrix, x0_in, 0.005F, z0_in).color(r, g, b, innerT);
+                  glowRimBuf.vertex(matrix, x1_in, 0.005F, z1_in).color(r, g, b, innerT);
+                  glowRimBuf.vertex(matrix, x1_out, 0.001F, z1_out).color(r, g, b, outerAlpha);
+                  glowRimBuf.vertex(matrix, x0_out, 0.001F, z0_out).color(r, g, b, outerAlpha);
                }
 
-               class_286.method_43433(glowRimBuf.method_60800());
+               client.render.BufferRenderer.drawWithGlobalProgram(glowRimBuf.end());
                RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
-               RenderSystem.setShader(class_10142.field_53880);
-               class_287 bloomBaseBuf = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
+               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+               client.render.BufferBuilder bloomBaseBuf = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
                float bSize = 0.663F;
-               bloomBaseBuf.method_22918(matrix, -bSize, 0.005F, bSize).method_22913(0.0F, 1.0F).method_22915(r, g, b, 0.4F);
-               bloomBaseBuf.method_22918(matrix, bSize, 0.005F, bSize).method_22913(1.0F, 1.0F).method_22915(r, g, b, 0.4F);
-               bloomBaseBuf.method_22918(matrix, bSize, 0.005F, -bSize).method_22913(1.0F, 0.0F).method_22915(r, g, b, 0.4F);
-               bloomBaseBuf.method_22918(matrix, -bSize, 0.005F, -bSize).method_22913(0.0F, 0.0F).method_22915(r, g, b, 0.4F);
-               class_286.method_43433(bloomBaseBuf.method_60800());
-               matrices.method_22909();
+               bloomBaseBuf.vertex(matrix, -bSize, 0.005F, bSize).texture(0.0F, 1.0F).color(r, g, b, 0.4F);
+               bloomBaseBuf.vertex(matrix, bSize, 0.005F, bSize).texture(1.0F, 1.0F).color(r, g, b, 0.4F);
+               bloomBaseBuf.vertex(matrix, bSize, 0.005F, -bSize).texture(1.0F, 0.0F).color(r, g, b, 0.4F);
+               bloomBaseBuf.vertex(matrix, -bSize, 0.005F, -bSize).texture(0.0F, 0.0F).color(r, g, b, 0.4F);
+               client.render.BufferRenderer.drawWithGlobalProgram(bloomBaseBuf.end());
+               matrices.pop();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(true);
                RenderSystem.enableCull();
@@ -231,7 +231,7 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
    }
 
    private Color lerpColor(Color a, Color b, float t) {
-      t = class_3532.method_15363(t, 0.0F, 1.0F);
+      t = util.math.MathHelper.clamp(t, 0.0F, 1.0F);
       return new Color(
          (int)(a.getRed() + (b.getRed() - a.getRed()) * t),
          (int)(a.getGreen() + (b.getGreen() - a.getGreen()) * t),
@@ -240,7 +240,7 @@ public class ChinaHatFeatureRenderer extends class_3887<class_10055, class_591> 
    }
 
    private float smoothstep(float t) {
-      t = class_3532.method_15363(t, 0.0F, 1.0F);
+      t = util.math.MathHelper.clamp(t, 0.0F, 1.0F);
       return t * t * (3.0F - 2.0F * t);
    }
 }

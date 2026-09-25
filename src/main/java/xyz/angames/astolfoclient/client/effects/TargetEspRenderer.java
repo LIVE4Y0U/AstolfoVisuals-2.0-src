@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -10,19 +10,19 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.class_10142;
-import net.minecraft.class_1297;
-import net.minecraft.class_276;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_2960;
-import net.minecraft.class_310;
-import net.minecraft.class_4587;
-import net.minecraft.class_6367;
-import net.minecraft.class_7833;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.entity.Entity;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.BufferUtils;
@@ -39,14 +39,14 @@ import xyz.angames.astolfoclient.client.util.TargetUtils;
 
 @Environment(EnvType.CLIENT)
 public class TargetEspRenderer {
-   private static final class_2960 TEXTURE_DEFAULT = class_2960.method_60655("astolfoclient", "textures/effects/target_esp.png");
-   private static final class_2960 TEXTURE_BO = class_2960.method_60655("astolfoclient", "textures/effects/target_esp_cube/target_bo.png");
-   private static final class_2960 TEXTURE_FRAME = class_2960.method_60655("astolfoclient", "textures/effects/target_esp_cube/target_frame.png");
-   private static final class_2960 TEXTURE_JEKA = class_2960.method_60655("astolfoclient", "textures/effects/target_esp_cube/target_jeka.png");
-   private static final class_2960 TEXTURE_VEGAS = class_2960.method_60655("astolfoclient", "textures/effects/target_esp_cube/target_vegas.png");
+   private static final minecraft.util.Identifier TEXTURE_DEFAULT = minecraft.util.Identifier.of("astolfoclient", "textures/effects/target_esp.png");
+   private static final minecraft.util.Identifier TEXTURE_BO = minecraft.util.Identifier.of("astolfoclient", "textures/effects/target_esp_cube/target_bo.png");
+   private static final minecraft.util.Identifier TEXTURE_FRAME = minecraft.util.Identifier.of("astolfoclient", "textures/effects/target_esp_cube/target_frame.png");
+   private static final minecraft.util.Identifier TEXTURE_JEKA = minecraft.util.Identifier.of("astolfoclient", "textures/effects/target_esp_cube/target_jeka.png");
+   private static final minecraft.util.Identifier TEXTURE_VEGAS = minecraft.util.Identifier.of("astolfoclient", "textures/effects/target_esp_cube/target_vegas.png");
    private final TargetEspManager manager;
    private static final float BASE_ROTATION_SPEED = 0.15F;
-   private class_276 distortionFbo = null;
+   private client.gl.Framebuffer distortionFbo = null;
    private int distortionProgram = -1;
    private int distortionVao = -1;
    private int distortionVbo = -1;
@@ -55,7 +55,7 @@ public class TargetEspRenderer {
       this.manager = manager;
    }
 
-   private class_2960 getCubeTexture(TargetEspModule module) {
+   private minecraft.util.Identifier getCubeTexture(TargetEspModule module) {
       return switch (module.cubeTexture.get()) {
          case "Rounded", "target_bo.png", "Bo" -> TEXTURE_BO;
          case "Frame", "target_frame.png" -> TEXTURE_FRAME;
@@ -81,34 +81,34 @@ public class TargetEspRenderer {
    }
 
    private void renderDistortionShader(WorldRenderContext context, TargetEspModule tem) {
-      class_310 mc = class_310.method_1551();
-      if (mc.field_1724 != null && context.camera() != null) {
-         class_276 mainFbo = mc.method_1522();
+      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      if (mc.player != null && context.camera() != null) {
+         client.gl.Framebuffer mainFbo = mc.getFramebuffer();
          if (mainFbo != null) {
-            int width = mainFbo.field_1482;
-            int height = mainFbo.field_1481;
+            int width = mainFbo.textureWidth;
+            int height = mainFbo.textureHeight;
             if (width > 0 && height > 0) {
-               double camX = context.camera().method_19326().field_1352;
-               double camY = context.camera().method_19326().field_1351;
-               double camZ = context.camera().method_19326().field_1350;
-               float tickDelta = context.tickCounter().method_60637(true);
+               double camX = context.camera().getPos().x;
+               double camY = context.camera().getPos().y;
+               double camZ = context.camera().getPos().z;
+               float tickDelta = context.tickCounter().getTickDelta(true);
                long currentTime = System.currentTimeMillis();
                String mode = tem.mode.get();
                List<TargetEspRenderer.DistortionNode> nodes = new ArrayList<>();
                if ("Cube".equals(mode)) {
                   for (TargetEspEffect effect : this.manager.getEffects().values()) {
-                     class_1297 target = effect.target;
-                     if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+                     minecraft.entity.Entity target = effect.target;
+                     if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long age = currentTime - effect.lastHitTime;
                         if (age <= 450L) {
                            float progress = (float)age / 450.0F;
                            float alpha = 1.0F - Math.max(0.0F, (progress - 0.5F) * 2.0F);
                            if (!(alpha <= 0.01F)) {
-                              double lerpX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                              double lerpY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                              double lerpZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                              double centerY = lerpY + target.method_17682() / 2.0F;
-                              float tRadius = Math.max(target.method_17681() * 1.3F, target.method_17682() * 0.7F);
+                              double lerpX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                              double lerpY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                              double lerpZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                              double centerY = lerpY + target.getHeight() / 2.0F;
+                              float tRadius = Math.max(target.getWidth() * 1.3F, target.getHeight() * 0.7F);
                               nodes.add(
                                  new TargetEspRenderer.DistortionNode((float)(lerpX - camX), (float)(centerY - camY), (float)(lerpZ - camZ), tRadius, alpha)
                               );
@@ -118,16 +118,16 @@ public class TargetEspRenderer {
                   }
                } else if ("Diamond".equals(mode) && AstolfoclientClient.diamondEspManager != null) {
                   for (DiamondEspManager.DiamondEffect effect : AstolfoclientClient.diamondEspManager.getEffects().values()) {
-                     class_1297 target = effect.target;
-                     if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+                     minecraft.entity.Entity target = effect.target;
+                     if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long timeSinceStart = currentTime - effect.startTime;
                         long timeSinceHit = currentTime - effect.lastHitTime;
                         if (timeSinceHit <= 450L) {
                            float fastTime = (float)timeSinceStart / 1000.0F;
-                           double tX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                           double tY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                           double tZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                           float entityCenterY = (float)(tY + target.method_17682() * 0.5F);
+                           double tX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                           double tY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                           double tZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                           float entityCenterY = (float)(tY + target.getHeight() * 0.5F);
                            float arriveProgress = Math.min(1.0F, (float)timeSinceStart / 400.0F);
                            float arriveEase = 1.0F - (float)Math.pow(1.0F - arriveProgress, 3.0);
                            float scatterProgress = Math.max(0.0F, ((float)timeSinceHit - 360.0F) / 90.0F);
@@ -135,10 +135,10 @@ public class TargetEspRenderer {
                            float baseAlpha = arriveProgress < 1.0F ? arriveEase : 1.0F - scatterEase;
                            if (!(baseAlpha <= 0.01F)) {
                               int numDiamonds = 18;
-                              float baseRadius = target.method_17681() * 1.1F;
+                              float baseRadius = target.getWidth() * 1.1F;
 
                               for (int i = 0; i < numDiamonds; i++) {
-                                 float[] pos = this.calculateDiamondPos(i, numDiamonds, fastTime, baseRadius, target.method_17682(), arriveEase, scatterEase);
+                                 float[] pos = this.calculateDiamondPos(i, numDiamonds, fastTime, baseRadius, target.getHeight(), arriveEase, scatterEase);
                                  float dX = (float)(tX + pos[0] - camX);
                                  float dY = (float)(entityCenterY + pos[1] - camY);
                                  float dZ = (float)(tZ + pos[2] - camZ);
@@ -153,28 +153,28 @@ public class TargetEspRenderer {
                   boolean isMimbran = "Mimbran".equals(tem.circleMode.get());
 
                   for (CircleEspManager.CircleEspEffect effect : AstolfoclientClient.circleEspManager.getEffects().values()) {
-                     class_1297 target = effect.target;
-                     if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+                     minecraft.entity.Entity target = effect.target;
+                     if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long timeSinceHit = currentTime - effect.lastHitTime;
                         float fadeProgress = (float)timeSinceHit / 450.0F;
                         float alpha = 1.0F - Math.max(0.0F, (fadeProgress - 0.5F) * 2.0F);
                         if (!(alpha <= 0.05F)) {
                            float animTime = (float)(currentTime - effect.startTime) / 1000.0F;
-                           double tX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                           double tY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                           double tZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                           float targetH = target.method_17682();
+                           double tX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                           double tY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                           double tZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                           float targetH = target.getHeight();
                            float radius;
                            float scanY;
                            if (isMimbran) {
                               float speedY = 3.5F;
                               scanY = (float)((Math.sin(animTime * speedY) + 1.0) / 2.0) * targetH;
-                              radius = target.method_17681() / 2.0F + 0.1F;
+                              radius = target.getWidth() / 2.0F + 0.1F;
                            } else {
                               float scanSpeed = 3.0F;
                               float phase = (float)Math.sin(animTime * scanSpeed);
                               scanY = (phase + 1.0F) / 2.0F * targetH;
-                              radius = target.method_17681() * 0.8F;
+                              radius = target.getWidth() * 0.8F;
                            }
 
                            if (timeSinceHit > 400L) {
@@ -201,16 +201,16 @@ public class TargetEspRenderer {
                   int trailLength = 22;
 
                   for (GhostEspEffect effect : AstolfoclientClient.ghostEspManager.getEffects().values()) {
-                     class_1297 target = effect.target;
-                     if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+                     minecraft.entity.Entity target = effect.target;
+                     if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long age = currentTime - effect.lastHitTime;
                         float lifeProgress = (float)age / 450.0F;
                         float baseAlpha = 1.0F - Math.max(0.0F, (lifeProgress - 0.5F) * 2.0F);
                         if (!(baseAlpha <= 0.05F)) {
-                           double tX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                           double tY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                           double tZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                           float baseRadius = target.method_17681() * baseDistanceMultiplier;
+                           double tX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                           double tY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                           double tZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                           float baseRadius = target.getWidth() * baseDistanceMultiplier;
                            if (age > 400L) {
                               float endProgress = (float)(age - 400L) / 200.0F;
                               baseRadius *= Math.max(0.0F, 1.0F - endProgress);
@@ -225,7 +225,7 @@ public class TargetEspRenderer {
                               float histAnimTime = (float)(safeTime / 1000.0);
                               float scanSpeed = 2.0F;
                               float phase = (float)Math.sin(histAnimTime * scanSpeed);
-                              float scanY = (phase + 1.0F) / 2.0F * target.method_17682();
+                              float scanY = (phase + 1.0F) / 2.0F * target.getHeight();
                               float gX = (float)(tX + localX - camX);
                               float gY = (float)(tY + scanY - camY);
                               float gZ = (float)(tZ + localZ - camZ);
@@ -242,7 +242,7 @@ public class TargetEspRenderer {
                                     float tLocalZ = (float)Math.sin(tAngle) * currentRadius;
                                     float tAnimTime = histSafeTime / 1000.0F;
                                     float tPhase = (float)Math.sin(tAnimTime * scanSpeed);
-                                    float tScanY = (tPhase + 1.0F) / 2.0F * target.method_17682();
+                                    float tScanY = (tPhase + 1.0F) / 2.0F * target.getHeight();
                                     float tgX = (float)(tX + tLocalX - camX);
                                     float tgY = (float)(tY + tScanY - camY);
                                     float tgZ = (float)(tZ + tLocalZ - camZ);
@@ -263,12 +263,12 @@ public class TargetEspRenderer {
                         this.ensureDistortionFbo(width, height);
                         int prevReadFbo = GL11.glGetInteger(36010);
                         int prevDrawFbo = GL11.glGetInteger(36006);
-                        GL30.glBindFramebuffer(36008, mainFbo.field_1476);
-                        GL30.glBindFramebuffer(36009, this.distortionFbo.field_1476);
+                        GL30.glBindFramebuffer(36008, mainFbo.fbo);
+                        GL30.glBindFramebuffer(36009, this.distortionFbo.fbo);
                         GL30.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, 16384, 9728);
                         GL30.glBindFramebuffer(36008, prevReadFbo);
                         GL30.glBindFramebuffer(36009, prevDrawFbo);
-                        GL30.glBindFramebuffer(36160, mainFbo.field_1476);
+                        GL30.glBindFramebuffer(36160, mainFbo.fbo);
                         int prevProgram = GL11.glGetInteger(35725);
                         int prevVao = GL11.glGetInteger(34229);
                         int prevVbo = GL11.glGetInteger(34964);
@@ -284,13 +284,13 @@ public class TargetEspRenderer {
                         RenderSystem.disableCull();
                         RenderSystem.disableBlend();
                         GL20.glUseProgram(this.distortionProgram);
-                        Matrix4f viewRotMat = new Matrix4f().rotation(new Quaternionf(context.camera().method_23767()).conjugate());
+                        Matrix4f viewRotMat = new Matrix4f().rotation(new Quaternionf(context.camera().getRotation()).conjugate());
                         Matrix4f projMat = new Matrix4f(context.projectionMatrix());
                         Matrix4f viewProjMat = new Matrix4f(projMat).mul(viewRotMat);
                         float[] viewProjArr = new float[16];
                         viewProjMat.get(viewProjArr);
                         GL13.glActiveTexture(33984);
-                        GL11.glBindTexture(3553, this.distortionFbo.method_30277());
+                        GL11.glBindTexture(3553, this.distortionFbo.getColorAttachment());
                         this.setUniform1i("uColorTexture", 0);
                         this.setUniformMatrix4fv("uViewProjMat", viewProjArr);
                         this.setUniform2f("uResolution", width, height);
@@ -370,18 +370,18 @@ public class TargetEspRenderer {
    }
 
    private void renderCubeMeshes(WorldRenderContext context, TargetEspModule tem) {
-      Map<class_1297, TargetEspEffect> effects = this.manager.getEffects();
+      Map<minecraft.entity.Entity, TargetEspEffect> effects = this.manager.getEffects();
       if (!effects.isEmpty()) {
          RenderSystem.enableBlend();
-         RenderSystem.blendFunc(class_4535.SRC_ALPHA, class_4534.ONE);
+         RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
          RenderSystem.disableCull();
          RenderSystem.disableDepthTest();
          RenderSystem.depthMask(false);
-         class_2960 selectedCubeTexture = this.getCubeTexture(tem);
+         minecraft.util.Identifier selectedCubeTexture = this.getCubeTexture(tem);
          RenderSystem.setShaderTexture(0, selectedCubeTexture);
-         RenderSystem.setShader(class_10142.field_53880);
-         class_289 tessellator = class_289.method_1348();
-         float tickDelta = context.tickCounter().method_60637(true);
+         RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+         client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+         float tickDelta = context.tickCounter().getTickDelta(true);
          long currentTime = System.currentTimeMillis();
          int rgb = ThemeManager.getThemedColor(0L);
          float r = (rgb >> 16 & 0xFF) / 255.0F;
@@ -389,8 +389,8 @@ public class TargetEspRenderer {
          float b = (rgb & 0xFF) / 255.0F;
 
          for (TargetEspEffect effect : effects.values()) {
-            class_1297 target = effect.target;
-            if (target != null && target.method_5805() && !TargetUtils.isInvisible(target)) {
+            minecraft.entity.Entity target = effect.target;
+            if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                long age = currentTime - effect.lastHitTime;
                if (age <= 450L) {
                   float progress = (float)age / 450.0F;
@@ -398,19 +398,19 @@ public class TargetEspRenderer {
                   long deltaTime = effect.lastRenderTime == 0L ? 0L : currentTime - effect.lastRenderTime;
                   effect.lastRenderTime = currentTime;
                   effect.currentAngle += 0.15F * (float)deltaTime;
-                  double lerpX = target.field_6038 + (target.method_23317() - target.field_6038) * tickDelta;
-                  double lerpY = target.field_5971 + (target.method_23318() - target.field_5971) * tickDelta;
-                  double lerpZ = target.field_5989 + (target.method_23321() - target.field_5989) * tickDelta;
-                  double centerY = lerpY + target.method_17682() / 2.0F;
-                  class_4587 matrixStack = context.matrixStack();
-                  matrixStack.method_22903();
-                  matrixStack.method_22904(
-                     lerpX - context.camera().method_19326().field_1352,
-                     centerY - context.camera().method_19326().field_1351,
-                     lerpZ - context.camera().method_19326().field_1350
+                  double lerpX = target.lastRenderX + (target.getX() - target.lastRenderX) * tickDelta;
+                  double lerpY = target.lastRenderY + (target.getY() - target.lastRenderY) * tickDelta;
+                  double lerpZ = target.lastRenderZ + (target.getZ() - target.lastRenderZ) * tickDelta;
+                  double centerY = lerpY + target.getHeight() / 2.0F;
+                  util.math.MatrixStack matrixStack = context.matrixStack();
+                  matrixStack.push();
+                  matrixStack.translate(
+                     lerpX - context.camera().getPos().x,
+                     centerY - context.camera().getPos().y,
+                     lerpZ - context.camera().getPos().z
                   );
-                  matrixStack.method_22907(context.camera().method_23767());
-                  matrixStack.method_22907(class_7833.field_40718.rotationDegrees(effect.currentAngle));
+                  matrixStack.multiply(context.camera().getRotation());
+                  matrixStack.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(effect.currentAngle));
                   float scaleProgress = 1.0F;
                   long timeSinceStart = currentTime - effect.startTime;
                   if (timeSinceStart < 200L) {
@@ -422,16 +422,16 @@ public class TargetEspRenderer {
                      scaleProgress = Math.max(0.0F, 1.0F - endProgress);
                   }
 
-                  float scale = target.method_17681() * 2.5F * scaleProgress;
-                  matrixStack.method_22905(scale, scale, scale);
-                  Matrix4f matrix = matrixStack.method_23760().method_23761();
-                  class_287 buffer = tessellator.method_60827(class_5596.field_27382, class_290.field_1575);
-                  buffer.method_22918(matrix, -0.5F, -0.5F, 0.0F).method_22913(0.0F, 0.0F).method_22915(r, g, b, alpha);
-                  buffer.method_22918(matrix, -0.5F, 0.5F, 0.0F).method_22913(0.0F, 1.0F).method_22915(r, g, b, alpha);
-                  buffer.method_22918(matrix, 0.5F, 0.5F, 0.0F).method_22913(1.0F, 1.0F).method_22915(r, g, b, alpha);
-                  buffer.method_22918(matrix, 0.5F, -0.5F, 0.0F).method_22913(1.0F, 0.0F).method_22915(r, g, b, alpha);
-                  class_286.method_43433(buffer.method_60800());
-                  matrixStack.method_22909();
+                  float scale = target.getWidth() * 2.5F * scaleProgress;
+                  matrixStack.scale(scale, scale, scale);
+                  Matrix4f matrix = matrixStack.peek().getPositionMatrix();
+                  client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                  buffer.vertex(matrix, -0.5F, -0.5F, 0.0F).texture(0.0F, 0.0F).color(r, g, b, alpha);
+                  buffer.vertex(matrix, -0.5F, 0.5F, 0.0F).texture(0.0F, 1.0F).color(r, g, b, alpha);
+                  buffer.vertex(matrix, 0.5F, 0.5F, 0.0F).texture(1.0F, 1.0F).color(r, g, b, alpha);
+                  buffer.vertex(matrix, 0.5F, -0.5F, 0.0F).texture(1.0F, 0.0F).color(r, g, b, alpha);
+                  client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+                  matrixStack.pop();
                }
             }
          }
@@ -445,14 +445,14 @@ public class TargetEspRenderer {
    }
 
    private void ensureDistortionFbo(int width, int height) {
-      if (this.distortionFbo == null || this.distortionFbo.field_1482 != width || this.distortionFbo.field_1481 != height) {
+      if (this.distortionFbo == null || this.distortionFbo.textureWidth != width || this.distortionFbo.textureHeight != height) {
          if (this.distortionFbo != null) {
-            this.distortionFbo.method_1238();
+            this.distortionFbo.delete();
          }
 
-         this.distortionFbo = new class_6367(width, height, false);
-         this.distortionFbo.method_1236(0.0F, 0.0F, 0.0F, 0.0F);
-         GL11.glBindTexture(3553, this.distortionFbo.method_30277());
+         this.distortionFbo = new client.gl.SimpleFramebuffer(width, height, false);
+         this.distortionFbo.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+         GL11.glBindTexture(3553, this.distortionFbo.getColorAttachment());
          GL11.glTexParameteri(3553, 10241, 9729);
          GL11.glTexParameteri(3553, 10240, 9729);
          GL11.glTexParameteri(3553, 10242, 33071);

@@ -2,7 +2,7 @@ package xyz.angames.astolfoclient.client.protection;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_2561;
+import net.minecraft.text.Text;
 
 @Environment(EnvType.CLIENT)
 public class NameLimiter {
@@ -11,7 +11,7 @@ public class NameLimiter {
    private NameLimiter() {
    }
 
-   public static class_2561 truncate(class_2561 name) {
+   public static minecraft.text.Text truncate(minecraft.text.Text name) {
       if (name == null) {
          return null;
       }
@@ -27,6 +27,6 @@ public class NameLimiter {
       }
 
       String cut = text.substring(0, cutIndex) + "...";
-      return class_2561.method_43470(cut);
+      return minecraft.text.Text.literal(cut);
    }
 }

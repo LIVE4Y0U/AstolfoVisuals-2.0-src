@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -11,19 +11,19 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.class_10142;
-import net.minecraft.class_2338;
-import net.minecraft.class_2382;
-import net.minecraft.class_243;
-import net.minecraft.class_2680;
-import net.minecraft.class_286;
-import net.minecraft.class_287;
-import net.minecraft.class_289;
-import net.minecraft.class_290;
-import net.minecraft.class_310;
-import net.minecraft.class_3532;
-import net.minecraft.class_4587;
-import net.minecraft.class_293.class_5596;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -34,12 +34,12 @@ import xyz.angames.astolfoclient.client.module.modules.render.LineGlyphsModule;
 public class LineGlyphsRenderer {
    private final List<LineGlyphsRenderer.GlyphsVecGen> glyphs = new ArrayList<>();
    private final Random rand = new Random(93882L);
-   private final class_310 client = class_310.method_1551();
+   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
    private long lastTickTime = 0L;
 
    public void render(WorldRenderContext context) {
       Module mod = AstolfoclientClient.moduleManager.getModuleByName("LineGlyphs");
-      if (mod instanceof LineGlyphsModule && mod.isEnabled() && this.client.field_1724 != null && this.client.field_1687 != null) {
+      if (mod instanceof LineGlyphsModule && mod.isEnabled() && this.client.player != null && this.client.world != null) {
          LineGlyphsModule module = (LineGlyphsModule)mod;
          int maxCount = (int)module.glyphsCount.get();
          boolean slow = module.slowSpeed.get();
@@ -53,16 +53,16 @@ public class LineGlyphsRenderer {
 
          this.glyphs.removeIf(genx -> genx.isToRemove());
          if (!this.glyphs.isEmpty()) {
-            class_4587 stack = context.matrixStack();
-            class_243 cam = context.camera().method_19326();
+            util.math.MatrixStack stack = context.matrixStack();
+            util.math.Vec3d cam = context.camera().getPos();
             RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(class_4535.SRC_ALPHA, glowing ? class_4534.ONE : class_4534.ONE_MINUS_SRC_ALPHA, class_4535.ONE, class_4534.ZERO);
+            RenderSystem.blendFuncSeparate(platform.GlStateManager.SrcFactor.SRC_ALPHA, glowing ? platform.GlStateManager.DstFactor.ONE : platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, platform.GlStateManager.SrcFactor.ONE, platform.GlStateManager.DstFactor.ZERO);
             RenderSystem.disableCull();
             RenderSystem.enableDepthTest();
             RenderSystem.depthMask(false);
-            RenderSystem.setShader(class_10142.field_53876);
-            class_289 tessellator = class_289.method_1348();
-            float pTicks = context.tickCounter().method_60637(true);
+            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+            client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+            float pTicks = context.tickCounter().getTickDelta(true);
             int colorIndex = 0;
 
             for (LineGlyphsRenderer.GlyphsVecGen gen : this.glyphs) {
@@ -95,14 +95,14 @@ public class LineGlyphsRenderer {
    }
 
    private void clientColoredBegin(
-      LineGlyphsRenderer.GlyphsVecGen gen, int colorIndex, float pTicks, class_243 cam, class_4587 stack, class_289 tessellator, float widthMul, float widthAdd
+      LineGlyphsRenderer.GlyphsVecGen gen, int colorIndex, float pTicks, util.math.Vec3d cam, util.math.MatrixStack stack, client.render.Tessellator tessellator, float widthMul, float widthAdd
    ) {
       if (gen.vecGens.size() >= 2) {
          float lineWidth = this.calcLineWidth(gen, cam);
          RenderSystem.lineWidth(Math.min(lineWidth * widthMul + widthAdd, 15.0F));
-         Matrix4f mat = stack.method_23760().method_23761();
-         class_287 buffer = tessellator.method_60827(class_5596.field_29345, class_290.field_1576);
-         List<class_243> vecs = gen.getPosVectors(pTicks);
+         Matrix4f mat = stack.peek().getPositionMatrix();
+         client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+         List<util.math.Vec3d> vecs = gen.getPosVectors(pTicks);
          float alphaPC = gen.getAlphaPC();
          if (widthAdd == 4.0F) {
             alphaPC *= 0.1F;
@@ -114,30 +114,30 @@ public class LineGlyphsRenderer {
 
          int index = 0;
 
-         for (class_243 vec : vecs) {
+         for (util.math.Vec3d vec : vecs) {
             float pointAlpha = alphaPC * (0.25F + (float)index / gen.vecGens.size() / 1.75F);
             Color c = new Color(ThemeManager.getThemedColor(colorIndex * 15 + index * 5));
             float r = c.getRed() / 255.0F * 0.9F + 0.1F;
             float g = c.getGreen() / 255.0F * 0.9F + 0.1F;
             float b = c.getBlue() / 255.0F * 0.9F + 0.1F;
-            buffer.method_22918(
-                  mat, (float)(vec.field_1352 - cam.field_1352), (float)(vec.field_1351 - cam.field_1351), (float)(vec.field_1350 - cam.field_1350)
+            buffer.vertex(
+                  mat, (float)(vec.x - cam.x), (float)(vec.y - cam.y), (float)(vec.z - cam.z)
                )
-               .method_22915(r, g, b, pointAlpha);
+               .color(r, g, b, pointAlpha);
             index++;
          }
 
-         class_286.method_43433(buffer.method_60800());
+         client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
       }
    }
 
-   private float calcLineWidth(LineGlyphsRenderer.GlyphsVecGen gen, class_243 cam) {
-      class_2382 pos = gen.vecGens
+   private float calcLineWidth(LineGlyphsRenderer.GlyphsVecGen gen, util.math.Vec3d cam) {
+      util.math.Vec3i pos = gen.vecGens
          .stream()
-         .min(Comparator.comparingDouble(v -> cam.method_1028(v.method_10263(), v.method_10264(), v.method_10260())))
+         .min(Comparator.comparingDouble(v -> cam.squaredDistanceTo(v.getX(), v.getY(), v.getZ())))
          .orElse(gen.vecGens.get(0));
-      double dst = Math.sqrt(cam.method_1028(pos.method_10263(), pos.method_10264(), pos.method_10260()));
-      return 1.0E-4F + 3.0F * (float)class_3532.method_15350(1.0 - dst / 20.0, 0.0, 1.0);
+      double dst = Math.sqrt(cam.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()));
+      return 1.0E-4F + 3.0F * (float)util.math.MathHelper.clamp(1.0 - dst / 20.0, 0.0, 1.0);
    }
 
    private void glyphsUpdate(boolean slowSpeed) {
@@ -148,43 +148,43 @@ public class LineGlyphsRenderer {
 
    private void addAllGlyphs(int countCap) {
       while (this.glyphs.size() < countCap) {
-         class_2382 pos = this.randGlyphSpawnPos();
+         util.math.Vec3i pos = this.randGlyphSpawnPos();
          this.glyphs.add(new LineGlyphsRenderer.GlyphsVecGen(pos, this.randInt(7, 12)));
       }
    }
 
-   private class_2382 randGlyphSpawnPos() {
-      class_243 cam = this.client.field_1724 != null ? this.client.field_1724.method_19538() : class_243.field_1353;
-      double fov = ((Integer)this.client.field_1690.method_41808().method_41753()).intValue();
-      float yaw = this.client.field_1724 != null ? this.client.field_1724.method_36454() : 0.0F;
+   private util.math.Vec3i randGlyphSpawnPos() {
+      util.math.Vec3d cam = this.client.player != null ? this.client.player.getPos() : util.math.Vec3d.ZERO;
+      double fov = ((Integer)this.client.options.getFov().getValue()).intValue();
+      float yaw = this.client.player != null ? this.client.player.getYaw() : 0.0F;
 
       for (int attempt = 16; attempt > 0; attempt--) {
          double dst = this.randInt(6, 24);
          int yawMin = (int)(yaw - fov * 0.75);
          int yawMax = (int)(yaw + fov * 0.75);
          float radYaw = (float)Math.toRadians(this.randInt(yawMin, yawMax));
-         int randXOff = (int)(-(class_3532.method_15374(radYaw) * dst));
+         int randXOff = (int)(-(util.math.MathHelper.sin(radYaw) * dst));
          int randYOff = this.randInt(0, 12);
-         int randZOff = (int)(class_3532.method_15362(radYaw) * dst);
-         class_2382 pos = new class_2382((int)cam.field_1352 + randXOff, (int)cam.field_1351 + randYOff, (int)cam.field_1350 + randZOff);
+         int randZOff = (int)(util.math.MathHelper.cos(radYaw) * dst);
+         util.math.Vec3i pos = new util.math.Vec3i((int)cam.x + randXOff, (int)cam.y + randYOff, (int)cam.z + randZOff);
          if (this.isSpawnPosFree(pos)) {
             return pos;
          }
       }
 
-      return new class_2382((int)cam.field_1352, (int)cam.field_1351, (int)cam.field_1350);
+      return new util.math.Vec3i((int)cam.x, (int)cam.y, (int)cam.z);
    }
 
-   private boolean isSpawnPosFree(class_2382 pos) {
-      if (this.client.field_1687 == null) {
+   private boolean isSpawnPosFree(util.math.Vec3i pos) {
+      if (this.client.world == null) {
          return true;
       } else {
-         class_2338 bp = new class_2338(pos.method_10263(), pos.method_10264(), pos.method_10260());
-         class_2680 state = this.client.field_1687.method_8320(bp);
-         if (state.method_26215()) {
+         util.math.BlockPos bp = new util.math.BlockPos(pos.getX(), pos.getY(), pos.getZ());
+         minecraft.block.BlockState state = this.client.world.getBlockState(bp);
+         if (state.isAir()) {
             return true;
          } else {
-            return !state.method_26227().method_15769() ? false : state.method_26220(this.client.field_1687, bp).method_1110();
+            return !state.getFluidState().isEmpty() ? false : state.getCollisionShape(this.client.world, bp).isEmpty();
          }
       }
    }
@@ -212,23 +212,23 @@ public class LineGlyphsRenderer {
       return new int[]{a, b};
    }
 
-   private class_2382 offsetFromRXYR(class_2382 vec3i, int[] rxy, int r) {
+   private util.math.Vec3i offsetFromRXYR(util.math.Vec3i vec3i, int[] rxy, int r) {
       float yawR = (float)Math.toRadians(rxy[0]);
       float pitchR = (float)Math.toRadians(rxy[1]);
       float r1 = r;
-      int ry = (int)(class_3532.method_15374(pitchR) * r1);
+      int ry = (int)(util.math.MathHelper.sin(pitchR) * r1);
       if (pitchR != 0.0F) {
          r1 = 0.0F;
       }
 
-      int rx = (int)(-(class_3532.method_15374(yawR) * r1));
-      int rz = (int)(class_3532.method_15362(yawR) * r1);
-      return new class_2382(vec3i.method_10263() + rx, vec3i.method_10264() + ry, vec3i.method_10260() + rz);
+      int rx = (int)(-(util.math.MathHelper.sin(yawR) * r1));
+      int rz = (int)(util.math.MathHelper.cos(yawR) * r1);
+      return new util.math.Vec3i(vec3i.getX() + rx, vec3i.getY() + ry, vec3i.getZ() + rz);
    }
 
    @Environment(EnvType.CLIENT)
    private class GlyphsVecGen {
-      private final List<class_2382> vecGens = new ArrayList<>();
+      private final List<util.math.Vec3i> vecGens = new ArrayList<>();
       private int currentStepTicks;
       private int lastStepSet;
       private int stepsAmount;
@@ -237,7 +237,7 @@ public class LineGlyphsRenderer {
       private boolean removing = false;
       private long removeTime;
 
-      GlyphsVecGen(class_2382 spawnPos, int maxStepsAmount) {
+      GlyphsVecGen(util.math.Vec3i spawnPos, int maxStepsAmount) {
          this.vecGens.add(spawnPos);
          this.lastYawPitch = LineGlyphsRenderer.this.getR360XY();
          this.stepsAmount = maxStepsAmount;
@@ -256,13 +256,13 @@ public class LineGlyphsRenderer {
                this.currentStepTicks = 0;
             }
          } else if (!this.removing) {
-            class_2382 last = this.vecGens.get(this.vecGens.size() - 1);
+            util.math.Vec3i last = this.vecGens.get(this.vecGens.size() - 1);
             boolean added = false;
 
             for (int attempt = 6; attempt > 0; attempt--) {
                int[] nextR = LineGlyphsRenderer.this.getA90R(this.lastYawPitch);
                int step = LineGlyphsRenderer.this.randInt(0, 3);
-               class_2382 next = LineGlyphsRenderer.this.offsetFromRXYR(last, nextR, step);
+               util.math.Vec3i next = LineGlyphsRenderer.this.offsetFromRXYR(last, nextR, step);
                if (LineGlyphsRenderer.this.isSpawnPosFree(next)) {
                   this.lastYawPitch = nextR;
                   this.lastStepSet = this.currentStepTicks = step;
@@ -279,23 +279,23 @@ public class LineGlyphsRenderer {
          }
       }
 
-      public List<class_243> getPosVectors(float pTicks) {
-         List<class_243> smoothVecs = new ArrayList<>();
+      public List<util.math.Vec3d> getPosVectors(float pTicks) {
+         List<util.math.Vec3d> smoothVecs = new ArrayList<>();
          float advance = Math.min(Math.max(1.0F - (this.currentStepTicks - pTicks) / Math.max(1, this.lastStepSet), 0.0F), 1.0F);
 
          for (int i = 0; i < this.vecGens.size(); i++) {
-            class_2382 v = this.vecGens.get(i);
-            double x = v.method_10263();
-            double y = v.method_10264();
-            double z = v.method_10260();
+            util.math.Vec3i v = this.vecGens.get(i);
+            double x = v.getX();
+            double y = v.getY();
+            double z = v.getZ();
             if (this.vecGens.size() >= 2 && i == this.vecGens.size() - 1 && !this.removing) {
-               class_2382 prev = this.vecGens.get(this.vecGens.size() - 2);
-               x = prev.method_10263() + (x - prev.method_10263()) * advance;
-               y = prev.method_10264() + (y - prev.method_10264()) * advance;
-               z = prev.method_10260() + (z - prev.method_10260()) * advance;
+               util.math.Vec3i prev = this.vecGens.get(this.vecGens.size() - 2);
+               x = prev.getX() + (x - prev.getX()) * advance;
+               y = prev.getY() + (y - prev.getY()) * advance;
+               z = prev.getZ() + (z - prev.getZ()) * advance;
             }
 
-            smoothVecs.add(new class_243(x, y, z));
+            smoothVecs.add(new util.math.Vec3d(x, y, z));
          }
 
          return smoothVecs;

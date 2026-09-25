@@ -2,9 +2,9 @@ package xyz.angames.astolfoclient.client.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_310;
-import net.minecraft.class_4184;
-import net.minecraft.class_757;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.GameRenderer;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,23 +16,23 @@ import xyz.angames.astolfoclient.client.module.modules.render.AspectRatioModule;
 import xyz.angames.astolfoclient.client.module.modules.render.CameraUtilsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(class_757.class)
+@Mixin(client.render.GameRenderer.class)
 public abstract class GameRendererMixin {
    @Shadow
    @Final
-   private class_310 field_4015;
+   private minecraft.client.MinecraftClient client;
    @Shadow
-   private float field_4005;
+   private float zoom;
    @Shadow
-   private float field_3988;
+   private float zoomX;
    @Shadow
-   private float field_4004;
+   private float zoomY;
 
    @Shadow
-   public abstract float method_32796();
+   public abstract float getFarPlaneDistance();
 
    @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
-   private void onGetFov(class_4184 camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir) {
+   private void onGetFov(client.render.Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir) {
       CameraUtilsModule camUtils = CameraUtilsModule.getInstance();
       if (camUtils != null && camUtils.isEnabled()) {
          float baseFov = (Float)cir.getReturnValue();
@@ -44,15 +44,15 @@ public abstract class GameRendererMixin {
    private void onGetBasicProjectionMatrix(float fov, CallbackInfoReturnable<Matrix4f> cir) {
       AspectRatioModule aspectRatioModule = AspectRatioModule.getInstance();
       if (aspectRatioModule != null && aspectRatioModule.isEnabled()) {
-         float defaultAspect = (float)this.field_4015.method_22683().method_4489() / this.field_4015.method_22683().method_4506();
+         float defaultAspect = (float)this.client.getWindow().getFramebufferWidth() / this.client.getWindow().getFramebufferHeight();
          float aspect = aspectRatioModule.getAspectRatio(defaultAspect);
          Matrix4f matrix4f = new Matrix4f();
-         if (this.field_4005 != 1.0F) {
-            matrix4f.translate(this.field_3988, -this.field_4004, 0.0F);
-            matrix4f.scale(this.field_4005, this.field_4005, 1.0F);
+         if (this.zoom != 1.0F) {
+            matrix4f.translate(this.zoomX, -this.zoomY, 0.0F);
+            matrix4f.scale(this.zoom, this.zoom, 1.0F);
          }
 
-         matrix4f.perspective(fov * (float) (Math.PI / 180.0), aspect, 0.05F, this.method_32796());
+         matrix4f.perspective(fov * (float) (Math.PI / 180.0), aspect, 0.05F, this.getFarPlaneDistance());
          cir.setReturnValue(matrix4f);
       }
    }

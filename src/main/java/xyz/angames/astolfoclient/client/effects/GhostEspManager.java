@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_1297;
+import net.minecraft.entity.Entity;
 import xyz.angames.astolfoclient.client.util.TargetUtils;
 
 @Environment(EnvType.CLIENT)
 public class GhostEspManager {
    public static final long LIFESPAN = 450L;
-   private final Map<class_1297, GhostEspEffect> effects = new ConcurrentHashMap<>();
+   private final Map<minecraft.entity.Entity, GhostEspEffect> effects = new ConcurrentHashMap<>();
 
-   public void addEffect(class_1297 target) {
+   public void addEffect(minecraft.entity.Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          this.effects.compute(target, (entity, effect) -> {
             if (effect == null) {
@@ -25,7 +25,7 @@ public class GhostEspManager {
       }
    }
 
-   public void addAttack(class_1297 target) {
+   public void addAttack(minecraft.entity.Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          this.effects.computeIfPresent(target, (entity, effect) -> {
             effect.lastAttackTime = System.currentTimeMillis();
@@ -38,13 +38,13 @@ public class GhostEspManager {
       this.effects
          .entrySet()
          .removeIf(
-            entry -> !entry.getKey().method_5805()
+            entry -> !entry.getKey().isAlive()
                || System.currentTimeMillis() - entry.getValue().lastHitTime > 450L
                || TargetUtils.isInvisible(entry.getKey())
          );
    }
 
-   public Map<class_1297, GhostEspEffect> getEffects() {
+   public Map<minecraft.entity.Entity, GhostEspEffect> getEffects() {
       return this.effects;
    }
 }
