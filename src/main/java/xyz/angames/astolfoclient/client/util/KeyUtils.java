@@ -34,7 +34,7 @@ public class KeyUtils {
 
       for (int i = 0; i < 350; i++) {
          try {
-            util.InputUtil.Key key = util.InputUtil.Type.KEYSYM.createFromCode(i);
+            InputUtil.Key key = InputUtil.Type.KEYSYM.createFromCode(i);
             String name = key.getTranslationKey();
             if (name != null && !name.isEmpty() && !name.contains("unknown")) {
                String simpleName = name.replace("key.keyboard.", "").toUpperCase();

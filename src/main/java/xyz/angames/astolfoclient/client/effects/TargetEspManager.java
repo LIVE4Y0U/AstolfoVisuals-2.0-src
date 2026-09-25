@@ -10,9 +10,9 @@ import xyz.angames.astolfoclient.client.util.TargetUtils;
 @Environment(EnvType.CLIENT)
 public class TargetEspManager {
    public static final long LIFESPAN = 450L;
-   private final Map<minecraft.entity.Entity, TargetEspEffect> effects = new ConcurrentHashMap<>();
+   private final Map<Entity, TargetEspEffect> effects = new ConcurrentHashMap<>();
 
-   public void addEffect(minecraft.entity.Entity target) {
+   public void addEffect(Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          this.effects.computeIfAbsent(target, TargetEspEffect::new).registerHit();
       }
@@ -29,7 +29,7 @@ public class TargetEspManager {
          );
    }
 
-   public Map<minecraft.entity.Entity, TargetEspEffect> getEffects() {
+   public Map<Entity, TargetEspEffect> getEffects() {
       return this.effects;
    }
 }

@@ -34,8 +34,8 @@ public class ActiveBindsManager {
    private static final Supplier<MsdfFont> ICON_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("interface_icons_activebinds")
-         .data(minecraft.util.Identifier.of("mre", "icons/interface/interface.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "icons/interface/interface.png"))
+         .data(Identifier.of("mre", "icons/interface/interface.json"))
+         .atlas(Identifier.of("mre", "icons/interface/interface.png"))
          .glyphMapper(g -> {
             int idx = g.index();
             if (idx == 3) {
@@ -61,8 +61,8 @@ public class ActiveBindsManager {
    private float masterAlpha = 0.0F;
    private long lastUpdateTimeNs = -1L;
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   public void render(DrawContext context, float tickDelta) {
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.world != null) {
          boolean isEditing = mc.currentScreen instanceof HudEditorScreen;
          InterfaceModule interfaceMod = (InterfaceModule)(
@@ -273,7 +273,7 @@ public class ActiveBindsManager {
    }
 
    private float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;
@@ -283,7 +283,7 @@ public class ActiveBindsManager {
    }
 
    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       boolean isEditing = mc.currentScreen instanceof HudEditorScreen;
       InterfaceModule interfaceMod = (InterfaceModule)(
          AstolfoclientClient.moduleManager != null ? AstolfoclientClient.moduleManager.getModuleByName("Interface") : null
@@ -308,7 +308,7 @@ public class ActiveBindsManager {
 
    public boolean onMouseDragged(double mouseX, double mouseY, int button) {
       if (this.dragging && button == 0) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          float scaleModifier = this.getScaleModifier();
          float screenW = mc.getWindow().getScaledWidth();
          float screenH = mc.getWindow().getScaledHeight();

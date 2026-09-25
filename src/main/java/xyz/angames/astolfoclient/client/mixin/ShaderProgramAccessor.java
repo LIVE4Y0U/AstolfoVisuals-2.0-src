@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.gl.ShaderProgram.class)
+@Mixin(ShaderProgram.class)
 public interface ShaderProgramAccessor {
    @Accessor("uniformsByName")
-   Map<String, client.gl.GlUniform> getUniformsByName();
+   Map<String, GlUniform> getUniformsByName();
 }

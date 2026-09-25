@@ -13,14 +13,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.module.modules.render.NoRenderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.hud.InGameHud.class)
+@Mixin(InGameHud.class)
 public class MixinInGameHud {
    @Inject(
       method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/scoreboard/ScoreboardObjective;)V",
       at = @At("HEAD"),
       cancellable = true
    )
-   private void onRenderScoreboard(client.gui.DrawContext context, minecraft.scoreboard.ScoreboardObjective objective, CallbackInfo ci) {
+   private void onRenderScoreboard(DrawContext context, ScoreboardObjective objective, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.scoreboard.get()) {
          ci.cancel();
@@ -28,7 +28,7 @@ public class MixinInGameHud {
    }
 
    @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
-   private void onRenderPortalOverlay(client.gui.DrawContext context, float f, CallbackInfo ci) {
+   private void onRenderPortalOverlay(DrawContext context, float f, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.portal.get()) {
          ci.cancel();
@@ -36,7 +36,7 @@ public class MixinInGameHud {
    }
 
    @Inject(method = "renderOverlay", at = @At("HEAD"), cancellable = true)
-   private void onRenderPumpkinOverlay(client.gui.DrawContext context, minecraft.util.Identifier texture, float opacity, CallbackInfo ci) {
+   private void onRenderPumpkinOverlay(DrawContext context, Identifier texture, float opacity, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.pumpkin.get() && texture.getPath().contains("pumpkin")) {
          ci.cancel();

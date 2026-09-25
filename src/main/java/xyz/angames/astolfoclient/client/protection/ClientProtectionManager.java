@@ -31,7 +31,7 @@ public class ClientProtectionManager {
    private long lastSoundTime = 0L;
    private static final int ADVANCEMENT_QUEUE_LIMIT = 1600;
    private static final long ADVANCEMENT_QUIET_PERIOD_MS = 3000L;
-   private final Queue<network.packet.Packet<?>> pendingAdvancements = new ConcurrentLinkedQueue<>();
+   private final Queue<Packet<?>> pendingAdvancements = new ConcurrentLinkedQueue<>();
    private volatile long lastAdvancementPacketTime = 0L;
 
    public static ClientProtectionManager getInstance() {
@@ -69,19 +69,19 @@ public class ClientProtectionManager {
          }
       }
 
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc != null && mc.inGameHud != null && mc.inGameHud.getChatHud() != null) {
-         mc.inGameHud.getChatHud().addMessage(minecraft.text.Text.literal("§c[Protection] §fBlocked crash exploit: §e" + title + " §7(" + details + ")"));
+         mc.inGameHud.getChatHud().addMessage(Text.literal("§c[Protection] §fBlocked crash exploit: §e" + title + " §7(" + details + ")"));
       }
    }
 
-   public boolean isMaliciousPacket(network.packet.Packet<?> packet) {
+   public boolean isMaliciousPacket(Packet<?> packet) {
       if (packet == null) {
          return false;
       }
 
-      if (packet instanceof s2c.play.ExplosionS2CPacket explosion) {
-         util.math.Vec3d center = explosion.comp_2883();
+      if (packet instanceof ExplosionS2CPacket explosion) {
+         Vec3d center = explosion.comp_2883();
          if (center == null
             || isInvalidDouble(center.x)
             || isInvalidDouble(center.y)
@@ -94,7 +94,7 @@ public class ClientProtectionManager {
          }
 
          if (explosion.comp_2884().isPresent()) {
-            util.math.Vec3d kb = (util.math.Vec3d)explosion.comp_2884().get();
+            Vec3d kb = (Vec3d)explosion.comp_2884().get();
             if (kb == null
                || isInvalidDouble(kb.x)
                || isInvalidDouble(kb.y)
@@ -108,7 +108,7 @@ public class ClientProtectionManager {
          }
       }
 
-      if (packet instanceof s2c.play.ParticleS2CPacket particle) {
+      if (packet instanceof ParticleS2CPacket particle) {
          if (isInvalidDouble(particle.getX())
             || isInvalidDouble(particle.getY())
             || isInvalidDouble(particle.getZ())
@@ -140,7 +140,7 @@ public class ClientProtectionManager {
          }
       }
 
-      if (packet instanceof s2c.play.AdvancementUpdateS2CPacket) {
+      if (packet instanceof AdvancementUpdateS2CPacket) {
          if (this.pendingAdvancements.size() >= 1600) {
             this.pendingAdvancements.poll();
             this.onCrashBlocked("Advancement Flood", "Queue exceeded limit (1600)");
@@ -150,7 +150,7 @@ public class ClientProtectionManager {
          this.lastAdvancementPacketTime = System.currentTimeMillis();
          return true;
       } else {
-         if (packet instanceof s2c.play.EntityVelocityUpdateS2CPacket vel) {
+         if (packet instanceof EntityVelocityUpdateS2CPacket vel) {
             double vx = Math.abs(vel.getVelocityX() / 8000.0);
             double vy = Math.abs(vel.getVelocityY() / 8000.0);
             double vz = Math.abs(vel.getVelocityZ() / 8000.0);
@@ -160,7 +160,7 @@ public class ClientProtectionManager {
             }
          }
 
-         if (packet instanceof s2c.play.PlaySoundS2CPacket sound) {
+         if (packet instanceof PlaySoundS2CPacket sound) {
             if (isInvalidDouble(sound.getX())
                || isInvalidDouble(sound.getY())
                || isInvalidDouble(sound.getZ())
@@ -182,7 +182,7 @@ public class ClientProtectionManager {
             }
          }
 
-         if (packet instanceof s2c.play.EntitySpawnS2CPacket spawn) {
+         if (packet instanceof EntitySpawnS2CPacket spawn) {
             if (isInvalidDouble(spawn.getX())
                || isInvalidDouble(spawn.getY())
                || isInvalidDouble(spawn.getZ())
@@ -204,11 +204,11 @@ public class ClientProtectionManager {
             }
          }
 
-         if (packet instanceof s2c.play.PlayerPositionLookS2CPacket teleport) {
-            entity.player.PlayerPosition change = teleport.comp_3228();
+         if (packet instanceof PlayerPositionLookS2CPacket teleport) {
+            PlayerPosition change = teleport.comp_3228();
             if (change != null) {
-               util.math.Vec3d pos = change.comp_3148();
-               util.math.Vec3d delta = change.comp_3149();
+               Vec3d pos = change.comp_3148();
+               Vec3d delta = change.comp_3149();
                if (pos == null
                   || isInvalidDouble(pos.x)
                   || isInvalidDouble(pos.y)
@@ -233,9 +233,9 @@ public class ClientProtectionManager {
                   this.onCrashBlocked("Teleport Crash", "Invalid Coordinates (" + coordsStr + ")");
 
                   try {
-                     minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+                     MinecraftClient mc = MinecraftClient.getInstance();
                      if (mc != null && mc.getNetworkHandler() != null) {
-                        mc.getNetworkHandler().sendPacket(new c2s.play.TeleportConfirmC2SPacket(teleport.comp_3133()));
+                        mc.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(teleport.comp_3133()));
                      }
                   } catch (Exception var9) {
                   }
@@ -245,8 +245,8 @@ public class ClientProtectionManager {
             }
          }
 
-         if (packet instanceof s2c.play.VehicleMoveS2CPacket vehicleMove) {
-            util.math.Vec3d pos = vehicleMove.comp_3347();
+         if (packet instanceof VehicleMoveS2CPacket vehicleMove) {
+            Vec3d pos = vehicleMove.comp_3347();
             if (pos == null
                || isInvalidDouble(pos.x)
                || isInvalidDouble(pos.y)
@@ -263,10 +263,10 @@ public class ClientProtectionManager {
             }
          }
 
-         if (packet instanceof s2c.play.EntityPositionS2CPacket entityPos) {
-            entity.player.PlayerPosition change = entityPos.comp_3238();
+         if (packet instanceof EntityPositionS2CPacket entityPos) {
+            PlayerPosition change = entityPos.comp_3238();
             if (change != null) {
-               util.math.Vec3d pos = change.comp_3148();
+               Vec3d pos = change.comp_3148();
                if (pos == null
                   || isInvalidDouble(pos.x)
                   || isInvalidDouble(pos.y)
@@ -280,10 +280,10 @@ public class ClientProtectionManager {
             }
          }
 
-         if (packet instanceof s2c.play.EntityPositionSyncS2CPacket entitySync) {
-            entity.player.PlayerPosition values = entitySync.comp_3224();
+         if (packet instanceof EntityPositionSyncS2CPacket entitySync) {
+            PlayerPosition values = entitySync.comp_3224();
             if (values != null) {
-               util.math.Vec3d pos = values.comp_3148();
+               Vec3d pos = values.comp_3148();
                if (pos == null
                   || isInvalidDouble(pos.x)
                   || isInvalidDouble(pos.y)
@@ -309,10 +309,10 @@ public class ClientProtectionManager {
       }
 
       if (!this.pendingAdvancements.isEmpty() && System.currentTimeMillis() - this.lastAdvancementPacketTime >= 3000L) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc.getNetworkHandler() != null) {
             while (!this.pendingAdvancements.isEmpty()) {
-               network.packet.Packet<?> p = this.pendingAdvancements.poll();
+               Packet<?> p = this.pendingAdvancements.poll();
                if (p != null) {
                   try {
                      p.apply(mc.getNetworkHandler());

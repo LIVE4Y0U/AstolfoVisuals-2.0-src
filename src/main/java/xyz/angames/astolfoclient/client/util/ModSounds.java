@@ -12,26 +12,26 @@ import xyz.angames.astolfoclient.client.config.SoundSettings;
 
 @Environment(EnvType.CLIENT)
 public class ModSounds {
-   public static final minecraft.util.Identifier ENABLE_ID = minecraft.util.Identifier.of("astolfoclient", "module_enable");
-   public static final minecraft.sound.SoundEvent ENABLE_SOUND = minecraft.sound.SoundEvent.of(ENABLE_ID);
-   public static final minecraft.util.Identifier DISABLE_ID = minecraft.util.Identifier.of("astolfoclient", "module_disable");
-   public static final minecraft.sound.SoundEvent DISABLE_SOUND = minecraft.sound.SoundEvent.of(DISABLE_ID);
-   public static final minecraft.util.Identifier CRASH_DETECTION_ID = minecraft.util.Identifier.of("astolfoclient", "crash_detection");
-   public static final minecraft.sound.SoundEvent CRASH_DETECTION_SOUND = minecraft.sound.SoundEvent.of(CRASH_DETECTION_ID);
-   public static final minecraft.util.Identifier CRASH_DETECTION_HYPHEN_ID = minecraft.util.Identifier.of("astolfoclient", "crash-detection");
-   public static final minecraft.sound.SoundEvent CRASH_DETECTION_HYPHEN_SOUND = minecraft.sound.SoundEvent.of(CRASH_DETECTION_HYPHEN_ID);
-   public static final minecraft.util.Identifier GUI_OPEN_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_open");
-   public static final minecraft.sound.SoundEvent GUI_OPEN_SOUND = minecraft.sound.SoundEvent.of(GUI_OPEN_ID);
-   public static final minecraft.util.Identifier CATEGORY_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_category");
-   public static final minecraft.sound.SoundEvent CATEGORY_SOUND = minecraft.sound.SoundEvent.of(CATEGORY_ID);
-   public static final minecraft.util.Identifier MODULE_SELECT_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_module");
-   public static final minecraft.sound.SoundEvent MODULE_SELECT_SOUND = minecraft.sound.SoundEvent.of(MODULE_SELECT_ID);
-   public static final minecraft.util.Identifier SLIDER_MOVING_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_slider");
-   public static final minecraft.sound.SoundEvent SLIDER_MOVING_SOUND = minecraft.sound.SoundEvent.of(SLIDER_MOVING_ID);
-   public static final minecraft.util.Identifier SEARCH_CLICK_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_search");
-   public static final minecraft.sound.SoundEvent SEARCH_CLICK_SOUND = minecraft.sound.SoundEvent.of(SEARCH_CLICK_ID);
-   public static final minecraft.util.Identifier MODE_OPEN_ID = minecraft.util.Identifier.of("astolfoclient", "clickgui_mode_open");
-   public static final minecraft.sound.SoundEvent MODE_OPEN_SOUND = minecraft.sound.SoundEvent.of(MODE_OPEN_ID);
+   public static final Identifier ENABLE_ID = Identifier.of("astolfoclient", "module_enable");
+   public static final SoundEvent ENABLE_SOUND = SoundEvent.of(ENABLE_ID);
+   public static final Identifier DISABLE_ID = Identifier.of("astolfoclient", "module_disable");
+   public static final SoundEvent DISABLE_SOUND = SoundEvent.of(DISABLE_ID);
+   public static final Identifier CRASH_DETECTION_ID = Identifier.of("astolfoclient", "crash_detection");
+   public static final SoundEvent CRASH_DETECTION_SOUND = SoundEvent.of(CRASH_DETECTION_ID);
+   public static final Identifier CRASH_DETECTION_HYPHEN_ID = Identifier.of("astolfoclient", "crash-detection");
+   public static final SoundEvent CRASH_DETECTION_HYPHEN_SOUND = SoundEvent.of(CRASH_DETECTION_HYPHEN_ID);
+   public static final Identifier GUI_OPEN_ID = Identifier.of("astolfoclient", "clickgui_open");
+   public static final SoundEvent GUI_OPEN_SOUND = SoundEvent.of(GUI_OPEN_ID);
+   public static final Identifier CATEGORY_ID = Identifier.of("astolfoclient", "clickgui_category");
+   public static final SoundEvent CATEGORY_SOUND = SoundEvent.of(CATEGORY_ID);
+   public static final Identifier MODULE_SELECT_ID = Identifier.of("astolfoclient", "clickgui_module");
+   public static final SoundEvent MODULE_SELECT_SOUND = SoundEvent.of(MODULE_SELECT_ID);
+   public static final Identifier SLIDER_MOVING_ID = Identifier.of("astolfoclient", "clickgui_slider");
+   public static final SoundEvent SLIDER_MOVING_SOUND = SoundEvent.of(SLIDER_MOVING_ID);
+   public static final Identifier SEARCH_CLICK_ID = Identifier.of("astolfoclient", "clickgui_search");
+   public static final SoundEvent SEARCH_CLICK_SOUND = SoundEvent.of(SEARCH_CLICK_ID);
+   public static final Identifier MODE_OPEN_ID = Identifier.of("astolfoclient", "clickgui_mode_open");
+   public static final SoundEvent MODE_OPEN_SOUND = SoundEvent.of(MODE_OPEN_ID);
    private static long lastSliderSoundTime = 0L;
 
    public static void register() {
@@ -47,23 +47,23 @@ public class ModSounds {
       registerSound(MODE_OPEN_ID, MODE_OPEN_SOUND);
    }
 
-   private static void registerSound(minecraft.util.Identifier id, minecraft.sound.SoundEvent sound) {
-      if (!minecraft.registry.Registries.SOUND_EVENT.containsId(id)) {
-         minecraft.registry.Registry.register(minecraft.registry.Registries.SOUND_EVENT, id, sound);
+   private static void registerSound(Identifier id, SoundEvent sound) {
+      if (!Registries.SOUND_EVENT.containsId(id)) {
+         Registry.register(Registries.SOUND_EVENT, id, sound);
       }
    }
 
-   public static void playSound(minecraft.sound.SoundEvent sound, float volume) {
+   public static void playSound(SoundEvent sound, float volume) {
       if (SoundSettings.isSoundEnabled()) {
          float master = SoundSettings.getMasterVolume() / 100.0F;
          float vol = volume / 100.0F * master;
          if (!(vol <= 0.001F)) {
-            minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+            MinecraftClient mc = MinecraftClient.getInstance();
             if (mc != null) {
                mc.execute(() -> {
                   try {
                      if (mc.getSoundManager() != null) {
-                        mc.getSoundManager().play(client.sound.PositionedSoundInstance.master(sound, 1.0F, vol));
+                        mc.getSoundManager().play(PositionedSoundInstance.master(sound, 1.0F, vol));
                      }
                   } catch (Exception var4x) {
                   }

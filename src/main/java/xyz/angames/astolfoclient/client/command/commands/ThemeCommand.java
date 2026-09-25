@@ -22,7 +22,7 @@ public class ThemeCommand extends Command {
          switch (action) {
             case "get":
             case "color":
-               sendMessage(minecraft.util.Formatting.GOLD + "Current Theme Color: " + minecraft.util.Formatting.WHITE + ThemeManager.getCustomColor1Hex());
+               sendMessage(Formatting.GOLD + "Current Theme Color: " + Formatting.WHITE + ThemeManager.getCustomColor1Hex());
                break;
             case "set":
                if (args.length != 2) {
@@ -32,7 +32,7 @@ public class ThemeCommand extends Command {
 
                try {
                   ThemeManager.setCustomColor(args[1]);
-                  sendMessage(minecraft.util.Formatting.GREEN + "Theme color set to " + args[1]);
+                  sendMessage(Formatting.GREEN + "Theme color set to " + args[1]);
                } catch (Exception e) {
                   this.sendError("Invalid hex color: " + args[1]);
                }
@@ -41,7 +41,7 @@ public class ThemeCommand extends Command {
                if (args[0].startsWith("#")) {
                   try {
                      ThemeManager.setCustomColor(args[0]);
-                     sendMessage(minecraft.util.Formatting.GREEN + "Theme color set to " + args[0]);
+                     sendMessage(Formatting.GREEN + "Theme color set to " + args[0]);
                   } catch (Exception e) {
                      this.sendError("Invalid hex color: " + args[0]);
                   }

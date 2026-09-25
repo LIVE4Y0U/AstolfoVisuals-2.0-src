@@ -25,13 +25,13 @@ import xyz.angames.astolfoclient.client.render.CustomModelRenderer;
 import xyz.angames.astolfoclient.client.util.FriendManager;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.entity.LivingEntityRenderer.class)
+@Mixin(LivingEntityRenderer.class)
 public abstract class MixinLivingEntityRenderer {
    @Unique
    private CustomModelRenderer customModelRenderer;
 
    @Shadow
-   public abstract entity.model.EntityModel<?> getModel();
+   public abstract EntityModel<?> getModel();
 
    @Unique
    private CustomModelRenderer getCustomModelRenderer() {
@@ -47,12 +47,12 @@ public abstract class MixinLivingEntityRenderer {
       at = @At("HEAD"),
       cancellable = true
    )
-   private void renderCustomModel(entity.state.LivingEntityRenderState state, util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-      if (state instanceof entity.state.PlayerEntityRenderState playerState) {
-         if (this instanceof render.entity.PlayerEntityRenderer) {
+   private void renderCustomModel(LivingEntityRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+      if (state instanceof PlayerEntityRenderState playerState) {
+         if (this instanceof PlayerEntityRenderer) {
             ModelsModule modelsModule = (ModelsModule)AstolfoclientClient.moduleManager.getModuleByName("Models");
             if (modelsModule != null && modelsModule.isEnabled()) {
-               minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+               MinecraftClient mc = MinecraftClient.getInstance();
                String renderedName = playerState.name != null ? playerState.name : "";
                boolean isSelf = false;
                boolean isFriend = false;
@@ -78,14 +78,14 @@ public abstract class MixinLivingEntityRenderer {
                }
 
                if (shouldRenderCustom) {
-                  entity.model.EntityModel<?> model = this.getModel();
-                  if (model instanceof entity.model.PlayerEntityModel playerModel) {
+                  EntityModel<?> model = this.getModel();
+                  if (model instanceof PlayerEntityModel playerModel) {
                      playerModel.setAngles(playerState);
                   }
 
                   matrices.push();
                   matrices.translate(0.0, playerState.height / 2.0, 0.0);
-                  matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - playerState.bodyYaw));
+                  matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - playerState.bodyYaw));
                   String mode = modelsModule.mode.get();
                   if (mode.equals("Amogus") || mode.equals("Rabbit") || mode.equals("Cow")) {
                      matrices.multiply(new Quaternionf().rotationX((float) Math.PI));
@@ -113,7 +113,7 @@ public abstract class MixinLivingEntityRenderer {
                   }
 
                   matrices.scale(scale, scale, scale);
-                  if (model instanceof entity.model.PlayerEntityModel playerModel) {
+                  if (model instanceof PlayerEntityModel playerModel) {
                      this.getCustomModelRenderer().render(playerState, matrices, vertexConsumers, light, mode, playerModel);
                   }
 

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.entity.LivingEntity.class)
+@Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
    @Accessor("jumpingCooldown")
    void setJumpingCooldown(int var1);

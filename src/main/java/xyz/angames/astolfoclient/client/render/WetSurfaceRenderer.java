@@ -46,18 +46,18 @@ public final class WetSurfaceRenderer implements AutoCloseable {
       return INSTANCE;
    }
 
-   public void apply(minecraft.client.MinecraftClient mc, client.render.Camera camera, Matrix4f viewMatrix, Matrix4f projectionMatrix, WetSurfaceRenderer.Parameters parameters) {
+   public void apply(MinecraftClient mc, Camera camera, Matrix4f viewMatrix, Matrix4f projectionMatrix, WetSurfaceRenderer.Parameters parameters) {
       if (!this.disabled && mc != null && camera != null && viewMatrix != null && projectionMatrix != null && parameters != null) {
          if (mc.world != null
             && mc.player != null
             && isWindowValid(mc)
             && !(parameters.wetness <= 1.0E-4F)
             && !(parameters.reflectionStrength <= 1.0E-4F)) {
-            client.util.Window window = mc.getWindow();
+            Window window = mc.getWindow();
             int width = window.getFramebufferWidth();
             int height = window.getFramebufferHeight();
             if (width > 1 && height > 1) {
-               client.gl.Framebuffer framebuffer = mc.getFramebuffer();
+               Framebuffer framebuffer = mc.getFramebuffer();
                if (framebuffer != null) {
                   int colorTexture = framebuffer.getColorAttachment();
                   int depthTexture = framebuffer.getDepthAttachment();
@@ -86,7 +86,7 @@ public final class WetSurfaceRenderer implements AutoCloseable {
                         if (!this.disabled && this.ensureScene(width, height) && this.copyColorToScene(colorTexture, width, height)) {
                            Matrix4f inverseProjection = new Matrix4f(projectionMatrix).invert();
                            Matrix4f inverseView = new Matrix4f(viewMatrix).invert();
-                           util.math.Vec3d cameraPos = camera.getPos();
+                           Vec3d cameraPos = camera.getPos();
                            inverseView.m30((float)cameraPos.x);
                            inverseView.m31((float)cameraPos.y);
                            inverseView.m32((float)cameraPos.z);
@@ -350,7 +350,7 @@ public final class WetSurfaceRenderer implements AutoCloseable {
       try {
          InputStream stream = WetSurfaceRenderer.class.getClassLoader().getResourceAsStream("assets/astolfoclient/" + relativePath);
          if (stream == null) {
-            stream = minecraft.client.MinecraftClient.getInstance().getResourceManager().open(minecraft.util.Identifier.of("astolfoclient", relativePath));
+            stream = MinecraftClient.getInstance().getResourceManager().open(Identifier.of("astolfoclient", relativePath));
          }
 
          if (stream != null) {
@@ -435,8 +435,8 @@ public final class WetSurfaceRenderer implements AutoCloseable {
       this.disabled = false;
    }
 
-   private static boolean isWindowValid(minecraft.client.MinecraftClient mc) {
-      client.util.Window window = mc == null ? null : mc.getWindow();
+   private static boolean isWindowValid(MinecraftClient mc) {
+      Window window = mc == null ? null : mc.getWindow();
       return window != null && window.getFramebufferWidth() > 0 && window.getFramebufferHeight() > 0;
    }
 

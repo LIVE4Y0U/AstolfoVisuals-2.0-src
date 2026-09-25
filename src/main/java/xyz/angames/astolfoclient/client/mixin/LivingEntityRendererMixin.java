@@ -16,16 +16,16 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.entity.LivingEntityRenderer.class)
+@Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin {
    @Inject(
       method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
       at = @At("HEAD")
    )
-   private void shrinkToBabySize(entity.state.LivingEntityRenderState state, util.math.MatrixStack matrixStack, client.render.VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-      if (state instanceof entity.state.PlayerEntityRenderState playerState
-         && minecraft.client.MinecraftClient.getInstance().player != null
-         && playerState.id == minecraft.client.MinecraftClient.getInstance().player.getId()
+   private void shrinkToBabySize(LivingEntityRenderState state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+      if (state instanceof PlayerEntityRenderState playerState
+         && MinecraftClient.getInstance().player != null
+         && playerState.id == MinecraftClient.getInstance().player.getId()
          && AstolfoclientClient.moduleManager != null) {
          Module babyMod = AstolfoclientClient.moduleManager.getModuleByName("BabyPlayer");
          if (babyMod != null && babyMod.isEnabled()) {

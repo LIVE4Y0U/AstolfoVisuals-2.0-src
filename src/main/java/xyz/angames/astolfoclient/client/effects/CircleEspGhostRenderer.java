@@ -31,27 +31,27 @@ public class CircleEspGhostRenderer {
          RenderSystem.enableDepthTest();
          RenderSystem.depthFunc(515);
          RenderSystem.depthMask(false);
-         RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
-         client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+         Tessellator tessellator = Tessellator.getInstance();
          long currentTime = System.currentTimeMillis();
-         util.math.MatrixStack matrices = context.matrixStack();
+         MatrixStack matrices = context.matrixStack();
          double camX = context.camera().getPos().x;
          double camY = context.camera().getPos().y;
          double camZ = context.camera().getPos().z;
          Quaternionf cameraRot = context.camera().getRotation();
 
          for (CircleEspManager.CircleEspEffect effect : effects) {
-            minecraft.entity.Entity target = effect.target;
+            Entity target = effect.target;
             if (target.isAlive() && !TargetUtils.isInvisible(target)) {
                long timeSinceHit = currentTime - effect.lastHitTime;
-               float fadeProgress = util.math.MathHelper.clamp((float)timeSinceHit / 450.0F, 0.0F, 1.0F);
+               float fadeProgress = MathHelper.clamp((float)timeSinceHit / 450.0F, 0.0F, 1.0F);
                float baseAlpha = 1.0F - Math.max(0.0F, (fadeProgress - 0.5F) * 2.0F);
                if (!(baseAlpha <= 0.05F)) {
                   float animTime = (float)(currentTime - effect.startTime) / 1000.0F;
                   float tickDelta = context.tickCounter().getTickDelta(true);
-                  double tX = util.math.MathHelper.lerp(tickDelta, target.lastRenderX, target.getX()) - camX;
-                  double tY = util.math.MathHelper.lerp(tickDelta, target.lastRenderY, target.getY()) - camY;
-                  double tZ = util.math.MathHelper.lerp(tickDelta, target.lastRenderZ, target.getZ()) - camZ;
+                  double tX = MathHelper.lerp(tickDelta, target.lastRenderX, target.getX()) - camX;
+                  double tY = MathHelper.lerp(tickDelta, target.lastRenderY, target.getY()) - camY;
+                  double tZ = MathHelper.lerp(tickDelta, target.lastRenderZ, target.getZ()) - camZ;
                   float height = target.getHeight();
                   float radius = target.getWidth() / 2.0F + 0.1F;
                   if (timeSinceHit > 400L) {
@@ -60,8 +60,8 @@ public class CircleEspGhostRenderer {
                   }
 
                   float speedY = 3.5F;
-                  RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-                  client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.TRIANGLES, client.render.VertexFormats.POSITION_COLOR);
+                  RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+                  BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
                   float mainY = (float)((Math.sin(animTime * speedY) + 1.0) / 2.0) * height;
                   Color headColor = new Color(ThemeManager.getThemedColor(0L));
                   float rH = headColor.getRed() / 255.0F;
@@ -111,7 +111,7 @@ public class CircleEspGhostRenderer {
                      }
                   }
 
-                  client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+                  BufferRenderer.drawWithGlobalProgram(buffer.end());
                }
             }
          }
@@ -124,7 +124,7 @@ public class CircleEspGhostRenderer {
       }
    }
 
-   private void drawBatchedGlowingDot(Matrix4f matrix, client.render.BufferBuilder buffer, float r, float g, float b, float alpha) {
+   private void drawBatchedGlowingDot(Matrix4f matrix, BufferBuilder buffer, float r, float g, float b, float alpha) {
       float coreR = r * 0.15F + 0.85F;
       float coreG = g * 0.15F + 0.85F;
       float coreB = b * 0.15F + 0.85F;

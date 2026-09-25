@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.scoreboard.ScoreboardObjective.class)
+@Mixin(ScoreboardObjective.class)
 public class ScoreboardObjectiveMixin {
    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-   public void onGetDisplayName(CallbackInfoReturnable<minecraft.text.Text> cir) {
-      cir.setReturnValue(NameProtectModule.getProtectedText((minecraft.text.Text)cir.getReturnValue()));
+   public void onGetDisplayName(CallbackInfoReturnable<Text> cir) {
+      cir.setReturnValue(NameProtectModule.getProtectedText((Text)cir.getReturnValue()));
    }
 }

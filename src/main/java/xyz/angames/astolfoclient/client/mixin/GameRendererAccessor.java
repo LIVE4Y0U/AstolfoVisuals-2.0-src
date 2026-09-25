@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.render.GameRenderer.class)
+@Mixin(GameRenderer.class)
 public interface GameRendererAccessor {
    @Invoker("updateCrosshairTarget")
    void invokeUpdateCrosshairTarget(float var1);

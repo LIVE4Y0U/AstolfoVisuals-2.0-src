@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.module.modules.render.NoRenderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.hud.InGameOverlayRenderer.class)
+@Mixin(InGameOverlayRenderer.class)
 public class MixinInGameOverlayRenderer {
    @Inject(method = "renderFireOverlay", at = @At("HEAD"), cancellable = true)
-   private static void onRenderFireOverlay(util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, CallbackInfo ci) {
+   private static void onRenderFireOverlay(MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.fire.get()) {
          ci.cancel();
@@ -24,7 +24,7 @@ public class MixinInGameOverlayRenderer {
    }
 
    @Inject(method = "renderInWallOverlay", at = @At("HEAD"), cancellable = true)
-   private static void onRenderInWallOverlay(client.texture.Sprite sprite, util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, CallbackInfo ci) {
+   private static void onRenderInWallOverlay(Sprite sprite, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.blockOverlay.get()) {
          ci.cancel();

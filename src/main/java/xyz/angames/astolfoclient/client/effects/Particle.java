@@ -8,9 +8,9 @@ import xyz.angames.astolfoclient.client.module.modules.render.ParticlesModule;
 
 @Environment(EnvType.CLIENT)
 public class Particle {
-   public util.math.Vec3d position;
-   public util.math.Vec3d prevPosition;
-   public util.math.Vec3d velocity;
+   public Vec3d position;
+   public Vec3d prevPosition;
+   public Vec3d velocity;
    public final long creationTime = System.currentTimeMillis();
    public final float rotation;
    public final float scale;
@@ -19,11 +19,11 @@ public class Particle {
    public final long lifespan;
    public final Color color;
    public final Particle.ParticleAnimation animation;
-   public final util.math.Vec3d origin;
+   public final Vec3d origin;
    public double extraData1;
    public double extraData2;
 
-   public Particle(util.math.Vec3d position, util.math.Vec3d velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan) {
+   public Particle(Vec3d position, Vec3d velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan) {
       this(
          position,
          velocity,
@@ -38,7 +38,7 @@ public class Particle {
       );
    }
 
-   public Particle(util.math.Vec3d position, util.math.Vec3d velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan, Color color) {
+   public Particle(Vec3d position, Vec3d velocity, ParticlesModule.ParticleType type, boolean hasPhysics, long lifespan, Color color) {
       this(
          position,
          velocity,
@@ -54,14 +54,14 @@ public class Particle {
    }
 
    public Particle(
-      util.math.Vec3d position,
-      util.math.Vec3d velocity,
+      Vec3d position,
+      Vec3d velocity,
       ParticlesModule.ParticleType type,
       boolean hasPhysics,
       long lifespan,
       Color color,
       Particle.ParticleAnimation animation,
-      util.math.Vec3d origin,
+      Vec3d origin,
       double extraData1,
       double extraData2
    ) {

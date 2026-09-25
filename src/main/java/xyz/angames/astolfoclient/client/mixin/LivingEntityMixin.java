@@ -20,12 +20,12 @@ import xyz.angames.astolfoclient.client.module.modules.render.RagdollModule;
 import xyz.angames.astolfoclient.client.module.modules.render.SwingAnimationModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.entity.LivingEntity.class)
+@Mixin(LivingEntity.class)
 public class LivingEntityMixin {
    @Inject(method = "jump", at = @At("HEAD"))
    private void onJump(CallbackInfo ci) {
-      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
-      if (entity.equals(minecraft.client.MinecraftClient.getInstance().player) && AstolfoclientClient.moduleManager != null) {
+      LivingEntity entity = (LivingEntity)this;
+      if (entity.equals(MinecraftClient.getInstance().player) && AstolfoclientClient.moduleManager != null) {
          Module jumpCircleModule = AstolfoclientClient.moduleManager.getModuleByName("JumpCircle");
          if (jumpCircleModule != null && jumpCircleModule.isEnabled() && AstolfoclientClient.jumpCircleManager != null) {
             AstolfoclientClient.jumpCircleManager.addCircle(entity.getX(), entity.getY(), entity.getZ());
@@ -34,28 +34,28 @@ public class LivingEntityMixin {
    }
 
    @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
-   private void onHasStatusEffect(registry.entry.RegistryEntry<entity.effect.StatusEffect> effect, CallbackInfoReturnable<Boolean> cir) {
-      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
-      if (entity == minecraft.client.MinecraftClient.getInstance().player) {
+   private void onHasStatusEffect(RegistryEntry<StatusEffect> effect, CallbackInfoReturnable<Boolean> cir) {
+      LivingEntity entity = (LivingEntity)this;
+      if (entity == MinecraftClient.getInstance().player) {
          NoRenderModule noRender = NoRenderModule.getInstance();
          if (noRender != null
             && noRender.isEnabled()
             && noRender.blindness.get()
-            && (effect.equals(entity.effect.StatusEffects.BLINDNESS) || effect.equals(entity.effect.StatusEffects.DARKNESS))) {
+            && (effect.equals(StatusEffects.BLINDNESS) || effect.equals(StatusEffects.DARKNESS))) {
             cir.setReturnValue(false);
          }
       }
    }
 
    @Inject(method = "getStatusEffect", at = @At("HEAD"), cancellable = true)
-   private void onGetStatusEffect(registry.entry.RegistryEntry<entity.effect.StatusEffect> effect, CallbackInfoReturnable<entity.effect.StatusEffectInstance> cir) {
-      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
-      if (entity == minecraft.client.MinecraftClient.getInstance().player) {
+   private void onGetStatusEffect(RegistryEntry<StatusEffect> effect, CallbackInfoReturnable<StatusEffectInstance> cir) {
+      LivingEntity entity = (LivingEntity)this;
+      if (entity == MinecraftClient.getInstance().player) {
          NoRenderModule noRender = NoRenderModule.getInstance();
          if (noRender != null
             && noRender.isEnabled()
             && noRender.blindness.get()
-            && (effect.equals(entity.effect.StatusEffects.BLINDNESS) || effect.equals(entity.effect.StatusEffects.DARKNESS))) {
+            && (effect.equals(StatusEffects.BLINDNESS) || effect.equals(StatusEffects.DARKNESS))) {
             cir.setReturnValue(null);
          }
       }
@@ -63,7 +63,7 @@ public class LivingEntityMixin {
 
    @Inject(method = "handleStatus(B)V", at = @At("HEAD"))
    private void onHandleStatus(byte status, CallbackInfo ci) {
-      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
+      LivingEntity entity = (LivingEntity)this;
       if ((status == 35 || status == 3) && AstolfoclientClient.moduleManager != null) {
          Module ragdollModule = AstolfoclientClient.moduleManager.getModuleByName("Ragdoll");
          if (ragdollModule != null && ragdollModule.isEnabled()) {
@@ -85,8 +85,8 @@ public class LivingEntityMixin {
 
    @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)
    private void onGetHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
-      minecraft.entity.LivingEntity entity = (minecraft.entity.LivingEntity)this;
-      if (entity == minecraft.client.MinecraftClient.getInstance().player && AstolfoclientClient.moduleManager != null) {
+      LivingEntity entity = (LivingEntity)this;
+      if (entity == MinecraftClient.getInstance().player && AstolfoclientClient.moduleManager != null) {
          SwingAnimationModule swing = (SwingAnimationModule)AstolfoclientClient.moduleManager.getModuleByName("SwingAnimation");
          if (swing != null && swing.isEnabled() && swing.slow.get()) {
             cir.setReturnValue(Double.valueOf(swing.speed.getValue()).intValue());

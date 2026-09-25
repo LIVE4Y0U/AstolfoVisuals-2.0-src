@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(decoration.DisplayEntity.TextDisplayEntity.class)
+@Mixin(DisplayEntity.TextDisplayEntity.class)
 public class TextDisplayEntityMixin {
    @Inject(method = "getText", at = @At("RETURN"), cancellable = true)
-   public void onGetText(CallbackInfoReturnable<minecraft.text.Text> cir) {
+   public void onGetText(CallbackInfoReturnable<Text> cir) {
       if (cir.getReturnValue() != null) {
-         cir.setReturnValue(NameProtectModule.getProtectedText((minecraft.text.Text)cir.getReturnValue()));
+         cir.setReturnValue(NameProtectModule.getProtectedText((Text)cir.getReturnValue()));
       }
    }
 }

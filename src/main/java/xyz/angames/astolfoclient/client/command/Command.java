@@ -14,7 +14,7 @@ public abstract class Command {
    private final String description;
    private final String syntax;
    private final String[] aliases;
-   protected final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   protected final MinecraftClient mc = MinecraftClient.getInstance();
 
    public Command(String name, String description, String syntax, String... aliases) {
       this.name = name;
@@ -46,17 +46,17 @@ public abstract class Command {
    }
 
    public static void sendMessage(String message) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.inGameHud != null && mc.inGameHud.getChatHud() != null) {
-         mc.inGameHud.getChatHud().addMessage(minecraft.text.Text.literal("§d[Astolfo] §7" + message));
+         mc.inGameHud.getChatHud().addMessage(Text.literal("§d[Astolfo] §7" + message));
       }
    }
 
    protected void sendError(String message) {
-      sendMessage(minecraft.util.Formatting.RED + message);
+      sendMessage(Formatting.RED + message);
    }
 
    protected void sendSyntax() {
-      sendMessage(minecraft.util.Formatting.RED + "Usage: " + this.getSyntax());
+      sendMessage(Formatting.RED + "Usage: " + this.getSyntax());
    }
 }

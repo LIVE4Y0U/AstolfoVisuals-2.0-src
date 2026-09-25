@@ -16,11 +16,11 @@ import xyz.angames.astolfoclient.client.module.modules.render.AspectRatioModule;
 import xyz.angames.astolfoclient.client.module.modules.render.CameraUtilsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.render.GameRenderer.class)
+@Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
    @Shadow
    @Final
-   private minecraft.client.MinecraftClient client;
+   private MinecraftClient client;
    @Shadow
    private float zoom;
    @Shadow
@@ -32,7 +32,7 @@ public abstract class GameRendererMixin {
    public abstract float getFarPlaneDistance();
 
    @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
-   private void onGetFov(client.render.Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir) {
+   private void onGetFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir) {
       CameraUtilsModule camUtils = CameraUtilsModule.getInstance();
       if (camUtils != null && camUtils.isEnabled()) {
          float baseFov = (Float)cir.getReturnValue();

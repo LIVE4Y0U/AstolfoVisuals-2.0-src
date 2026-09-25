@@ -14,8 +14,8 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class BoyKisserManager {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
-   private final List<minecraft.util.Identifier> frames = new ArrayList<>();
+   private final MinecraftClient client = MinecraftClient.getInstance();
+   private final List<Identifier> frames = new ArrayList<>();
    private int currentFrame = 0;
    private long lastFrameTime = 0L;
    private final int frameDelay = 100;
@@ -31,26 +31,26 @@ public class BoyKisserManager {
       int frameCount = 52;
 
       for (int i = 0; i < frameCount; i++) {
-         this.frames.add(minecraft.util.Identifier.of("astolfoclient", "textures/gui/boikiser/boykisser_" + i + ".png"));
+         this.frames.add(Identifier.of("astolfoclient", "textures/gui/boikiser/boykisser_" + i + ".png"));
       }
    }
 
-   public void render(client.gui.DrawContext context, float delta) {
+   public void render(DrawContext context, float delta) {
       long now = (long)(System.nanoTime() / 1000000.0);
       if (now - this.lastFrameTime > 100L) {
          this.currentFrame = (this.currentFrame + 1) % this.frames.size();
          this.lastFrameTime = now;
       }
 
-      minecraft.util.Identifier currentTexture = this.frames.get(this.currentFrame);
+      Identifier currentTexture = this.frames.get(this.currentFrame);
       context.getMatrices().push();
       float scaleModifier = this.getScaleModifier();
       context.getMatrices().translate((float)this.x, (float)this.y, 0.0F);
       context.getMatrices().scale(scaleModifier, scaleModifier, 1.0F);
       context.getMatrices().translate((float)(-this.x), (float)(-this.y), 0.0F);
-      render.VertexConsumerProvider.Immediate provider = this.client.getBufferBuilders().getEntityVertexConsumers();
+      VertexConsumerProvider.Immediate provider = this.client.getBufferBuilders().getEntityVertexConsumers();
       Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
-      client.render.VertexConsumer vertexConsumer = provider.getBuffer(client.render.RenderLayer.getText(currentTexture));
+      VertexConsumer vertexConsumer = provider.getBuffer(RenderLayer.getText(currentTexture));
       int light = 15728880;
       float x1 = (float)this.x;
       float y1 = (float)this.y;
@@ -66,7 +66,7 @@ public class BoyKisserManager {
    }
 
    public float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;

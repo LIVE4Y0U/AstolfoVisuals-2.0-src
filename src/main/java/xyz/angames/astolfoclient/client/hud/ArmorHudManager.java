@@ -51,7 +51,7 @@ public class ArmorHudManager {
    private boolean wasRightMouseDown = false;
    private Object lastScreen = null;
    private long lastFrameTime = System.currentTimeMillis();
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
 
    public static boolean isVertical() {
       return layout != null && layout.equalsIgnoreCase("VERTICAL");
@@ -65,7 +65,7 @@ public class ArmorHudManager {
       return isVertical() ? 78.0F : 18.0F;
    }
 
-   public void render(client.gui.DrawContext context) {
+   public void render(DrawContext context) {
       InterfaceModule interfaceMod = getInterfaceModule();
       boolean isEditing = this.client.currentScreen instanceof HudEditorScreen;
       boolean inScreen = this.client.currentScreen != null;
@@ -96,11 +96,11 @@ public class ArmorHudManager {
                context.getMatrices().translate(this.x, this.y, 0.0F);
                context.getMatrices().scale(scaleModifier, scaleModifier, 1.0F);
                context.getMatrices().translate(-this.x, -this.y, 0.0F);
-               List<minecraft.item.ItemStack> armorList = new ArrayList<>();
+               List<ItemStack> armorList = new ArrayList<>();
                boolean hasArmor = false;
 
                for (int i = 0; i < 4; i++) {
-                  minecraft.item.ItemStack stack = (minecraft.item.ItemStack)this.client.player.getInventory().armor.get(i);
+                  ItemStack stack = (ItemStack)this.client.player.getInventory().armor.get(i);
                   armorList.add(stack);
                   if (!stack.isEmpty()) {
                      hasArmor = true;
@@ -108,12 +108,12 @@ public class ArmorHudManager {
                }
 
                if (isEditing && !hasArmor) {
-                  armorList.set(0, new minecraft.item.ItemStack(minecraft.item.Items.DIAMOND_BOOTS));
-                  armorList.set(1, new minecraft.item.ItemStack(minecraft.item.Items.DIAMOND_LEGGINGS));
-                  minecraft.item.ItemStack damagedChest = new minecraft.item.ItemStack(minecraft.item.Items.DIAMOND_CHESTPLATE);
+                  armorList.set(0, new ItemStack(Items.DIAMOND_BOOTS));
+                  armorList.set(1, new ItemStack(Items.DIAMOND_LEGGINGS));
+                  ItemStack damagedChest = new ItemStack(Items.DIAMOND_CHESTPLATE);
                   damagedChest.setDamage(damagedChest.getMaxDamage() - 10);
                   armorList.set(2, damagedChest);
-                  armorList.set(3, new minecraft.item.ItemStack(minecraft.item.Items.DIAMOND_HELMET));
+                  armorList.set(3, new ItemStack(Items.DIAMOND_HELMET));
                }
 
                float startX = this.x;
@@ -122,7 +122,7 @@ public class ArmorHudManager {
                context.getMatrices().translate(0.0F, 0.0F, 1.0F);
 
                for (int i = 3; i >= 0; i--) {
-                  minecraft.item.ItemStack stack = armorList.get(i);
+                  ItemStack stack = armorList.get(i);
                   if (!stack.isEmpty()) {
                      int index = 3 - i;
                      float drawX = vertical ? startX : startX + index * 20;
@@ -243,7 +243,7 @@ public class ArmorHudManager {
    }
 
    private void drawAnimatedContextPanel(
-      client.gui.DrawContext context,
+      DrawContext context,
       float aX,
       float aY,
       float aW,

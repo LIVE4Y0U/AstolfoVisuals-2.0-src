@@ -106,11 +106,11 @@ public class HitGlowModule extends Module {
          return HitGlowModule.this.particles.get();
       }
    };
-   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private static final Identifier BLOOM_TEXTURE = Identifier.of("astolfoclient", "textures/effects/bloom.png");
+   private final MinecraftClient mc = MinecraftClient.getInstance();
    private final List<HitGlowModule.GlowWave> activeWaves = new CopyOnWriteArrayList<>();
    private final List<HitGlowModule.GlowParticle> activeParticles = new CopyOnWriteArrayList<>();
-   private client.gl.Framebuffer glowFbo = null;
+   private Framebuffer glowFbo = null;
    private int glowProgram = -1;
    private int glowVao = -1;
    private int glowVbo = -1;
@@ -141,7 +141,7 @@ public class HitGlowModule extends Module {
             addWave(entity.getPos());
          }
 
-         return minecraft.util.ActionResult.PASS;
+         return ActionResult.PASS;
       });
       WorldRenderEvents.BEFORE_ENTITIES.register((BeforeEntities)context -> {
          if (this.isEnabled() && !this.distortEntities.get()) {
@@ -159,7 +159,7 @@ public class HitGlowModule extends Module {
       });
    }
 
-   public static void addWave(util.math.Vec3d pos) {
+   public static void addWave(Vec3d pos) {
       if (INSTANCE != null && INSTANCE.isEnabled() && pos != null) {
          INSTANCE.activeWaves.add(new HitGlowModule.GlowWave(pos));
          INSTANCE.spawnWaveParticles(pos);
@@ -178,7 +178,7 @@ public class HitGlowModule extends Module {
       this.activeParticles.clear();
    }
 
-   private void spawnWaveParticles(util.math.Vec3d center) {
+   private void spawnWaveParticles(Vec3d center) {
       if (this.particles.get()) {
          int rgb = ThemeManager.getThemedColor(0L);
          float r = (rgb >> 16 & 0xFF) / 255.0F;
@@ -205,7 +205,7 @@ public class HitGlowModule extends Module {
                this.mc
                   .world
                   .addParticle(
-                     Math.random() < 0.5 ? minecraft.particle.ParticleTypes.SOUL : minecraft.particle.ParticleTypes.SCULK_SOUL, px, py, pz, driftX * 0.5, 0.05 + Math.random() * 0.04, driftZ * 0.5
+                     Math.random() < 0.5 ? ParticleTypes.SOUL : ParticleTypes.SCULK_SOUL, px, py, pz, driftX * 0.5, 0.05 + Math.random() * 0.04, driftZ * 0.5
                   );
             }
          }
@@ -234,7 +234,7 @@ public class HitGlowModule extends Module {
    }
 
    private void renderGlowShader(WorldRenderContext context, long now, double currentSpeed) {
-      client.gl.Framebuffer mainFbo = this.mc.getFramebuffer();
+      Framebuffer mainFbo = this.mc.getFramebuffer();
       if (mainFbo != null) {
          int width = mainFbo.textureWidth;
          int height = mainFbo.textureHeight;
@@ -296,7 +296,7 @@ public class HitGlowModule extends Module {
                   this.setUniform1i("uDistortion", this.distortion.get() ? 1 : 0);
                   this.setUniform1f("uDistortionStrength", (float)this.distortionStrength.get());
                   this.setUniform1i("uChromatic", this.chromatic.get() ? 1 : 0);
-                  util.math.Vec3d camPos = context.camera().getPos();
+                  Vec3d camPos = context.camera().getPos();
                   this.setUniform3f("uCameraPos", (float)camPos.x, (float)camPos.y, (float)camPos.z);
                   this.setUniform1i("uBlockCorners", this.blockCorners.get() ? 1 : 0);
                   this.setUniform1f("uCornerGlow", (float)this.cornerGlow.get());
@@ -367,16 +367,16 @@ public class HitGlowModule extends Module {
 
    private void renderParticles(WorldRenderContext context, long time) {
       RenderSystem.enableBlend();
-      RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+      RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
       RenderSystem.disableCull();
       RenderSystem.disableDepthTest();
       RenderSystem.depthMask(false);
       RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
-      RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-      client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
-      client.render.BufferBuilder particleBuffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
-      util.math.MatrixStack matrices = context.matrixStack();
-      util.math.Vec3d camPos = context.camera().getPos();
+      RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+      Tessellator tessellator = Tessellator.getInstance();
+      BufferBuilder particleBuffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+      MatrixStack matrices = context.matrixStack();
+      Vec3d camPos = context.camera().getPos();
       Quaternionf camRot = context.camera().getRotation();
       boolean isGlowDot = this.particleMode.is("Glow Dots");
 
@@ -419,9 +419,9 @@ public class HitGlowModule extends Module {
          }
       }
 
-      client.render.BuiltBuffer built = particleBuffer.endNullable();
+      BuiltBuffer built = particleBuffer.endNullable();
       if (built != null) {
-         client.render.BufferRenderer.drawWithGlobalProgram(built);
+         BufferRenderer.drawWithGlobalProgram(built);
       }
 
       RenderSystem.enableDepthTest();
@@ -437,7 +437,7 @@ public class HitGlowModule extends Module {
             this.glowFbo.delete();
          }
 
-         this.glowFbo = new client.gl.SimpleFramebuffer(width, height, false);
+         this.glowFbo = new SimpleFramebuffer(width, height, false);
          this.glowFbo.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
          GL11.glBindTexture(3553, this.glowFbo.getColorAttachment());
          GL11.glTexParameteri(3553, 10241, 9729);
@@ -627,10 +627,10 @@ public class HitGlowModule extends Module {
 
    @Environment(EnvType.CLIENT)
    public static class GlowWave {
-      public final util.math.Vec3d pos;
+      public final Vec3d pos;
       public final long startTime;
 
-      public GlowWave(util.math.Vec3d pos) {
+      public GlowWave(Vec3d pos) {
          this.pos = pos;
          this.startTime = System.currentTimeMillis();
       }

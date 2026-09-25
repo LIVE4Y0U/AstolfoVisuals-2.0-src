@@ -23,10 +23,10 @@ public class InventoryHudManager {
    private boolean dragging = false;
    private float dragOffsetX;
    private float dragOffsetY;
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private Module cachedModule;
 
-   public void render(client.gui.DrawContext context) {
+   public void render(DrawContext context) {
       if (this.cachedModule == null) {
          this.cachedModule = AstolfoclientClient.moduleManager.getModuleByName("Interface");
       }
@@ -46,11 +46,11 @@ public class InventoryHudManager {
                context.getMatrices().translate(this.x, this.y, 0.0F);
                context.getMatrices().scale(scaleModifier, scaleModifier, 1.0F);
                context.getMatrices().translate(-this.x, -this.y, 0.0F);
-               List<minecraft.item.ItemStack> inventoryList = new ArrayList<>();
+               List<ItemStack> inventoryList = new ArrayList<>();
                boolean hasItems = false;
 
                for (int i = 0; i < 27; i++) {
-                  minecraft.item.ItemStack stack = (minecraft.item.ItemStack)this.client.player.getInventory().main.get(9 + i);
+                  ItemStack stack = (ItemStack)this.client.player.getInventory().main.get(9 + i);
                   inventoryList.add(stack);
                   if (!stack.isEmpty()) {
                      hasItems = true;
@@ -58,22 +58,22 @@ public class InventoryHudManager {
                }
 
                if (isEditing && !hasItems) {
-                  inventoryList.set(0, new minecraft.item.ItemStack(minecraft.item.Items.DIAMOND_SWORD));
-                  inventoryList.set(1, new minecraft.item.ItemStack(minecraft.item.Items.ENCHANTED_GOLDEN_APPLE, 64));
-                  inventoryList.set(2, new minecraft.item.ItemStack(minecraft.item.Items.ENDER_PEARL, 16));
-                  inventoryList.set(3, new minecraft.item.ItemStack(minecraft.item.Items.COBWEB, 64));
-                  inventoryList.set(4, new minecraft.item.ItemStack(minecraft.item.Items.OBSIDIAN, 64));
-                  inventoryList.set(5, new minecraft.item.ItemStack(minecraft.item.Items.TOTEM_OF_UNDYING));
-                  inventoryList.set(6, new minecraft.item.ItemStack(minecraft.item.Items.DIAMOND_PICKAXE));
-                  inventoryList.set(7, new minecraft.item.ItemStack(minecraft.item.Items.BOW));
-                  inventoryList.set(8, new minecraft.item.ItemStack(minecraft.item.Items.ARROW, 64));
+                  inventoryList.set(0, new ItemStack(Items.DIAMOND_SWORD));
+                  inventoryList.set(1, new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 64));
+                  inventoryList.set(2, new ItemStack(Items.ENDER_PEARL, 16));
+                  inventoryList.set(3, new ItemStack(Items.COBWEB, 64));
+                  inventoryList.set(4, new ItemStack(Items.OBSIDIAN, 64));
+                  inventoryList.set(5, new ItemStack(Items.TOTEM_OF_UNDYING));
+                  inventoryList.set(6, new ItemStack(Items.DIAMOND_PICKAXE));
+                  inventoryList.set(7, new ItemStack(Items.BOW));
+                  inventoryList.set(8, new ItemStack(Items.ARROW, 64));
                }
 
                context.getMatrices().push();
                context.getMatrices().translate(0.0F, 0.0F, 1.0F);
 
                for (int i = 0; i < 27; i++) {
-                  minecraft.item.ItemStack stack = inventoryList.get(i);
+                  ItemStack stack = inventoryList.get(i);
                   if (!stack.isEmpty()) {
                      int row = i / 9;
                      int col = i % 9;

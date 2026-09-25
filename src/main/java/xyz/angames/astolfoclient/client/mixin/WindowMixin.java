@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.util.Window.class)
+@Mixin(Window.class)
 public class WindowMixin {
    private boolean iconsSet = false;
 
@@ -30,7 +30,7 @@ public class WindowMixin {
    }
 
    @Inject(method = "setIcon", at = @At("HEAD"), cancellable = true)
-   private void onSetIcon(minecraft.resource.ResourcePack resourcePack, client.util.Icons icons, CallbackInfo ci) {
+   private void onSetIcon(ResourcePack resourcePack, Icons icons, CallbackInfo ci) {
       ci.cancel();
       if (!this.iconsSet) {
          this.setCustomIcons();
@@ -39,7 +39,7 @@ public class WindowMixin {
    }
 
    private void setCustomIcons() {
-      client.util.Window window = (client.util.Window)this;
+      Window window = (Window)this;
       long handle = window.getHandle();
       String[] paths = new String[]{
          "/assets/astolfoclient/textures/gui/logo_black_32.png",
@@ -53,7 +53,7 @@ public class WindowMixin {
          for (String path : paths) {
             try (InputStream is = WindowMixin.class.getResourceAsStream(path)) {
                if (is != null) {
-                  client.texture.NativeImage image = client.texture.NativeImage.read(is);
+                  NativeImage image = NativeImage.read(is);
                   if (image != null) {
                      int w = image.getWidth();
                      int h = image.getHeight();

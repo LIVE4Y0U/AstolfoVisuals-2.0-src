@@ -29,7 +29,7 @@ public class SoundSettings {
    }
 
    public static void setMasterVolume(float volume) {
-      masterVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      masterVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getGuiOpenVolume() {
@@ -37,7 +37,7 @@ public class SoundSettings {
    }
 
    public static void setGuiOpenVolume(float volume) {
-      guiOpenVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      guiOpenVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getCategoryVolume() {
@@ -45,7 +45,7 @@ public class SoundSettings {
    }
 
    public static void setCategoryVolume(float volume) {
-      categoryVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      categoryVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getModuleSelectVolume() {
@@ -53,7 +53,7 @@ public class SoundSettings {
    }
 
    public static void setModuleSelectVolume(float volume) {
-      moduleSelectVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      moduleSelectVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getSliderVolume() {
@@ -61,7 +61,7 @@ public class SoundSettings {
    }
 
    public static void setSliderVolume(float volume) {
-      sliderVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      sliderVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getSearchVolume() {
@@ -69,7 +69,7 @@ public class SoundSettings {
    }
 
    public static void setSearchVolume(float volume) {
-      searchVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      searchVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getModeOpenVolume() {
@@ -77,7 +77,7 @@ public class SoundSettings {
    }
 
    public static void setModeOpenVolume(float volume) {
-      modeOpenVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      modeOpenVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 
    public static float getModuleToggleVolume() {
@@ -85,6 +85,6 @@ public class SoundSettings {
    }
 
    public static void setModuleToggleVolume(float volume) {
-      moduleToggleVolume = util.math.MathHelper.clamp(volume, 0.0F, 100.0F);
+      moduleToggleVolume = MathHelper.clamp(volume, 0.0F, 100.0F);
    }
 }

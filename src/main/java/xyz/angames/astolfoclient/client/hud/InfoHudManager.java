@@ -28,8 +28,8 @@ public class InfoHudManager {
    private static final Supplier<MsdfFont> ICON_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("interface_icons_infohud")
-         .data(minecraft.util.Identifier.of("mre", "icons/interface/interface.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "icons/interface/interface.png"))
+         .data(Identifier.of("mre", "icons/interface/interface.json"))
+         .atlas(Identifier.of("mre", "icons/interface/interface.png"))
          .glyphMapper(g -> {
             int idx = g.index();
             if (idx == 3) {
@@ -65,8 +65,8 @@ public class InfoHudManager {
    private final InfoHudManager.AnimatedString coordZAnim = new InfoHudManager.AnimatedString();
    private final InfoHudManager.AnimatedString bpsAnim = new InfoHudManager.AnimatedString();
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   public void render(DrawContext context, float tickDelta) {
+      MinecraftClient client = MinecraftClient.getInstance();
       if (client.world != null && client.player != null && AstolfoclientClient.moduleManager != null) {
          boolean isEditing = client.currentScreen instanceof HudEditorScreen;
          InterfaceModule interfaceMod = (InterfaceModule)AstolfoclientClient.moduleManager.getModuleByName("Interface");
@@ -244,7 +244,7 @@ public class InfoHudManager {
    }
 
    private float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;
@@ -254,7 +254,7 @@ public class InfoHudManager {
    }
 
    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       boolean isEditing = mc.currentScreen instanceof HudEditorScreen;
       InterfaceModule interfaceMod = (InterfaceModule)AstolfoclientClient.moduleManager.getModuleByName("Interface");
       boolean isSettingEnabled = interfaceMod != null && interfaceMod.infoHud.get();
@@ -277,7 +277,7 @@ public class InfoHudManager {
 
    public boolean onMouseDragged(double mouseX, double mouseY, int button) {
       if (this.dragging && button == 0) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          float scaleModifier = this.getScaleModifier();
          float screenW = mc.getWindow().getScaledWidth();
          float screenH = mc.getWindow().getScaledHeight();

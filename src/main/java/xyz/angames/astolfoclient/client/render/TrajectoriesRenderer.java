@@ -67,9 +67,9 @@ import xyz.angames.astolfoclient.client.module.modules.render.TrajectoriesModule
 
 @Environment(EnvType.CLIENT)
 public class TrajectoriesRenderer {
-   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
-   private static final minecraft.util.Identifier HIT_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/hit.png");
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private static final Identifier BLOOM_TEXTURE = Identifier.of("astolfoclient", "textures/effects/bloom.png");
+   private static final Identifier HIT_TEXTURE = Identifier.of("astolfoclient", "textures/effects/hit.png");
+   private final MinecraftClient mc = MinecraftClient.getInstance();
    private final Map<Integer, TrajectoriesRenderer.CachedPearl> cachedPearls = new HashMap<>();
    private final List<TrajectoriesRenderer.TimerTagInfo> timersToRender = new ArrayList<>();
    private final Matrix4f lastModelViewMatrix = new Matrix4f();
@@ -88,8 +88,8 @@ public class TrajectoriesRenderer {
          Module rawMod = AstolfoclientClient.moduleManager.getModuleByName("Trajectories");
          if (rawMod != null && rawMod.isEnabled()) {
             TrajectoriesModule mod = (TrajectoriesModule)rawMod;
-            util.math.MatrixStack matrices = context.matrixStack();
-            util.math.Vec3d camPos = context.camera().getPos();
+            MatrixStack matrices = context.matrixStack();
+            Vec3d camPos = context.camera().getPos();
             Quaternionf cameraRot = context.camera().getRotation();
             float tickDelta = context.tickCounter().getTickDelta(true);
             Color themeColor = new Color(ThemeManager.getThemedColor(0L));
@@ -104,8 +104,8 @@ public class TrajectoriesRenderer {
             if (mod.thrownPearls.get()) {
                long currentTime = System.currentTimeMillis();
 
-               for (minecraft.entity.Entity entity : this.mc.world.getEntities()) {
-                  if (entity instanceof projectile.thrown.EnderPearlEntity pearl) {
+               for (Entity entity : this.mc.world.getEntities()) {
+                  if (entity instanceof EnderPearlEntity pearl) {
                      TrajectoriesRenderer.CachedPearl cache = this.calculatePearlPath(pearl, tickDelta);
                      cache.lastUpdateTime = currentTime;
                      this.cachedPearls.put(pearl.getId(), cache);
@@ -126,7 +126,7 @@ public class TrajectoriesRenderer {
                }
             }
 
-            minecraft.item.ItemStack stack = this.mc.player.getMainHandStack();
+            ItemStack stack = this.mc.player.getMainHandStack();
             if (stack.isEmpty() || !this.isThrowable(stack.getItem())) {
                stack = this.mc.player.getOffHandStack();
                if (stack.isEmpty() || !this.isThrowable(stack.getItem())) {
@@ -134,10 +134,10 @@ public class TrajectoriesRenderer {
                }
             }
 
-            minecraft.item.Item item = stack.getItem();
-            boolean isBow = item instanceof minecraft.item.BowItem;
-            boolean isCrossbow = item instanceof minecraft.item.CrossbowItem;
-            boolean isTrident = item instanceof minecraft.item.TridentItem;
+            Item item = stack.getItem();
+            boolean isBow = item instanceof BowItem;
+            boolean isCrossbow = item instanceof CrossbowItem;
+            boolean isTrident = item instanceof TridentItem;
             float velocity = 1.5F;
             float gravity = 0.03F;
             float drag = 0.99F;
@@ -161,11 +161,11 @@ public class TrajectoriesRenderer {
             } else if (isTrident) {
                velocity = 2.5F;
                gravity = 0.05F;
-            } else if (item instanceof minecraft.item.SplashPotionItem || item instanceof minecraft.item.LingeringPotionItem) {
+            } else if (item instanceof SplashPotionItem || item instanceof LingeringPotionItem) {
                velocity = 0.5F;
                gravity = 0.05F;
                pitchOffset = -20.0F;
-            } else if (item instanceof minecraft.item.ExperienceBottleItem) {
+            } else if (item instanceof ExperienceBottleItem) {
                velocity = 0.7F;
                gravity = 0.07F;
                pitchOffset = -20.0F;
@@ -184,8 +184,8 @@ public class TrajectoriesRenderer {
    }
 
    private void simulateAndDraw(
-      util.math.MatrixStack matrices,
-      util.math.Vec3d camPos,
+      MatrixStack matrices,
+      Vec3d camPos,
       Quaternionf cameraRot,
       float tickDelta,
       float velocity,
@@ -197,11 +197,11 @@ public class TrajectoriesRenderer {
       float yawOffset,
       float pitchOffset
    ) {
-      double yaw = util.math.MathHelper.lerp(tickDelta, this.mc.player.prevYaw, this.mc.player.getYaw()) + yawOffset;
-      double pitch = util.math.MathHelper.lerp(tickDelta, this.mc.player.prevPitch, this.mc.player.getPitch()) + pitchOffset;
-      double lerpX = util.math.MathHelper.lerp(tickDelta, this.mc.player.lastRenderX, this.mc.player.getX());
-      double lerpY = util.math.MathHelper.lerp(tickDelta, this.mc.player.lastRenderY, this.mc.player.getY());
-      double lerpZ = util.math.MathHelper.lerp(tickDelta, this.mc.player.lastRenderZ, this.mc.player.getZ());
+      double yaw = MathHelper.lerp(tickDelta, this.mc.player.prevYaw, this.mc.player.getYaw()) + yawOffset;
+      double pitch = MathHelper.lerp(tickDelta, this.mc.player.prevPitch, this.mc.player.getPitch()) + pitchOffset;
+      double lerpX = MathHelper.lerp(tickDelta, this.mc.player.lastRenderX, this.mc.player.getX());
+      double lerpY = MathHelper.lerp(tickDelta, this.mc.player.lastRenderY, this.mc.player.getY());
+      double lerpZ = MathHelper.lerp(tickDelta, this.mc.player.lastRenderZ, this.mc.player.getZ());
       double yawRad = Math.toRadians(yaw);
       double pitchRad = Math.toRadians(pitch);
       double posX = lerpX - Math.cos(yawRad) * 0.16;
@@ -214,25 +214,25 @@ public class TrajectoriesRenderer {
       motionX = motionX / distance * velocity;
       motionY = motionY / distance * velocity;
       motionZ = motionZ / distance * velocity;
-      List<util.math.Vec3d> path = new ArrayList<>();
-      util.math.Vec3d currentPos = new util.math.Vec3d(posX, posY, posZ);
-      util.hit.HitResult hitResult = null;
+      List<Vec3d> path = new ArrayList<>();
+      Vec3d currentPos = new Vec3d(posX, posY, posZ);
+      HitResult hitResult = null;
       int ticksToLand = 0;
 
       for (int i = 0; i < 300; i++) {
-         path.add(new util.math.Vec3d(posX, posY, posZ));
-         util.math.Vec3d nextPos = new util.math.Vec3d(posX + motionX, posY + motionY, posZ + motionZ);
-         hitResult = this.mc.world.raycast(new minecraft.world.RaycastContext(currentPos, nextPos, world.RaycastContext.ShapeType.COLLIDER, world.RaycastContext.FluidHandling.NONE, this.mc.player));
-         if (hitResult != null && hitResult.getType() == hit.HitResult.Type.BLOCK) {
+         path.add(new Vec3d(posX, posY, posZ));
+         Vec3d nextPos = new Vec3d(posX + motionX, posY + motionY, posZ + motionZ);
+         hitResult = this.mc.world.raycast(new RaycastContext(currentPos, nextPos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this.mc.player));
+         if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
             nextPos = hitResult.getPos();
          }
 
-         util.math.Box boundingBox = new util.math.Box(posX, posY, posZ, posX, posY, posZ).stretch(motionX, motionY, motionZ).expand(1.0);
+         Box boundingBox = new Box(posX, posY, posZ, posX, posY, posZ).stretch(motionX, motionY, motionZ).expand(1.0);
 
-         for (minecraft.entity.Entity entity : this.mc.world.getOtherEntities(this.mc.player, boundingBox, e -> e.canHit() && e.isAlive())) {
-            util.math.Box entBox = entity.getBoundingBox().expand(0.3F);
+         for (Entity entity : this.mc.world.getOtherEntities(this.mc.player, boundingBox, e -> e.canHit() && e.isAlive())) {
+            Box entBox = entity.getBoundingBox().expand(0.3F);
             if (entBox.contains(currentPos)) {
-               hitResult = new util.hit.EntityHitResult(entity);
+               hitResult = new EntityHitResult(entity);
                nextPos = currentPos;
                break;
             }
@@ -242,12 +242,12 @@ public class TrajectoriesRenderer {
          posY = nextPos.y;
          posZ = nextPos.z;
          ticksToLand++;
-         if (hitResult != null && hitResult.getType() != hit.HitResult.Type.MISS) {
-            path.add(new util.math.Vec3d(posX, posY, posZ));
+         if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
+            path.add(new Vec3d(posX, posY, posZ));
             break;
          }
 
-         util.math.BlockPos blockPos = util.math.BlockPos.ofFloored(posX, posY, posZ);
+         BlockPos blockPos = BlockPos.ofFloored(posX, posY, posZ);
          float currentDrag = this.mc.world.getFluidState(blockPos).isEmpty() ? drag : waterDrag;
          motionX *= currentDrag;
          motionY *= currentDrag;
@@ -257,28 +257,28 @@ public class TrajectoriesRenderer {
       }
 
       this.drawZapLine(matrices, path, camPos, cameraRot, color, mod.drawThroughWalls.get(), 0.25F, true);
-      if (hitResult != null && hitResult.getType() != hit.HitResult.Type.MISS) {
+      if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
          if (mod.showHitbox.get()) {
             this.drawLandingBox(
                matrices, hitResult, camPos, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, mod.drawThroughWalls.get()
             );
          }
 
-         minecraft.item.ItemStack held = this.mc.player.getMainHandStack();
-         if (held.isEmpty() || !(held.getItem() instanceof minecraft.item.EnderPearlItem)) {
+         ItemStack held = this.mc.player.getMainHandStack();
+         if (held.isEmpty() || !(held.getItem() instanceof EnderPearlItem)) {
             held = this.mc.player.getOffHandStack();
          }
 
-         if (!held.isEmpty() && held.getItem() instanceof minecraft.item.EnderPearlItem) {
+         if (!held.isEmpty() && held.getItem() instanceof EnderPearlItem) {
             this.collectCircularTimer(hitResult.getPos(), ticksToLand, camPos);
          }
       }
    }
 
    private void drawZapLine(
-      util.math.MatrixStack matrices,
-      List<util.math.Vec3d> path,
-      util.math.Vec3d camPos,
+      MatrixStack matrices,
+      List<Vec3d> path,
+      Vec3d camPos,
       Quaternionf cameraRot,
       Color color,
       boolean drawThroughWalls,
@@ -287,46 +287,46 @@ public class TrajectoriesRenderer {
    ) {
       if (path != null && !path.isEmpty()) {
          RenderSystem.enableBlend();
-         RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
          RenderSystem.disableCull();
          if (drawThroughWalls) {
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
          }
 
-         client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+         Tessellator tessellator = Tessellator.getInstance();
          float r = color.getRed() / 255.0F;
          float g = color.getGreen() / 255.0F;
          float b = color.getBlue() / 255.0F;
          if (drawAsLine) {
-            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
             RenderSystem.lineWidth(3.0F);
-            client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+            BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
             Matrix4f mx = matrices.peek().getPositionMatrix();
 
-            for (util.math.Vec3d point : path) {
+            for (Vec3d point : path) {
                float lx = (float)(point.x - camPos.x);
                float ly = (float)(point.y - camPos.y);
                float lz = (float)(point.z - camPos.z);
                buffer.vertex(mx, lx, ly, lz).color(r, g, b, 1.0F);
             }
 
-            client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
             RenderSystem.lineWidth(1.0F);
          } else {
             RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
-            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-            client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
-            util.math.Vec3d playerPos = this.mc.player != null ? this.mc.player.getPos() : util.math.Vec3d.ZERO;
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+            BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+            Vec3d playerPos = this.mc.player != null ? this.mc.player.getPos() : Vec3d.ZERO;
 
             for (int i = 0; i < path.size() - 1; i++) {
-               util.math.Vec3d p1 = path.get(i);
-               util.math.Vec3d p2 = path.get(i + 1);
+               Vec3d p1 = path.get(i);
+               Vec3d p2 = path.get(i + 1);
                double segmentDist = p1.distanceTo(p2);
                if (!(segmentDist < 0.001)) {
                   for (int k = 0; k < 10; k++) {
                      float t = k / 10.0F;
-                     util.math.Vec3d interpolatedPos = p1.add(p2.subtract(p1).multiply(t));
+                     Vec3d interpolatedPos = p1.add(p2.subtract(p1).multiply(t));
                      if (!(interpolatedPos.distanceTo(playerPos) <= 2.0)) {
                         float size1 = (float)segmentDist / 3.0F * scaleMultiplier;
                         this.drawBloomGlow(matrices, buffer, interpolatedPos, camPos, cameraRot, size1, r, g, b, 1.0F);
@@ -337,7 +337,7 @@ public class TrajectoriesRenderer {
                }
             }
 
-            client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
          }
 
          RenderSystem.defaultBlendFunc();
@@ -348,7 +348,7 @@ public class TrajectoriesRenderer {
    }
 
    private void drawBloomGlow(
-      util.math.MatrixStack matrices, client.render.BufferBuilder buffer, util.math.Vec3d pos, util.math.Vec3d camPos, Quaternionf cameraRot, float size, float r, float g, float b, float alpha
+      MatrixStack matrices, BufferBuilder buffer, Vec3d pos, Vec3d camPos, Quaternionf cameraRot, float size, float r, float g, float b, float alpha
    ) {
       matrices.push();
       matrices.translate(pos.x - camPos.x, pos.y - camPos.y, pos.z - camPos.z);
@@ -361,33 +361,33 @@ public class TrajectoriesRenderer {
       matrices.pop();
    }
 
-   private TrajectoriesRenderer.CachedPearl calculatePearlPath(projectile.thrown.EnderPearlEntity pearl, float tickDelta) {
+   private TrajectoriesRenderer.CachedPearl calculatePearlPath(EnderPearlEntity pearl, float tickDelta) {
       TrajectoriesRenderer.CachedPearl cache = new TrajectoriesRenderer.CachedPearl();
       cache.path = new ArrayList<>();
-      double posX = util.math.MathHelper.lerp(tickDelta, pearl.lastRenderX, pearl.getX());
-      double posY = util.math.MathHelper.lerp(tickDelta, pearl.lastRenderY, pearl.getY());
-      double posZ = util.math.MathHelper.lerp(tickDelta, pearl.lastRenderZ, pearl.getZ());
+      double posX = MathHelper.lerp(tickDelta, pearl.lastRenderX, pearl.getX());
+      double posY = MathHelper.lerp(tickDelta, pearl.lastRenderY, pearl.getY());
+      double posZ = MathHelper.lerp(tickDelta, pearl.lastRenderZ, pearl.getZ());
       double motionX = pearl.getVelocity().x;
       double motionY = pearl.getVelocity().y;
       double motionZ = pearl.getVelocity().z;
-      util.math.Vec3d currentPos = new util.math.Vec3d(posX, posY, posZ);
+      Vec3d currentPos = new Vec3d(posX, posY, posZ);
       int ticksToLand = 0;
-      util.hit.HitResult hitResult = null;
+      HitResult hitResult = null;
 
       for (int i = 0; i < 300; i++) {
-         cache.path.add(new util.math.Vec3d(posX, posY, posZ));
-         util.math.Vec3d nextPos = new util.math.Vec3d(posX + motionX, posY + motionY, posZ + motionZ);
-         hitResult = this.mc.world.raycast(new minecraft.world.RaycastContext(currentPos, nextPos, world.RaycastContext.ShapeType.COLLIDER, world.RaycastContext.FluidHandling.NONE, pearl));
-         if (hitResult != null && hitResult.getType() == hit.HitResult.Type.BLOCK) {
+         cache.path.add(new Vec3d(posX, posY, posZ));
+         Vec3d nextPos = new Vec3d(posX + motionX, posY + motionY, posZ + motionZ);
+         hitResult = this.mc.world.raycast(new RaycastContext(currentPos, nextPos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, pearl));
+         if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
             nextPos = hitResult.getPos();
          }
 
-         util.math.Box boundingBox = new util.math.Box(posX, posY, posZ, posX, posY, posZ).stretch(motionX, motionY, motionZ).expand(1.0);
+         Box boundingBox = new Box(posX, posY, posZ, posX, posY, posZ).stretch(motionX, motionY, motionZ).expand(1.0);
 
-         for (minecraft.entity.Entity entity : this.mc.world.getOtherEntities(pearl, boundingBox, e -> e.canHit() && e.isAlive())) {
-            util.math.Box entBox = entity.getBoundingBox().expand(0.3F);
+         for (Entity entity : this.mc.world.getOtherEntities(pearl, boundingBox, e -> e.canHit() && e.isAlive())) {
+            Box entBox = entity.getBoundingBox().expand(0.3F);
             if (entBox.contains(currentPos)) {
-               hitResult = new util.hit.EntityHitResult(entity);
+               hitResult = new EntityHitResult(entity);
                nextPos = currentPos;
                break;
             }
@@ -397,12 +397,12 @@ public class TrajectoriesRenderer {
          posY = nextPos.y;
          posZ = nextPos.z;
          ticksToLand++;
-         if (hitResult != null && hitResult.getType() != hit.HitResult.Type.MISS) {
-            cache.path.add(new util.math.Vec3d(posX, posY, posZ));
+         if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
+            cache.path.add(new Vec3d(posX, posY, posZ));
             break;
          }
 
-         util.math.BlockPos blockPos = util.math.BlockPos.ofFloored(posX, posY, posZ);
+         BlockPos blockPos = BlockPos.ofFloored(posX, posY, posZ);
          double currentDrag = this.mc.world.getFluidState(blockPos).isEmpty() ? 0.99 : 0.8;
          motionX *= currentDrag;
          motionY *= currentDrag;
@@ -417,16 +417,16 @@ public class TrajectoriesRenderer {
    }
 
    private void drawCachedPearl(
-      util.math.MatrixStack matrices,
+      MatrixStack matrices,
       TrajectoriesRenderer.CachedPearl cache,
-      util.math.Vec3d camPos,
+      Vec3d camPos,
       Quaternionf cameraRot,
       Color color,
       TrajectoriesModule mod,
       int ticksToLand
    ) {
       this.drawZapLine(matrices, cache.path, camPos, cameraRot, color, mod.drawThroughWalls.get(), 1.0F, false);
-      if (cache.hitResult != null && cache.hitResult.getType() != hit.HitResult.Type.MISS) {
+      if (cache.hitResult != null && cache.hitResult.getType() != HitResult.Type.MISS) {
          if (mod.showHitbox.get()) {
             this.drawLandingBox(
                matrices, cache.hitResult, camPos, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, mod.drawThroughWalls.get()
@@ -437,7 +437,7 @@ public class TrajectoriesRenderer {
       }
    }
 
-   private void collectCircularTimer(util.math.Vec3d hitPos, int ticksToLand, util.math.Vec3d camPos) {
+   private void collectCircularTimer(Vec3d hitPos, int ticksToLand, Vec3d camPos) {
       double dx = hitPos.x - camPos.x;
       double dy = hitPos.y + 0.75 - camPos.y;
       double dz = hitPos.z - camPos.z;
@@ -466,13 +466,13 @@ public class TrajectoriesRenderer {
       return new Vector3f(screenX, screenY, pos.w());
    }
 
-   public void renderHUD(client.gui.DrawContext drawContext) {
+   public void renderHUD(DrawContext drawContext) {
       Module rawMod = AstolfoclientClient.moduleManager.getModuleByName("Trajectories");
       if (rawMod != null && rawMod.isEnabled()) {
          TrajectoriesModule mod = (TrajectoriesModule)rawMod;
          if (this.hasMatrices && !this.timersToRender.isEmpty()) {
-            util.math.MatrixStack matrices = drawContext.getMatrices();
-            render.VertexConsumerProvider.Immediate imm = ((DrawContextAccessor)drawContext).getVertexConsumers();
+            MatrixStack matrices = drawContext.getMatrices();
+            VertexConsumerProvider.Immediate imm = ((DrawContextAccessor)drawContext).getVertexConsumers();
             Color themeColor = new Color(ThemeManager.getThemedColor(0L));
             this.timersToRender.sort((t1, t2) -> Double.compare(t2.distance, t1.distance));
 
@@ -490,10 +490,10 @@ public class TrajectoriesRenderer {
       }
    }
 
-   private void drawCircularTimer2D(util.math.MatrixStack matrices, int ticksToLand, Color themeColor, TrajectoriesModule mod, render.VertexConsumerProvider.Immediate imm) {
+   private void drawCircularTimer2D(MatrixStack matrices, int ticksToLand, Color themeColor, TrajectoriesModule mod, VertexConsumerProvider.Immediate imm) {
       float seconds = ticksToLand / 20.0F;
       String text = String.format("%.1fs", seconds);
-      client.font.TextRenderer tr = this.mc.textRenderer;
+      TextRenderer tr = this.mc.textRenderer;
       float textWidth = tr.getWidth(text);
       float circleSize = Math.max(20.0F, textWidth + 8.0F);
       matrices.push();
@@ -510,7 +510,7 @@ public class TrajectoriesRenderer {
                float progress = (float)i / layers;
                float fade = 1.0F - progress;
                float alpha = fade * fade * 0.25F * (float)mod.bgOpacity.get();
-               int currentAlpha = util.math.MathHelper.clamp((int)(255.0F * alpha), 0, 255);
+               int currentAlpha = MathHelper.clamp((int)(255.0F * alpha), 0, 255);
                if (currentAlpha > 0) {
                   float expand = progress * maxSpread;
                   Color layerColor = new Color(themeColor.getRed(), themeColor.getGreen(), themeColor.getBlue(), currentAlpha);
@@ -534,17 +534,17 @@ public class TrajectoriesRenderer {
 
       float textX = -(textWidth / 2.0F);
       float textY = -3.5F;
-      tr.draw(text, textX, textY, -1, true, mx, imm, font.TextRenderer.TextLayerType.SEE_THROUGH, 0, 15728880);
+      tr.draw(text, textX, textY, -1, true, mx, imm, TextRenderer.TextLayerType.SEE_THROUGH, 0, 15728880);
       imm.draw();
       matrices.pop();
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
-   private void drawLandingBox(util.math.MatrixStack matrices, util.hit.HitResult hit, util.math.Vec3d camPos, float r, float g, float b, boolean drawThroughWalls) {
-      client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
-      if (hit.getType() == hit.HitResult.Type.BLOCK) {
-         util.hit.BlockHitResult blockHit = (util.hit.BlockHitResult)hit;
-         util.math.Vec3d hitPos = blockHit.getPos();
+   private void drawLandingBox(MatrixStack matrices, HitResult hit, Vec3d camPos, float r, float g, float b, boolean drawThroughWalls) {
+      Tessellator tessellator = Tessellator.getInstance();
+      if (hit.getType() == HitResult.Type.BLOCK) {
+         BlockHitResult blockHit = (BlockHitResult)hit;
+         Vec3d hitPos = blockHit.getPos();
          float size = 1.0F;
          double hX = hitPos.x - camPos.x;
          double hY = hitPos.y - camPos.y;
@@ -572,9 +572,9 @@ public class TrajectoriesRenderer {
          matrices.push();
          matrices.translate(hX, hY, hZ);
          matrices.multiply(blockHit.getSide().getRotationQuaternion());
-         matrices.multiply(util.math.RotationAxis.NEGATIVE_X.rotationDegrees(-90.0F));
+         matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(-90.0F));
          RenderSystem.enableBlend();
-         RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
          RenderSystem.disableCull();
          if (drawThroughWalls) {
             RenderSystem.disableDepthTest();
@@ -585,22 +585,22 @@ public class TrajectoriesRenderer {
          }
 
          RenderSystem.setShaderTexture(0, HIT_TEXTURE);
-         RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-         client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+         RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+         BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
          Matrix4f mx = matrices.peek().getPositionMatrix();
          buffer.vertex(mx, -size / 3.0F, size / 3.0F, 0.0F).texture(0.0F, 1.0F).color(r, g, b, 1.0F);
          buffer.vertex(mx, size / 3.0F, size / 3.0F, 0.0F).texture(1.0F, 1.0F).color(r, g, b, 1.0F);
          buffer.vertex(mx, size / 3.0F, -size / 3.0F, 0.0F).texture(1.0F, 0.0F).color(r, g, b, 1.0F);
          buffer.vertex(mx, -size / 3.0F, -size / 3.0F, 0.0F).texture(0.0F, 0.0F).color(r, g, b, 1.0F);
-         client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+         BufferRenderer.drawWithGlobalProgram(buffer.end());
          matrices.pop();
          RenderSystem.defaultBlendFunc();
          RenderSystem.enableCull();
          RenderSystem.enableDepthTest();
          RenderSystem.depthMask(true);
-      } else if (hit.getType() == hit.HitResult.Type.ENTITY) {
-         minecraft.entity.Entity entity = ((util.hit.EntityHitResult)hit).getEntity();
-         util.math.Box bBox = entity.getBoundingBox().offset(-camPos.x, -camPos.y, -camPos.z);
+      } else if (hit.getType() == HitResult.Type.ENTITY) {
+         Entity entity = ((EntityHitResult)hit).getEntity();
+         Box bBox = entity.getBoundingBox().offset(-camPos.x, -camPos.y, -camPos.z);
          Matrix4f mx = matrices.peek().getPositionMatrix();
          RenderSystem.enableBlend();
          RenderSystem.defaultBlendFunc();
@@ -612,16 +612,16 @@ public class TrajectoriesRenderer {
             RenderSystem.depthMask(true);
          }
 
-         RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-         client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINES, client.render.VertexFormats.POSITION_COLOR);
+         RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+         BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
          this.drawBoxLines(buffer, mx, bBox, r, g, b, 1.0F);
-         client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+         BufferRenderer.drawWithGlobalProgram(buffer.end());
          RenderSystem.enableDepthTest();
          RenderSystem.depthMask(true);
       }
    }
 
-   private void drawBoxLines(client.render.BufferBuilder buffer, Matrix4f mx, util.math.Box box, float r, float g, float b, float a) {
+   private void drawBoxLines(BufferBuilder buffer, Matrix4f mx, Box box, float r, float g, float b, float a) {
       float x1 = (float)box.minX;
       float y1 = (float)box.minY;
       float z1 = (float)box.minZ;
@@ -654,35 +654,35 @@ public class TrajectoriesRenderer {
       buffer.vertex(mx, x1, y2, z2).color(r, g, b, a);
    }
 
-   private boolean isThrowable(minecraft.item.Item item) {
-      return item instanceof minecraft.item.BowItem
-         || item instanceof minecraft.item.CrossbowItem
-         || item instanceof minecraft.item.TridentItem
-         || item instanceof minecraft.item.EnderPearlItem
-         || item instanceof minecraft.item.SnowballItem
-         || item instanceof minecraft.item.EggItem
-         || item instanceof minecraft.item.SplashPotionItem
-         || item instanceof minecraft.item.LingeringPotionItem
-         || item instanceof minecraft.item.ExperienceBottleItem;
+   private boolean isThrowable(Item item) {
+      return item instanceof BowItem
+         || item instanceof CrossbowItem
+         || item instanceof TridentItem
+         || item instanceof EnderPearlItem
+         || item instanceof SnowballItem
+         || item instanceof EggItem
+         || item instanceof SplashPotionItem
+         || item instanceof LingeringPotionItem
+         || item instanceof ExperienceBottleItem;
    }
 
    @Environment(EnvType.CLIENT)
    private static class CachedPearl {
-      List<util.math.Vec3d> path;
-      util.hit.HitResult hitResult;
+      List<Vec3d> path;
+      HitResult hitResult;
       int ticksToLand;
       long lastUpdateTime;
    }
 
    @Environment(EnvType.CLIENT)
    private static class TimerTagInfo {
-      util.math.Vec3d hitPos;
+      Vec3d hitPos;
       int ticksToLand;
       double distance;
       double x;
       double y;
 
-      public TimerTagInfo(util.math.Vec3d hitPos, int ticksToLand, double distance, double x, double y) {
+      public TimerTagInfo(Vec3d hitPos, int ticksToLand, double distance, double x, double y) {
          this.hitPos = hitPos;
          this.ticksToLand = ticksToLand;
          this.distance = distance;

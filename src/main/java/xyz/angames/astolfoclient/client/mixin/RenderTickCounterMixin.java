@@ -12,7 +12,7 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.util.TimerManager;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.RenderTickCounter.Dynamic.class)
+@Mixin(RenderTickCounter.Dynamic.class)
 public class RenderTickCounterMixin {
    @Shadow
    private float tickTime;

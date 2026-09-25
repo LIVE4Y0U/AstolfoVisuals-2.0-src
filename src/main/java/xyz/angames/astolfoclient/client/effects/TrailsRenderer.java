@@ -28,20 +28,20 @@ import xyz.angames.astolfoclient.client.module.modules.render.BabyPlayerModule;
 
 @Environment(EnvType.CLIENT)
 public class TrailsRenderer {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private final List<TrailsRenderer.TrailPoint> points = new ArrayList<>();
    private static final long TRAIL_LIFESPAN = 850L;
 
    public void render(WorldRenderContext context) {
       Module module = AstolfoclientClient.moduleManager.getModuleByName("Trails");
       if (module != null && module.isEnabled() && !this.client.options.getPerspective().isFirstPerson()) {
-         client.network.ClientPlayerEntity player = this.client.player;
+         ClientPlayerEntity player = this.client.player;
          if (player != null) {
             float tickDelta = context.tickCounter().getTickDelta(true);
-            double x = util.math.MathHelper.lerp(tickDelta, player.lastRenderX, player.getX());
-            double y = util.math.MathHelper.lerp(tickDelta, player.lastRenderY, player.getY());
-            double z = util.math.MathHelper.lerp(tickDelta, player.lastRenderZ, player.getZ());
-            util.math.Vec3d currentPos = new util.math.Vec3d(x, y, z);
+            double x = MathHelper.lerp(tickDelta, player.lastRenderX, player.getX());
+            double y = MathHelper.lerp(tickDelta, player.lastRenderY, player.getY());
+            double z = MathHelper.lerp(tickDelta, player.lastRenderZ, player.getZ());
+            Vec3d currentPos = new Vec3d(x, y, z);
             boolean isBaby = false;
             if (AstolfoclientClient.moduleManager.getModuleByName("BabyPlayer") instanceof BabyPlayerModule bpm) {
                isBaby = bpm.isEnabled() && bpm.self.get();
@@ -59,18 +59,18 @@ public class TrailsRenderer {
                RenderSystem.disableCull();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(false);
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-               client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
-               util.math.MatrixStack matrices = context.matrixStack();
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+               Tessellator tessellator = Tessellator.getInstance();
+               MatrixStack matrices = context.matrixStack();
                Matrix4f matrix = matrices.peek().getPositionMatrix();
-               util.math.Vec3d cameraPos = context.camera().getPos();
-               client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.TRIANGLE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+               Vec3d cameraPos = context.camera().getPos();
+               BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
                int index = 0;
 
                for (TrailsRenderer.TrailPoint point : this.points) {
                   long age = currentTime - point.timeCreated;
-                  float progress = util.math.MathHelper.clamp((float)age / 850.0F, 0.0F, 1.0F);
+                  float progress = MathHelper.clamp((float)age / 850.0F, 0.0F, 1.0F);
                   float reverseProgress = 1.0F - progress;
                   float alpha = (float)Math.pow(reverseProgress, 2.5);
                   float bodyAlpha = alpha * 0.45F;
@@ -90,14 +90,14 @@ public class TrailsRenderer {
                   index++;
                }
 
-               client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+               BufferRenderer.drawWithGlobalProgram(buffer.end());
                RenderSystem.lineWidth(2.5F);
-               buffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+               buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
                index = 0;
 
                for (TrailsRenderer.TrailPoint point : this.points) {
                   long age = currentTime - point.timeCreated;
-                  float progress = util.math.MathHelper.clamp((float)age / 850.0F, 0.0F, 1.0F);
+                  float progress = MathHelper.clamp((float)age / 850.0F, 0.0F, 1.0F);
                   float reverseProgress = 1.0F - progress;
                   float alpha = (float)Math.pow(reverseProgress, 2.0);
                   float heightScale = reverseProgress * reverseProgress;
@@ -112,13 +112,13 @@ public class TrailsRenderer {
                   index++;
                }
 
-               client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
-               buffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+               BufferRenderer.drawWithGlobalProgram(buffer.end());
+               buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
                index = 0;
 
                for (TrailsRenderer.TrailPoint point : this.points) {
                   long age = currentTime - point.timeCreated;
-                  float progress = util.math.MathHelper.clamp((float)age / 850.0F, 0.0F, 1.0F);
+                  float progress = MathHelper.clamp((float)age / 850.0F, 0.0F, 1.0F);
                   float reverseProgress = 1.0F - progress;
                   float alpha = (float)Math.pow(reverseProgress, 2.0);
                   float heightScale = reverseProgress * reverseProgress;
@@ -133,7 +133,7 @@ public class TrailsRenderer {
                   index++;
                }
 
-               client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+               BufferRenderer.drawWithGlobalProgram(buffer.end());
                RenderSystem.lineWidth(1.0F);
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(true);
@@ -149,11 +149,11 @@ public class TrailsRenderer {
 
    @Environment(EnvType.CLIENT)
    private static class TrailPoint {
-      final util.math.Vec3d pos;
+      final Vec3d pos;
       final float height;
       final long timeCreated;
 
-      public TrailPoint(util.math.Vec3d pos, float height, long timeCreated) {
+      public TrailPoint(Vec3d pos, float height, long timeCreated) {
          this.pos = pos;
          this.height = height;
          this.timeCreated = timeCreated;

@@ -48,7 +48,7 @@ import xyz.angames.astolfoclient.client.util.DiscordAvatarManager;
 import xyz.angames.astolfoclient.client.util.ModSounds;
 
 @Environment(EnvType.CLIENT)
-public class ClickGuiScreen extends gui.screen.Screen {
+public class ClickGuiScreen extends Screen {
    private final List<ModuleButton> allModuleButtons;
    private static Method renderHandMethod = null;
    private ClickGuiScreen.NavTab activeTab = ClickGuiScreen.NavTab.RENDER;
@@ -119,7 +119,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
 
    public float getColorPickerY(float winY) {
       float popY = this.getSettingsModalY(winY);
-      return util.math.MathHelper.clamp(popY - 10.0F, winY + 38.0F, winY + 380.0F - 94.0F - 8.0F);
+      return MathHelper.clamp(popY - 10.0F, winY + 38.0F, winY + 380.0F - 94.0F - 8.0F);
    }
 
    public float getSoundSettingsX(float winX) {
@@ -128,7 +128,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
 
    public float getSoundSettingsY(float winY) {
       float popY = this.getSettingsModalY(winY);
-      return util.math.MathHelper.clamp(popY - 16.0F, winY + 38.0F, winY + 380.0F - 190.0F - 8.0F);
+      return MathHelper.clamp(popY - 16.0F, winY + 38.0F, winY + 380.0F - 190.0F - 8.0F);
    }
 
    public float getScaleSettingsX(float winX) {
@@ -137,7 +137,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
 
    public float getScaleSettingsY(float winY) {
       float popY = this.getSettingsModalY(winY);
-      return util.math.MathHelper.clamp(popY - 10.0F, winY + 38.0F, winY + 380.0F - 162.0F - 8.0F);
+      return MathHelper.clamp(popY - 10.0F, winY + 38.0F, winY + 380.0F - 162.0F - 8.0F);
    }
 
    public boolean isAnyModalOpen() {
@@ -155,7 +155,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
    }
 
    public ClickGuiScreen() {
-      super(minecraft.text.Text.literal("AstolfoClient"));
+      super(Text.literal("AstolfoClient"));
       this.allModuleButtons = AstolfoclientClient.moduleManager.getModules().stream().map(m -> new ModuleButton(m, 205.0F)).collect(Collectors.toList());
 
       for (ClickGuiScreen.NavTab tab : ClickGuiScreen.NavTab.values()) {
@@ -289,7 +289,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       super.close();
    }
 
-   public void render(client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
+   public void render(DrawContext context, int mouseX, int mouseY, float delta) {
       this.renderHandLogic(context, delta);
       long now = System.currentTimeMillis();
       if (this.lastFrameTime == 0L) {
@@ -298,7 +298,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
 
       float deltaTime = (float)(now - this.lastFrameTime) / 1000.0F;
       this.lastFrameTime = now;
-      deltaTime = util.math.MathHelper.clamp(deltaTime, 5.0E-4F, 0.1F);
+      deltaTime = MathHelper.clamp(deltaTime, 5.0E-4F, 0.1F);
 
       for (ModuleButton mb : this.allModuleButtons) {
          mb.isVisible = false;
@@ -363,7 +363,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       context.getMatrices().pop();
    }
 
-   private void drawSidebar(client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   private void drawSidebar(DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       Builder.rectangle()
          .size(new SizeState(1.0F, 380.0F))
          .radius(new QuadRadiusState(0.0F))
@@ -559,10 +559,10 @@ public class ClickGuiScreen extends gui.screen.Screen {
       float avY = profCenterY - avSize / 2.0F;
       float avRadius = avSize / 2.0F;
       boolean drawnAvatar = false;
-      minecraft.util.Identifier avTex = DiscordAvatarManager.getAvatarTexture();
+      Identifier avTex = DiscordAvatarManager.getAvatarTexture();
       if (avTex != null) {
          try {
-            client.texture.AbstractTexture tex = minecraft.client.MinecraftClient.getInstance().getTextureManager().getTexture(avTex);
+            AbstractTexture tex = MinecraftClient.getInstance().getTextureManager().getTexture(avTex);
             if (tex != null) {
                Builder.texture()
                   .size(new SizeState(avSize, avSize))
@@ -579,9 +579,9 @@ public class ClickGuiScreen extends gui.screen.Screen {
 
       if (!drawnAvatar && this.client.player != null) {
          try {
-            minecraft.util.Identifier skinTex = this.client.player.getSkinTextures().comp_1626();
+            Identifier skinTex = this.client.player.getSkinTextures().comp_1626();
             if (skinTex != null) {
-               client.texture.AbstractTexture tex = this.client.getTextureManager().getTexture(skinTex);
+               AbstractTexture tex = this.client.getTextureManager().getTexture(skinTex);
                if (tex != null) {
                   Builder.texture()
                      .size(new SizeState(avSize, avSize))
@@ -681,7 +681,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       GuiUtils.renderTextSafely(mx, tab.title, textX, textY, GuiUtils.withAlpha(Color.WHITE, alpha), 8.8F);
    }
 
-   private void drawTopBar(client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   private void drawTopBar(DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       float topBarX = winX + 138.0F;
       float topBarW = 442.0F;
       float topBarH = 36.0F;
@@ -745,7 +745,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       }
    }
 
-   private void drawMainContent(client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   private void drawMainContent(DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       float contentX = winX + 138.0F;
       float contentY = winY + 36.0F;
       float contentW = 442.0F;
@@ -761,7 +761,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
    }
 
    private void drawModulesView(
-      client.gui.DrawContext context,
+      DrawContext context,
       Matrix4f mx,
       float contentX,
       float contentY,
@@ -879,7 +879,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       float maxColumnY = Math.max(col1Y, col2Y) - scroll;
       float totalContentH = maxColumnY - (contentY + 10.0F);
       float maxScroll = Math.max(0.0F, totalContentH - (contentH - 20.0F));
-      this.targetScrollOffsets.put(this.activeTab, util.math.MathHelper.clamp(targetScroll, -maxScroll, 0.0F));
+      this.targetScrollOffsets.put(this.activeTab, MathHelper.clamp(targetScroll, -maxScroll, 0.0F));
       if (totalContentH > contentH - 20.0F) {
          float scrollbarW = 3.0F;
          float scrollbarX = contentX + contentW - 5.0F;
@@ -888,7 +888,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
          float thumbRatio = (contentH - 20.0F) / totalContentH;
          float thumbH = Math.max(20.0F, scrollbarTrackH * thumbRatio);
          float scrollProgress = -scroll / maxScroll;
-         float thumbY = scrollbarTrackY + (scrollbarTrackH - thumbH) * util.math.MathHelper.clamp(scrollProgress, 0.0F, 1.0F);
+         float thumbY = scrollbarTrackY + (scrollbarTrackH - thumbH) * MathHelper.clamp(scrollProgress, 0.0F, 1.0F);
          Builder.rectangle()
             .size(new SizeState(scrollbarW, thumbH))
             .radius(new QuadRadiusState(1.5F))
@@ -899,7 +899,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
    }
 
    private void drawConfigsView(
-      client.gui.DrawContext context,
+      DrawContext context,
       Matrix4f mx,
       float contentX,
       float contentY,
@@ -1076,7 +1076,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
    }
 
    private void drawSettingsModal(
-      client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor
+      DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor
    ) {
       float sm = this.settingsModalAnim;
       float ease = 1.0F - (float)Math.pow(1.0F - sm, 3.0);
@@ -1193,7 +1193,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       context.getMatrices().pop();
    }
 
-   private void drawSoundsModal(client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   private void drawSoundsModal(DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       float sndEase = 1.0F - (float)Math.pow(1.0F - this.soundSettingsAnim, 3.0);
       float sndScale = 0.9F + 0.1F * sndEase;
       float sndAlpha = alpha * sndEase;
@@ -1236,7 +1236,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
       context.getMatrices().pop();
    }
 
-   private void drawScaleModal(client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   private void drawScaleModal(DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       float scaleEase = 1.0F - (float)Math.pow(1.0F - this.scaleModalAnim, 3.0);
       float scaleScale = 0.9F + 0.1F * scaleEase;
       float scaleAlpha = alpha * scaleEase;
@@ -1280,7 +1280,7 @@ public class ClickGuiScreen extends gui.screen.Screen {
    }
 
    private void drawColorPickerModal(
-      client.gui.DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor
+      DrawContext context, Matrix4f mx, float winX, float winY, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor
    ) {
       float cpEase = 1.0F - (float)Math.pow(1.0F - this.colorPickerAnim, 3.0);
       float cpScale = 0.9F + 0.1F * cpEase;
@@ -1890,12 +1890,12 @@ public class ClickGuiScreen extends gui.screen.Screen {
       }
    }
 
-   private void renderHandLogic(client.gui.DrawContext ctx, float delta) {
+   private void renderHandLogic(DrawContext ctx, float delta) {
       boolean renderingHand = this.allModuleButtons.stream().anyMatch(mb -> mb.isVisible && mb.module instanceof HandPositionModule);
       if (renderingHand && this.client.gameRenderer != null) {
          try {
             if (renderHandMethod == null) {
-               renderHandMethod = client.render.GameRenderer.class.getDeclaredMethod("renderHand", util.math.MatrixStack.class, client.render.Camera.class, float.class);
+               renderHandMethod = GameRenderer.class.getDeclaredMethod("renderHand", MatrixStack.class, Camera.class, float.class);
                renderHandMethod.setAccessible(true);
             }
 

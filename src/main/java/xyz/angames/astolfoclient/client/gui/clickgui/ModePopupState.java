@@ -142,11 +142,11 @@ public class ModePopupState {
       }
 
       float sY = ACTIVE.triggerY - 2.0F;
-      return util.math.MathHelper.clamp(sY, winY + 38.0F, winY + winH - subH - 8.0F);
+      return MathHelper.clamp(sY, winY + 38.0F, winY + winH - subH - 8.0F);
    }
 
    public static void renderActive(
-      client.gui.DrawContext context, float winX, float winY, float winW, float winH, int mouseX, int mouseY, float deltaTime, float masterAlpha, Color themeColor
+      DrawContext context, float winX, float winY, float winW, float winH, int mouseX, int mouseY, float deltaTime, float masterAlpha, Color themeColor
    ) {
       if (ACTIVE != null) {
          ACTIVE.anim = GuiUtils.animate(ACTIVE.anim, ACTIVE.isClosing ? 0.0F : 1.0F, 18.0F, deltaTime);
@@ -295,7 +295,7 @@ public class ModePopupState {
             if (maxScroll > 0.5F) {
                float scrollTrackH = subH - 12.0F;
                float scrollThumbH = Math.max(14.0F, contentH / totalContentH * scrollTrackH);
-               float scrollProgress = util.math.MathHelper.clamp(-ACTIVE.scrollY / maxScroll, 0.0F, 1.0F);
+               float scrollProgress = MathHelper.clamp(-ACTIVE.scrollY / maxScroll, 0.0F, 1.0F);
                float scrollThumbY = sY + 6.0F + scrollProgress * (scrollTrackH - scrollThumbH);
                Builder.rectangle()
                   .size(new SizeState(2.5F, scrollThumbH))
@@ -364,7 +364,7 @@ public class ModePopupState {
          float maxScroll = Math.max(0.0F, totalContentH - visibleCount * 16.0F);
          if (GuiUtils.isMouseOver((float)mouseX, (float)mouseY, sX, sY, subW, subH)) {
             if (maxScroll > 0.5F) {
-               ACTIVE.targetScrollY = util.math.MathHelper.clamp(ACTIVE.targetScrollY + (float)amount * 18.0F, -maxScroll, 0.0F);
+               ACTIVE.targetScrollY = MathHelper.clamp(ACTIVE.targetScrollY + (float)amount * 18.0F, -maxScroll, 0.0F);
             }
 
             return true;

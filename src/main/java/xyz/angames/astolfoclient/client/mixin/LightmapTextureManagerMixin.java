@@ -17,10 +17,10 @@ import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.render.LightmapTextureManager.class)
+@Mixin(LightmapTextureManager.class)
 public class LightmapTextureManagerMixin {
    @Unique
-   private client.texture.NativeImage astolfo$image = null;
+   private NativeImage astolfo$image = null;
    @Unique
    private Object astolfo$texture = null;
    @Unique
@@ -31,13 +31,13 @@ public class LightmapTextureManagerMixin {
       if (AstolfoclientClient.moduleManager != null) {
          AmbientsModule ambients = (AmbientsModule)AstolfoclientClient.moduleManager.getModuleByName("Ambients");
          if (this.astolfo$image == null || this.astolfo$texture == null) {
-            for (Field field : client.render.LightmapTextureManager.class.getDeclaredFields()) {
+            for (Field field : LightmapTextureManager.class.getDeclaredFields()) {
                field.setAccessible(true);
 
                try {
                   Object value = field.get(this);
-                  if (value instanceof client.texture.NativeImage) {
-                     this.astolfo$image = (client.texture.NativeImage)value;
+                  if (value instanceof NativeImage) {
+                     this.astolfo$image = (NativeImage)value;
                   } else if (value != null) {
                      String className = value.getClass().getSimpleName();
                      if (className.equals("DynamicTexture") || className.equals("NativeImageBackedTexture")) {

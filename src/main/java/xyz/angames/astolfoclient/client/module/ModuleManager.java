@@ -104,7 +104,7 @@ public class ModuleManager {
       if (module != null) {
          modules.removeIf(m -> m.getName().equalsIgnoreCase(module.getName()));
          modules.add(module);
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc != null && mc.currentScreen instanceof ClickGuiScreen clickGui) {
             clickGui.refreshModuleButtons();
          }
@@ -116,7 +116,7 @@ public class ModuleManager {
          module.setEnabled(false);
          modules.remove(module);
          modules.removeIf(m -> m.getName().equalsIgnoreCase(module.getName()));
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc != null && mc.currentScreen instanceof ClickGuiScreen clickGui) {
             clickGui.refreshModuleButtons();
          }

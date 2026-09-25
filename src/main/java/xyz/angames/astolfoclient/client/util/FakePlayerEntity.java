@@ -11,10 +11,10 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 
 @Environment(EnvType.CLIENT)
-public class FakePlayerEntity extends client.network.OtherClientPlayerEntity {
+public class FakePlayerEntity extends OtherClientPlayerEntity {
    public static FakePlayerEntity instance = null;
 
-   public FakePlayerEntity(client.world.ClientWorld world, GameProfile profile) {
+   public FakePlayerEntity(ClientWorld world, GameProfile profile) {
       super(world, profile);
       this.setHealth(20.0F);
    }
@@ -27,14 +27,14 @@ public class FakePlayerEntity extends client.network.OtherClientPlayerEntity {
       return false;
    }
 
-   public boolean collidesWith(minecraft.entity.Entity other) {
+   public boolean collidesWith(Entity other) {
       return false;
    }
 
    public void takeKnockback(double strength, double x, double z) {
    }
 
-   public minecraft.item.ItemStack getEquippedStack(minecraft.entity.EquipmentSlot slot) {
-      return slot == minecraft.entity.EquipmentSlot.OFFHAND ? new minecraft.item.ItemStack(minecraft.item.Items.TOTEM_OF_UNDYING) : super.getEquippedStack(slot);
+   public ItemStack getEquippedStack(EquipmentSlot slot) {
+      return slot == EquipmentSlot.OFFHAND ? new ItemStack(Items.TOTEM_OF_UNDYING) : super.getEquippedStack(slot);
    }
 }

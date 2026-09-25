@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.option.KeyBinding.class)
+@Mixin(KeyBinding.class)
 public interface KeyBindingAccessor {
    @Accessor("timesPressed")
    void setTimesPressed(int var1);

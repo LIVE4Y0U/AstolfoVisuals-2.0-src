@@ -52,11 +52,11 @@ public class GuiUtils {
    }
 
    public static Color withAlpha(Color c, float alpha) {
-      return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(util.math.MathHelper.clamp(alpha, 0.0F, 1.0F) * 255.0F));
+      return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(MathHelper.clamp(alpha, 0.0F, 1.0F) * 255.0F));
    }
 
    public static Color interpolateColor(Color c1, Color c2, float factor) {
-      float f = util.math.MathHelper.clamp(factor, 0.0F, 1.0F);
+      float f = MathHelper.clamp(factor, 0.0F, 1.0F);
       return new Color(
          (int)(c1.getRed() + (c2.getRed() - c1.getRed()) * f),
          (int)(c1.getGreen() + (c2.getGreen() - c1.getGreen()) * f),
@@ -99,7 +99,7 @@ public class GuiUtils {
       return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
    }
 
-   public static float getScaleModifier(minecraft.client.MinecraftClient client) {
+   public static float getScaleModifier(MinecraftClient client) {
       return client != null && client.getWindow() != null ? (float)(2.0 / client.getWindow().getScaleFactor()) : 1.0F;
    }
 

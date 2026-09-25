@@ -13,15 +13,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.util.FriendManager;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.network.PlayerListEntry.class)
+@Mixin(PlayerListEntry.class)
 public class MixinPlayerListEntry {
    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-   private void astolfo$formatFriendName(CallbackInfoReturnable<minecraft.text.Text> cir) {
-      client.network.PlayerListEntry entry = (client.network.PlayerListEntry)this;
+   private void astolfo$formatFriendName(CallbackInfoReturnable<Text> cir) {
+      PlayerListEntry entry = (PlayerListEntry)this;
       if (entry.getProfile() != null && entry.getProfile().getName() != null) {
          String playerName = entry.getProfile().getName();
          if (FriendManager.isFriend(playerName)) {
-            minecraft.text.MutableText friendName = minecraft.text.Text.literal(playerName).formatted(new minecraft.util.Formatting[]{minecraft.util.Formatting.GREEN, minecraft.util.Formatting.BOLD});
+            MutableText friendName = Text.literal(playerName).formatted(new Formatting[]{Formatting.GREEN, Formatting.BOLD});
             cir.setReturnValue(friendName);
          }
       }

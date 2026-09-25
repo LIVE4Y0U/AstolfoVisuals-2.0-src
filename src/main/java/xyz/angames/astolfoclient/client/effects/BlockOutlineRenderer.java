@@ -31,14 +31,14 @@ import xyz.angames.astolfoclient.client.module.modules.render.BlockOutlineModule
 @Environment(EnvType.CLIENT)
 public class BlockOutlineRenderer {
    private BlockOutlineRenderer.RenderBox currentBox = null;
-   private util.math.BlockPos lastPos = null;
+   private BlockPos lastPos = null;
    private long lastRenderTime = System.currentTimeMillis();
    private float fadeAlpha = 0.0F;
 
    public void render(WorldRenderContext context) {
       BlockOutlineModule module = (BlockOutlineModule)AstolfoclientClient.moduleManager.getModuleByName("BlockOutline");
       if (module != null && module.isEnabled()) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc.world != null && mc.player != null) {
             long now = System.currentTimeMillis();
             float deltaTime = (float)(now - this.lastRenderTime) / 1000.0F;
@@ -51,8 +51,8 @@ public class BlockOutlineRenderer {
                deltaTime = 0.001F;
             }
 
-            util.hit.HitResult hit = mc.crosshairTarget;
-            boolean hasBlockTarget = hit != null && hit.getType() == hit.HitResult.Type.BLOCK;
+            HitResult hit = mc.crosshairTarget;
+            boolean hasBlockTarget = hit != null && hit.getType() == HitResult.Type.BLOCK;
             if (module.fadeEffect.get()) {
                float fadeRate = (float)module.fadeSpeed.get();
                if (hasBlockTarget) {
@@ -69,12 +69,12 @@ public class BlockOutlineRenderer {
                this.lastPos = null;
             } else {
                if (hasBlockTarget) {
-                  util.hit.BlockHitResult blockHit = (util.hit.BlockHitResult)hit;
-                  util.math.BlockPos pos = blockHit.getBlockPos();
-                  minecraft.block.BlockState state = mc.world.getBlockState(pos);
-                  util.shape.VoxelShape shape = state.getOutlineShape(mc.world, pos);
+                  BlockHitResult blockHit = (BlockHitResult)hit;
+                  BlockPos pos = blockHit.getBlockPos();
+                  BlockState state = mc.world.getBlockState(pos);
+                  VoxelShape shape = state.getOutlineShape(mc.world, pos);
                   if (!shape.isEmpty()) {
-                     util.math.Box targetBox = shape.getBoundingBox().offset(pos).expand(0.002);
+                     Box targetBox = shape.getBoundingBox().offset(pos).expand(0.002);
                      BlockOutlineRenderer.RenderBox targetRenderBox = new BlockOutlineRenderer.RenderBox(
                         targetBox.minX, targetBox.minY, targetBox.minZ, targetBox.maxX, targetBox.maxY, targetBox.maxZ
                      );
@@ -91,8 +91,8 @@ public class BlockOutlineRenderer {
                }
 
                if (this.currentBox != null) {
-                  client.render.Camera camera = context.camera();
-                  util.math.MatrixStack matrices = context.matrixStack();
+                  Camera camera = context.camera();
+                  MatrixStack matrices = context.matrixStack();
                   matrices.push();
                   matrices.translate(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
                   Color themeColor = new Color(ThemeManager.getThemedColor(0L));
@@ -108,9 +108,9 @@ public class BlockOutlineRenderer {
                      RenderSystem.disableDepthTest();
                   }
 
-                  client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+                  Tessellator tessellator = Tessellator.getInstance();
                   if (module.shaderFill.get()) {
-                     client.gl.ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.BLOCK_OUTLINE_SHADER);
+                     ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.BLOCK_OUTLINE_SHADER);
                      if (shader != null) {
                         float timeSecs = (float)(System.currentTimeMillis() % 1000000L) / 1000.0F;
                         if (shader.getUniform("uTime") != null) {
@@ -189,24 +189,24 @@ public class BlockOutlineRenderer {
                         }
                      }
 
-                     client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                     BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                      this.drawBoxFaces(matrices, buffer, this.currentBox, r, g, b, 1.0F);
-                     client.render.BuiltBuffer builtBuffer = buffer.endNullable();
+                     BuiltBuffer builtBuffer = buffer.endNullable();
                      if (builtBuffer != null) {
-                        client.render.BufferRenderer.drawWithGlobalProgram(builtBuffer);
+                        BufferRenderer.drawWithGlobalProgram(builtBuffer);
                      }
                   }
 
                   if (module.outline.get()) {
-                     RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+                     RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
                      RenderSystem.lineWidth((float)module.lineWidth.get());
                      float finalOutlineAlpha = (float)module.outlineAlpha.get() * this.fadeAlpha;
                      if (finalOutlineAlpha > 0.01F) {
-                        client.render.BufferBuilder lineBuffer = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINES, client.render.VertexFormats.POSITION_COLOR);
+                        BufferBuilder lineBuffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
                         this.drawBoxOutline(matrices, lineBuffer, this.currentBox, r, g, b, finalOutlineAlpha);
-                        client.render.BuiltBuffer builtLines = lineBuffer.endNullable();
+                        BuiltBuffer builtLines = lineBuffer.endNullable();
                         if (builtLines != null) {
-                           client.render.BufferRenderer.drawWithGlobalProgram(builtLines);
+                           BufferRenderer.drawWithGlobalProgram(builtLines);
                         }
                      }
 
@@ -227,7 +227,7 @@ public class BlockOutlineRenderer {
       }
    }
 
-   private void drawBoxFaces(util.math.MatrixStack matrices, client.render.BufferBuilder buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
+   private void drawBoxFaces(MatrixStack matrices, BufferBuilder buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
       float minX = (float)box.minX;
       float minY = (float)box.minY;
       float minZ = (float)box.minZ;
@@ -261,7 +261,7 @@ public class BlockOutlineRenderer {
       buffer.vertex(m, maxX, maxY, maxZ).texture(0.0F, 1.0F).color(r, g, b, a);
    }
 
-   private void drawBoxOutline(util.math.MatrixStack matrices, client.render.BufferBuilder buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
+   private void drawBoxOutline(MatrixStack matrices, BufferBuilder buffer, BlockOutlineRenderer.RenderBox box, float r, float g, float b, float a) {
       float minX = (float)box.minX;
       float minY = (float)box.minY;
       float minZ = (float)box.minZ;

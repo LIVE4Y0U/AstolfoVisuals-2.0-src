@@ -18,15 +18,15 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.modules.render.ParticlesModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.particle.ParticleManager.class)
+@Mixin(ParticleManager.class)
 public class MinecraftParticleManagerMixin {
    @Unique
    private static long astolfoclient$lastTotemPopTime = 0L;
 
    @Inject(method = "addEmitter(Lnet/minecraft/entity/Entity;Lnet/minecraft/particle/ParticleEffect;I)V", at = @At("HEAD"), cancellable = true)
-   private void onAddEmitter(minecraft.entity.Entity entity, minecraft.particle.ParticleEffect parameters, int maxAge, CallbackInfo ci) {
+   private void onAddEmitter(Entity entity, ParticleEffect parameters, int maxAge, CallbackInfo ci) {
       if (parameters != null
-         && parameters.getType() == minecraft.particle.ParticleTypes.TOTEM_OF_UNDYING
+         && parameters.getType() == ParticleTypes.TOTEM_OF_UNDYING
          && (AstolfoclientClient.moduleManager != null ? AstolfoclientClient.moduleManager.getModuleByName("Particles") : null) instanceof ParticlesModule pm
          && pm.isEnabled()
          && pm.totemPop.get()) {
@@ -34,7 +34,7 @@ public class MinecraftParticleManagerMixin {
          if (now - astolfoclient$lastTotemPopTime > 40L) {
             astolfoclient$lastTotemPopTime = now;
             if (AstolfoclientClient.particleManager != null && entity != null) {
-               util.math.Vec3d pos = entity.getPos().add(0.0, entity.getHeight() * 0.5, 0.0);
+               Vec3d pos = entity.getPos().add(0.0, entity.getHeight() * 0.5, 0.0);
                AstolfoclientClient.particleManager.addTotemPop(pos);
             }
          }
@@ -44,9 +44,9 @@ public class MinecraftParticleManagerMixin {
    }
 
    @Inject(method = "addEmitter(Lnet/minecraft/entity/Entity;Lnet/minecraft/particle/ParticleEffect;)V", at = @At("HEAD"), cancellable = true)
-   private void onAddEmitterShort(minecraft.entity.Entity entity, minecraft.particle.ParticleEffect parameters, CallbackInfo ci) {
+   private void onAddEmitterShort(Entity entity, ParticleEffect parameters, CallbackInfo ci) {
       if (parameters != null
-         && parameters.getType() == minecraft.particle.ParticleTypes.TOTEM_OF_UNDYING
+         && parameters.getType() == ParticleTypes.TOTEM_OF_UNDYING
          && (AstolfoclientClient.moduleManager != null ? AstolfoclientClient.moduleManager.getModuleByName("Particles") : null) instanceof ParticlesModule pm
          && pm.isEnabled()
          && pm.totemPop.get()) {
@@ -54,7 +54,7 @@ public class MinecraftParticleManagerMixin {
          if (now - astolfoclient$lastTotemPopTime > 40L) {
             astolfoclient$lastTotemPopTime = now;
             if (AstolfoclientClient.particleManager != null && entity != null) {
-               util.math.Vec3d pos = entity.getPos().add(0.0, entity.getHeight() * 0.5, 0.0);
+               Vec3d pos = entity.getPos().add(0.0, entity.getHeight() * 0.5, 0.0);
                AstolfoclientClient.particleManager.addTotemPop(pos);
             }
          }
@@ -65,7 +65,7 @@ public class MinecraftParticleManagerMixin {
 
    @Inject(method = "addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
    private void onAddParticle(
-      minecraft.particle.ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<client.particle.Particle> cir
+      ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> cir
    ) {
       if (!Double.isNaN(x)
          && !Double.isNaN(y)
@@ -83,7 +83,7 @@ public class MinecraftParticleManagerMixin {
          && !(Math.abs(y) > 3.0E7)
          && !(Math.abs(z) > 3.0E7)) {
          if (parameters != null
-            && parameters.getType() == minecraft.particle.ParticleTypes.TOTEM_OF_UNDYING
+            && parameters.getType() == ParticleTypes.TOTEM_OF_UNDYING
             && (AstolfoclientClient.moduleManager != null ? AstolfoclientClient.moduleManager.getModuleByName("Particles") : null) instanceof ParticlesModule pm
             && pm.isEnabled()
             && pm.totemPop.get()) {

@@ -12,24 +12,24 @@ public class ClickGuiIcons {
    public static final Supplier<MsdfFont> CLICKGUI_ICONS = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("clickgui_icons")
-         .data(minecraft.util.Identifier.of("mre", "icons/clickgui/clickgui.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "icons/clickgui/clickgui.png"))
+         .data(Identifier.of("mre", "icons/clickgui/clickgui.json"))
+         .atlas(Identifier.of("mre", "icons/clickgui/clickgui.png"))
          .glyphMapper(g -> 65 + g.index())
          .build()
    );
    public static final Supplier<MsdfFont> SP_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("settings_panel")
-         .data(minecraft.util.Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
+         .data(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
+         .atlas(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
          .glyphMapper(g -> 65 + g.index())
          .build()
    );
    public static final Supplier<MsdfFont> ASTOLFO_LOGO = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("astolfo_logo")
-         .data(minecraft.util.Identifier.of("mre", "fonts/astolfo.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "fonts/astolfo.png"))
+         .data(Identifier.of("mre", "fonts/astolfo.json"))
+         .atlas(Identifier.of("mre", "fonts/astolfo.png"))
          .build()
    );
    public static final Supplier<MsdfFont> BOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("bold").data("bold").build());

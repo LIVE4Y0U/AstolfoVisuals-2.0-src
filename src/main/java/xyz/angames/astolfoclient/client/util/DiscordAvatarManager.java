@@ -12,7 +12,7 @@ import net.minecraft.client.MinecraftClient;
 
 @Environment(EnvType.CLIENT)
 public class DiscordAvatarManager {
-   private static minecraft.util.Identifier avatarTexture = null;
+   private static Identifier avatarTexture = null;
    private static volatile String lastAvatarUrl = "";
    private static volatile boolean isDownloading = false;
 
@@ -44,11 +44,11 @@ public class DiscordAvatarManager {
                conn.connect();
                if (conn.getResponseCode() == 200) {
                   try (InputStream in = conn.getInputStream()) {
-                     client.texture.NativeImage img = client.texture.NativeImage.read(in);
+                     NativeImage img = NativeImage.read(in);
                      if (img != null) {
-                        minecraft.client.MinecraftClient.getInstance().execute(() -> {
-                           minecraft.util.Identifier id = minecraft.util.Identifier.of("astolfoclient", "discord_avatar_" + System.currentTimeMillis());
-                           minecraft.client.MinecraftClient.getInstance().getTextureManager().registerTexture(id, new client.texture.NativeImageBackedTexture(img));
+                        MinecraftClient.getInstance().execute(() -> {
+                           Identifier id = Identifier.of("astolfoclient", "discord_avatar_" + System.currentTimeMillis());
+                           MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(img));
                            avatarTexture = id;
                         });
                      }
@@ -64,7 +64,7 @@ public class DiscordAvatarManager {
       }
    }
 
-   public static minecraft.util.Identifier getAvatarTexture() {
+   public static Identifier getAvatarTexture() {
       return avatarTexture;
    }
 }

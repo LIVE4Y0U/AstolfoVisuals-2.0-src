@@ -21,10 +21,10 @@ public class KillEffectManager {
    public static final long LIFESPAN = 3000L;
    private final List<KillEffectManager.KillEffect> effects = new CopyOnWriteArrayList<>();
    private final Map<Integer, KillEffectManager.TrackedTarget> recentAttacks = new ConcurrentHashMap<>();
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
 
-   public void onAttack(minecraft.entity.Entity target) {
-      if (target instanceof minecraft.entity.LivingEntity living) {
+   public void onAttack(Entity target) {
+      if (target instanceof LivingEntity living) {
          this.recentAttacks.put(target.getId(), new KillEffectManager.TrackedTarget(living));
       }
    }
@@ -39,14 +39,14 @@ public class KillEffectManager {
             if (now - tracked.lastHitTime > 10000L) {
                this.recentAttacks.remove(id);
             } else {
-               minecraft.entity.Entity currentEntity = this.client.world.getEntityById(id);
+               Entity currentEntity = this.client.world.getEntityById(id);
                boolean isKilled = false;
-               util.math.Vec3d deathPos = tracked.lastPos;
-               util.math.Box deathBox = tracked.lastBox;
+               Vec3d deathPos = tracked.lastPos;
+               Box deathBox = tracked.lastBox;
                if (currentEntity == null) {
                   isKilled = true;
-               } else if (currentEntity instanceof minecraft.entity.LivingEntity living) {
-                  util.math.Vec3d currentPos = living.getPos();
+               } else if (currentEntity instanceof LivingEntity living) {
+                  Vec3d currentPos = living.getPos();
                   if (living.isDead() || living.getHealth() <= 0.0F || living.deathTime > 0 || !living.isAlive()) {
                      isKilled = true;
                      deathPos = currentPos;
@@ -83,25 +83,25 @@ public class KillEffectManager {
 
    @Environment(EnvType.CLIENT)
    public static class KillEffect {
-      public final util.math.Vec3d pos;
+      public final Vec3d pos;
       public final String mode;
       public final long startTime;
-      public final List<util.math.Vec3d> zapPoints = new ArrayList<>();
+      public final List<Vec3d> zapPoints = new ArrayList<>();
       public final List<KillEffectManager.ThanosParticle> thanosParticles = new ArrayList<>();
 
-      public KillEffect(util.math.Vec3d pos, util.math.Box box, String mode, long startTime) {
+      public KillEffect(Vec3d pos, Box box, String mode, long startTime) {
          this.pos = pos;
          this.mode = mode;
          this.startTime = startTime;
          if (mode.equals("Zap")) {
             float currentX = 0.0F;
             float currentZ = 0.0F;
-            this.zapPoints.add(new util.math.Vec3d(0.0, 0.0, 0.0));
+            this.zapPoints.add(new Vec3d(0.0, 0.0, 0.0));
 
             for (float y = 1.0F + (float)Math.random() * 1.5F; y <= 20.0F; y = (float)(y + (1.0 + Math.random() * 1.5))) {
                currentX = (float)(currentX + (Math.random() - 0.5) * 3.5);
                currentZ = (float)(currentZ + (Math.random() - 0.5) * 3.5);
-               this.zapPoints.add(new util.math.Vec3d(currentX, y, currentZ));
+               this.zapPoints.add(new Vec3d(currentX, y, currentZ));
             }
          } else if (mode.equals("Thanos")) {
             float width = box != null ? (float)(box.maxX - box.minX) : 0.6F;
@@ -131,11 +131,11 @@ public class KillEffectManager {
 
    @Environment(EnvType.CLIENT)
    private static class TrackedTarget {
-      public util.math.Vec3d lastPos;
-      public util.math.Box lastBox;
+      public Vec3d lastPos;
+      public Box lastBox;
       public final long lastHitTime;
 
-      public TrackedTarget(minecraft.entity.LivingEntity entity) {
+      public TrackedTarget(LivingEntity entity) {
          this.lastPos = entity.getPos();
          this.lastBox = entity.getBoundingBox();
          this.lastHitTime = System.currentTimeMillis();

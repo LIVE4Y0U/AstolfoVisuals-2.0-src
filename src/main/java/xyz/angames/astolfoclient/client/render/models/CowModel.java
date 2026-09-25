@@ -23,8 +23,8 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class CowModel {
-   private static final minecraft.util.Identifier MODEL_LOCATION = minecraft.util.Identifier.of("astolfoclient", "models/cow_mesh.json");
-   private static final minecraft.util.Identifier TEXTURE_LOCATION = minecraft.util.Identifier.of("astolfoclient", "textures/models/cow.png");
+   private static final Identifier MODEL_LOCATION = Identifier.of("astolfoclient", "models/cow_mesh.json");
+   private static final Identifier TEXTURE_LOCATION = Identifier.of("astolfoclient", "textures/models/cow.png");
    private static final float MODEL_SCALE = 0.48F;
    private final List<CowModel.MeshTriangle> triangles = new ArrayList<>();
    private boolean loaded;
@@ -34,7 +34,7 @@ public class CowModel {
    private float minY;
    private float bodyPivotY;
 
-   public void render(util.math.MatrixStack matrixStack, client.render.VertexConsumerProvider vertexConsumers, entity.state.PlayerEntityRenderState state, int light) {
+   public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumers, PlayerEntityRenderState state, int light) {
       this.ensureLoaded();
       if (!this.failed && !this.triangles.isEmpty()) {
          float ageInTicks = state.age;
@@ -42,14 +42,14 @@ public class CowModel {
          float bob = (float)Math.sin(state.limbFrequency * 0.6662F) * walkAmount * 0.035F + (float)Math.sin(ageInTicks * 0.08F) * 0.01F;
          float sway = (float)Math.sin(ageInTicks * 0.05F) * 0.9F;
          float pitch = -2.0F + walkAmount * 5.5F + (float)Math.cos(ageInTicks * 0.07F) * 0.6F;
-         client.render.VertexConsumer buffer = vertexConsumers.getBuffer(client.render.RenderLayer.getEntityTranslucent(TEXTURE_LOCATION));
+         VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(TEXTURE_LOCATION));
          matrixStack.push();
          matrixStack.translate(0.0, bob, 0.0);
-         matrixStack.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(state.bodyYaw));
+         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(state.bodyYaw));
          matrixStack.scale(0.48F, 0.48F, 0.48F);
          matrixStack.translate(this.centerX, this.bodyPivotY, this.centerZ);
-         matrixStack.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(sway));
-         matrixStack.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(pitch));
+         matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(sway));
+         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(pitch));
          matrixStack.translate(-this.centerX, -this.bodyPivotY, -this.centerZ);
          matrixStack.translate(-this.centerX, -this.minY, -this.centerZ);
          this.renderTriangles(matrixStack, buffer, light);
@@ -60,7 +60,7 @@ public class CowModel {
    private void ensureLoaded() {
       if (!this.loaded && !this.failed) {
          try (
-            InputStream stream = minecraft.client.MinecraftClient.getInstance().getResourceManager().getResourceOrThrow(MODEL_LOCATION).getInputStream();
+            InputStream stream = MinecraftClient.getInstance().getResourceManager().getResourceOrThrow(MODEL_LOCATION).getInputStream();
             InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
          ) {
             this.parse(JsonParser.parseReader(reader).getAsJsonObject());
@@ -114,7 +114,7 @@ public class CowModel {
       );
    }
 
-   private void renderTriangles(util.math.MatrixStack matrixStack, client.render.VertexConsumer buffer, int light) {
+   private void renderTriangles(MatrixStack matrixStack, VertexConsumer buffer, int light) {
       Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 
       for (CowModel.MeshTriangle triangle : this.triangles) {
@@ -124,11 +124,11 @@ public class CowModel {
       }
    }
 
-   private void putVertex(client.render.VertexConsumer buffer, Matrix4f matrix, CowModel.MeshVertex vertex, int light) {
+   private void putVertex(VertexConsumer buffer, Matrix4f matrix, CowModel.MeshVertex vertex, int light) {
       buffer.vertex(matrix, vertex.x, vertex.y, vertex.z)
          .color(255, 255, 255, 255)
          .texture(vertex.u, vertex.v)
-         .overlay(client.render.OverlayTexture.DEFAULT_UV)
+         .overlay(OverlayTexture.DEFAULT_UV)
          .light(light)
          .normal(0.0F, 1.0F, 0.0F);
    }

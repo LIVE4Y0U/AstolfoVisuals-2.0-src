@@ -45,7 +45,7 @@ public class NameProtectModule extends Module {
       }
    }
 
-   public static minecraft.text.Text getProtectedText(minecraft.text.Text original) {
+   public static Text getProtectedText(Text original) {
       if (original == null) {
          return null;
       }
@@ -66,30 +66,30 @@ public class NameProtectModule extends Module {
       }
    }
 
-   private static minecraft.text.Text protectTree(minecraft.text.Text text) {
+   private static Text protectTree(Text text) {
       if (text == null) {
          return null;
       }
 
-      minecraft.text.TextContent content = text.getContent();
-      minecraft.text.TextContent newContent = content;
+      TextContent content = text.getContent();
+      TextContent newContent = content;
       boolean contentChanged = false;
-      if (content instanceof text.PlainTextContent.Literal literal) {
+      if (content instanceof PlainTextContent.Literal literal) {
          String str = literal.comp_737();
          String replaced = replaceTargets(str);
          if (!replaced.equals(str)) {
-            newContent = minecraft.text.Text.literal(replaced).getContent();
+            newContent = Text.literal(replaced).getContent();
             contentChanged = true;
          }
-      } else if (content instanceof minecraft.text.TranslatableTextContent translatableContent) {
+      } else if (content instanceof TranslatableTextContent translatableContent) {
          Object[] args = translatableContent.getArgs();
          Object[] newArgs = new Object[args.length];
          boolean argsChanged = false;
 
          for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            if (arg instanceof minecraft.text.Text argText) {
-               minecraft.text.Text protectedArg = protectTree(argText);
+            if (arg instanceof Text argText) {
+               Text protectedArg = protectTree(argText);
                newArgs[i] = protectedArg;
                if (protectedArg != argText) {
                   argsChanged = true;
@@ -106,17 +106,17 @@ public class NameProtectModule extends Module {
          }
 
          if (argsChanged) {
-            newContent = new minecraft.text.TranslatableTextContent(translatableContent.getKey(), translatableContent.getFallback(), newArgs);
+            newContent = new TranslatableTextContent(translatableContent.getKey(), translatableContent.getFallback(), newArgs);
             contentChanged = true;
          }
       }
 
-      List<minecraft.text.Text> siblings = text.getSiblings();
-      List<minecraft.text.Text> newSiblings = new ArrayList<>(siblings.size());
+      List<Text> siblings = text.getSiblings();
+      List<Text> newSiblings = new ArrayList<>(siblings.size());
       boolean siblingsChanged = false;
 
-      for (minecraft.text.Text sibling : siblings) {
-         minecraft.text.Text protectedSibling = protectTree(sibling);
+      for (Text sibling : siblings) {
+         Text protectedSibling = protectTree(sibling);
          newSiblings.add(protectedSibling);
          if (protectedSibling != sibling) {
             siblingsChanged = true;
@@ -127,9 +127,9 @@ public class NameProtectModule extends Module {
          return text;
       }
 
-      minecraft.text.MutableText result = minecraft.text.MutableText.of(newContent).setStyle(text.getStyle());
+      MutableText result = MutableText.of(newContent).setStyle(text.getStyle());
 
-      for (minecraft.text.Text sibling : newSiblings) {
+      for (Text sibling : newSiblings) {
          result.append(sibling);
       }
 
@@ -138,7 +138,7 @@ public class NameProtectModule extends Module {
 
    private static List<NameProtectModule.TargetEntry> getActiveTargets() {
       List<NameProtectModule.TargetEntry> targets = new ArrayList<>();
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient client = MinecraftClient.getInstance();
       if (client.getSession() != null && client.getSession().getUsername() != null) {
          String myName = client.getSession().getUsername().trim();
          if (!myName.isEmpty() && !myName.equalsIgnoreCase("astolfoclient.top")) {

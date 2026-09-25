@@ -45,7 +45,7 @@ public class EffectHudManager {
    private float mainPanelAnim = 0.0F;
    private float subPanelAnim = 0.0F;
    private boolean wasMouseDown = false;
-   private final Map<entity.effect.StatusEffect, EffectHudManager.PotionCardState> cardStateMap = new LinkedHashMap<>();
+   private final Map<StatusEffect, EffectHudManager.PotionCardState> cardStateMap = new LinkedHashMap<>();
    private float totalHeight = 0.0F;
    private float lastFrameTotalMaxWidth = 90.0F;
    private float animatedX = 10.0F;
@@ -56,14 +56,14 @@ public class EffectHudManager {
    private static final Supplier<MsdfFont> MEDIUM_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("medium").data("medium").build());
    private static final Supplier<MsdfFont> ICON_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("icon").data("icon").build());
 
-   public void render(client.gui.DrawContext context) {
-      this.render(context, minecraft.client.MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false));
+   public void render(DrawContext context) {
+      this.render(context, MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false));
    }
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   public void render(DrawContext context, float tickDelta) {
+      MinecraftClient client = MinecraftClient.getInstance();
       if (client.player != null) {
-         Collection<entity.effect.StatusEffectInstance> effects = client.player.getStatusEffects();
+         Collection<StatusEffectInstance> effects = client.player.getStatusEffects();
          boolean isEditing = client.currentScreen instanceof HudEditorScreen;
          InterfaceModule interfaceMod = (InterfaceModule)(
             AstolfoclientClient.moduleManager != null ? AstolfoclientClient.moduleManager.getModuleByName("Interface") : null
@@ -83,22 +83,22 @@ public class EffectHudManager {
 
          long themeTime = (long)(nowNs / 1000000.0);
          Color themeColor = new Color(ThemeManager.getThemedColor(themeTime / 10L));
-         List<entity.effect.StatusEffectInstance> list = isEditing ? this.getPlaceholders() : new ArrayList<>(effects);
-         Set<entity.effect.StatusEffect> currentActiveEffects = new HashSet<>();
+         List<StatusEffectInstance> list = isEditing ? this.getPlaceholders() : new ArrayList<>(effects);
+         Set<StatusEffect> currentActiveEffects = new HashSet<>();
          if (isSettingEnabled && (interfaceMod == null || interfaceMod.isEnabled() || isEditing)) {
-            for (entity.effect.StatusEffectInstance inst : list) {
-               entity.effect.StatusEffect effect = (entity.effect.StatusEffect)inst.getEffectType().comp_349();
+            for (StatusEffectInstance inst : list) {
+               StatusEffect effect = (StatusEffect)inst.getEffectType().comp_349();
                currentActiveEffects.add(effect);
                EffectHudManager.PotionCardState state = this.cardStateMap.computeIfAbsent(effect, k -> new EffectHudManager.PotionCardState());
                state.cachedInstance = inst;
             }
          }
 
-         Iterator<Entry<entity.effect.StatusEffect, EffectHudManager.PotionCardState>> iterator = this.cardStateMap.entrySet().iterator();
+         Iterator<Entry<StatusEffect, EffectHudManager.PotionCardState>> iterator = this.cardStateMap.entrySet().iterator();
 
          while (iterator.hasNext()) {
-            Entry<entity.effect.StatusEffect, EffectHudManager.PotionCardState> entry = iterator.next();
-            entity.effect.StatusEffect effect = entry.getKey();
+            Entry<StatusEffect, EffectHudManager.PotionCardState> entry = iterator.next();
+            StatusEffect effect = entry.getKey();
             EffectHudManager.PotionCardState state = entry.getValue();
             boolean isActive = currentActiveEffects.contains(effect);
             float targetAnim = isActive ? 1.0F : 0.0F;
@@ -155,15 +155,15 @@ public class EffectHudManager {
             float currentY = this.y;
             float currentFrameMaxWidth = 0.0F;
 
-            for (Entry<entity.effect.StatusEffect, EffectHudManager.PotionCardState> entry : this.cardStateMap.entrySet()) {
-               entity.effect.StatusEffect effect = entry.getKey();
+            for (Entry<StatusEffect, EffectHudManager.PotionCardState> entry : this.cardStateMap.entrySet()) {
+               StatusEffect effect = entry.getKey();
                EffectHudManager.PotionCardState state = entry.getValue();
-               entity.effect.StatusEffectInstance instance = state.cachedInstance;
+               StatusEffectInstance instance = state.cachedInstance;
                if (instance != null) {
                   float cardProgress = state.animProgress;
                   float effectiveAlpha = cardProgress * this.masterAlpha;
                   if (!(effectiveAlpha <= 0.002F)) {
-                     String name = minecraft.text.Text.translatable(effect.getTranslationKey()).getString();
+                     String name = Text.translatable(effect.getTranslationKey()).getString();
                      int level = instance.getAmplifier() + 1;
                      boolean showLevel = level > 1;
                      String levelNum = String.valueOf(level);
@@ -209,7 +209,7 @@ public class EffectHudManager {
                      float currentX = cardX + paddingX;
                      float iconCX = currentX + iconSize / 2.0F;
                      this.drawIconGlowShadow(cardMat, iconCX, centerY, iconSize / 2.0F, themeColor, 0.12F * effectiveAlpha);
-                     minecraft.util.Identifier icon = this.getEffectIconIdentifier(instance.getEffectType());
+                     Identifier icon = this.getEffectIconIdentifier(instance.getEffectType());
                      Builder.texture()
                         .size(new SizeState(iconSize, iconSize))
                         .radius(new QuadRadiusState(3.0F))
@@ -265,7 +265,7 @@ public class EffectHudManager {
    }
 
    private void drawConnectedContextPanel(
-      client.gui.DrawContext context,
+      DrawContext context,
       float screenW,
       float screenH,
       Color themeColor,
@@ -518,13 +518,13 @@ public class EffectHudManager {
       }
    }
 
-   private minecraft.util.Identifier getEffectIconIdentifier(registry.entry.RegistryEntry<entity.effect.StatusEffect> effect) {
+   private Identifier getEffectIconIdentifier(RegistryEntry<StatusEffect> effect) {
       return effect.getKey()
-         .map(key -> minecraft.util.Identifier.of("minecraft", "textures/mob_effect/" + key.getValue().getPath() + ".png"))
-         .orElse(minecraft.util.Identifier.of("minecraft", "textures/missing.png"));
+         .map(key -> Identifier.of("minecraft", "textures/mob_effect/" + key.getValue().getPath() + ".png"))
+         .orElse(Identifier.of("minecraft", "textures/missing.png"));
    }
 
-   private String formatDuration(entity.effect.StatusEffectInstance effect) {
+   private String formatDuration(StatusEffectInstance effect) {
       if (effect.isInfinite()) {
          return "Infinite";
       }
@@ -533,12 +533,12 @@ public class EffectHudManager {
       return String.format("%d:%02d", totalSeconds / 60, totalSeconds % 60);
    }
 
-   private List<entity.effect.StatusEffectInstance> getPlaceholders() {
+   private List<StatusEffectInstance> getPlaceholders() {
       return List.of(
-         new entity.effect.StatusEffectInstance(entity.effect.StatusEffects.FIRE_RESISTANCE, 16500, 0),
-         new entity.effect.StatusEffectInstance(entity.effect.StatusEffects.STRENGTH, 740, 1),
-         new entity.effect.StatusEffectInstance(entity.effect.StatusEffects.SPEED, 1640, 1),
-         new entity.effect.StatusEffectInstance(entity.effect.StatusEffects.ABSORPTION, 2260, 3)
+         new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 16500, 0),
+         new StatusEffectInstance(StatusEffects.STRENGTH, 740, 1),
+         new StatusEffectInstance(StatusEffects.SPEED, 1640, 1),
+         new StatusEffectInstance(StatusEffects.ABSORPTION, 2260, 3)
       );
    }
 
@@ -589,7 +589,7 @@ public class EffectHudManager {
    }
 
    private float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;
@@ -599,19 +599,19 @@ public class EffectHudManager {
    }
 
    private double getScaledMouseX() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double scaleModifier = this.getScaleModifier();
       return mc.mouse.getX() * mc.getWindow().getScaledWidth() / mc.getWindow().getWidth() / scaleModifier;
    }
 
    private double getScaledMouseY() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double scaleModifier = this.getScaleModifier();
       return mc.mouse.getY() * mc.getWindow().getScaledHeight() / mc.getWindow().getHeight() / scaleModifier;
    }
 
    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       boolean isEditing = mc.currentScreen instanceof HudEditorScreen;
       if (!isEditing) {
          return false;
@@ -704,7 +704,7 @@ public class EffectHudManager {
       float animProgress = 0.0F;
       float heightScale = 0.0F;
       float width = 80.0F;
-      entity.effect.StatusEffectInstance cachedInstance;
+      StatusEffectInstance cachedInstance;
       EffectHudManager.TextAnimator durationAnimator = new EffectHudManager.TextAnimator();
    }
 

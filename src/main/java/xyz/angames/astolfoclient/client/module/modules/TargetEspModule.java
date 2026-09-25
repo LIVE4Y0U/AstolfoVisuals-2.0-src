@@ -48,7 +48,7 @@ public class TargetEspModule extends Module {
       this.addSetting(this.chromatic);
    }
 
-   public static void addTargetEffect(minecraft.entity.Entity target) {
+   public static void addTargetEffect(Entity target) {
       if (target != null) {
          if (AstolfoclientClient.moduleManager.getModuleByName("TargetESP") instanceof TargetEspModule tem && tem.isEnabled()) {
             String m = tem.mode.get();
@@ -65,7 +65,7 @@ public class TargetEspModule extends Module {
       }
    }
 
-   public static void addTargetAttack(minecraft.entity.Entity target) {
+   public static void addTargetAttack(Entity target) {
       if (target != null) {
          if (AstolfoclientClient.moduleManager.getModuleByName("TargetESP") instanceof TargetEspModule tem && tem.isEnabled()) {
             String m = tem.mode.get();

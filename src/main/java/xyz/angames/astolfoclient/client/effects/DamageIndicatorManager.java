@@ -20,12 +20,12 @@ public class DamageIndicatorManager {
    private final DecimalFormat format = new DecimalFormat("#.#");
 
    public void tick() {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient client = MinecraftClient.getInstance();
       if (client.world != null && client.player != null) {
          DamageIndicatorModule module = (DamageIndicatorModule)AstolfoclientClient.moduleManager.getModuleByName("DamageIndicators");
          if (module != null && module.isEnabled()) {
-            for (minecraft.entity.Entity entity : client.world.getEntities()) {
-               if (entity instanceof minecraft.entity.LivingEntity living) {
+            for (Entity entity : client.world.getEntities()) {
+               if (entity instanceof LivingEntity living) {
                   int id = living.getId();
                   float currentHealth = living.getHealth() + living.getAbsorptionAmount();
                   if (this.healthCache.containsKey(id)) {
@@ -63,7 +63,7 @@ public class DamageIndicatorManager {
       }
    }
 
-   private void spawnParticle(minecraft.entity.LivingEntity target, float damage) {
+   private void spawnParticle(LivingEntity target, float damage) {
       DamageIndicatorManager.DamageParticle p = new DamageIndicatorManager.DamageParticle();
       p.x = target.getX() + (Math.random() - 0.5) * 0.8;
       p.y = target.getY() + target.getHeight() * 0.5 + Math.random() * 0.5;

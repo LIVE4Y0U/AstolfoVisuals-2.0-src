@@ -16,13 +16,13 @@ public class HudRenderer {
       return this.logoRenderer;
    }
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
+   public void render(DrawContext context, float tickDelta) {
       InterfaceModule interfaceMod = (InterfaceModule)AstolfoclientClient.moduleManager.getModuleByName("Interface");
       if (interfaceMod != null && interfaceMod.isEnabled() && interfaceMod.logo.get()) {
          this.logoRenderer.render(context);
       }
 
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient client = MinecraftClient.getInstance();
       Module boyKisserModule = AstolfoclientClient.moduleManager.getModuleByName("BoyKisser");
       if (boyKisserModule != null && boyKisserModule.isEnabled() && client.currentScreen == null) {
          AstolfoclientClient.boyKisserManager.render(context, tickDelta);

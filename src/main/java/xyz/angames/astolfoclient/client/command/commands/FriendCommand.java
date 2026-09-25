@@ -37,7 +37,7 @@ public class FriendCommand extends Command {
                } else {
                   FriendManager.addFriend(nameToAdd);
                   AstolfoclientClient.configManager.saveFriends();
-                  sendMessage(minecraft.util.Formatting.GREEN + "Added " + minecraft.util.Formatting.AQUA + nameToAdd + minecraft.util.Formatting.GREEN + " to friends list.");
+                  sendMessage(Formatting.GREEN + "Added " + Formatting.AQUA + nameToAdd + Formatting.GREEN + " to friends list.");
                }
                break;
             case "remove":
@@ -52,24 +52,24 @@ public class FriendCommand extends Command {
                } else {
                   FriendManager.removeFriend(nameToRemove);
                   AstolfoclientClient.configManager.saveFriends();
-                  sendMessage(minecraft.util.Formatting.RED + "Removed " + minecraft.util.Formatting.AQUA + nameToRemove + minecraft.util.Formatting.RED + " from friends list.");
+                  sendMessage(Formatting.RED + "Removed " + Formatting.AQUA + nameToRemove + Formatting.RED + " from friends list.");
                }
                break;
             case "list":
                if (FriendManager.getFriends().isEmpty()) {
-                  sendMessage(minecraft.util.Formatting.GRAY + "Your friends list is currently empty.");
+                  sendMessage(Formatting.GRAY + "Your friends list is currently empty.");
                } else {
-                  sendMessage(minecraft.util.Formatting.GOLD + "--- Friends List ---");
+                  sendMessage(Formatting.GOLD + "--- Friends List ---");
 
                   for (String friend : FriendManager.getFriends()) {
-                     sendMessage(minecraft.util.Formatting.GRAY + "- " + minecraft.util.Formatting.AQUA + friend);
+                     sendMessage(Formatting.GRAY + "- " + Formatting.AQUA + friend);
                   }
                }
                break;
             case "clear":
                FriendManager.clearFriends();
                AstolfoclientClient.configManager.saveFriends();
-               sendMessage(minecraft.util.Formatting.GREEN + "Cleared all friends from the list.");
+               sendMessage(Formatting.GREEN + "Cleared all friends from the list.");
                break;
             default:
                this.sendError("Unknown action: " + action);
@@ -90,7 +90,7 @@ public class FriendCommand extends Command {
                   .getNetworkHandler()
                   .getPlayerList()
                   .stream()
-                  .<GameProfile>map(client.network.PlayerListEntry::getProfile)
+                  .<GameProfile>map(PlayerListEntry::getProfile)
                   .map(profile -> profile.getName())
                   .filter(name -> !FriendManager.isFriend(name))
                   .collect(Collectors.toList());

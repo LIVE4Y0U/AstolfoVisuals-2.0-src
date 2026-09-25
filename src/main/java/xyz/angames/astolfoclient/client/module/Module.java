@@ -78,7 +78,7 @@ public abstract class Module {
    public void setEnabled(boolean enabled) {
       if (this.enabled != enabled) {
          this.enabled = enabled;
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (this.enabled) {
             this.onEnable();
             ModSounds.playEnable();

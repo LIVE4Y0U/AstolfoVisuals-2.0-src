@@ -27,7 +27,7 @@ public class MusicHudManager {
    private static final Supplier<MsdfFont> BOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("bold").data("bold").build());
    private static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
    private static final Supplier<MsdfFont> MEDIUM_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("medium").data("medium").build());
-   private static final minecraft.util.Identifier LOGO_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/gui/logo.png");
+   private static final Identifier LOGO_TEXTURE = Identifier.of("astolfoclient", "textures/gui/logo.png");
    public float x = 10.0F;
    public float y = 150.0F;
    private boolean dragging = false;
@@ -49,8 +49,8 @@ public class MusicHudManager {
    private int lyricsOffset = 0;
    private long lastUpdateTimeNs = -1L;
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   public void render(DrawContext context, float tickDelta) {
+      MinecraftClient client = MinecraftClient.getInstance();
       if (client.world != null && AstolfoclientClient.moduleManager != null) {
          InterfaceModule interfaceMod = (InterfaceModule)AstolfoclientClient.moduleManager.getModuleByName("Interface");
          if (interfaceMod != null) {
@@ -117,7 +117,7 @@ public class MusicHudManager {
                   extendingRatio = (this.currentWidth - 69.0F) / 22.0F;
                }
 
-               extendingRatio = util.math.MathHelper.clamp(extendingRatio, 0.0F, 1.0F);
+               extendingRatio = MathHelper.clamp(extendingRatio, 0.0F, 1.0F);
                float scaleModifier = this.getScaleModifier();
                context.getMatrices().push();
                context.getMatrices().translate(this.x, this.y, 0.0F);
@@ -143,12 +143,12 @@ public class MusicHudManager {
                float artCenterX = artworkX + artworkSize / 2.0F;
                float artCenterY = artworkY + artworkSize / 2.0F;
                this.drawIconGlowShadow(matrix, artCenterX, artCenterY, artworkSize / 2.0F, themeColor, 0.12F * this.animationProgress);
-               minecraft.util.Identifier artIdent = MusicTracker.getArtworkTexture(artworkBytes);
+               Identifier artIdent = MusicTracker.getArtworkTexture(artworkBytes);
                if (artIdent == null) {
                   artIdent = LOGO_TEXTURE;
                }
 
-               client.texture.AbstractTexture artTexture = client.getTextureManager().getTexture(artIdent);
+               AbstractTexture artTexture = client.getTextureManager().getTexture(artIdent);
                if (artTexture != null) {
                   Builder.texture()
                      .size(new SizeState(artworkSize, artworkSize))
@@ -177,7 +177,7 @@ public class MusicHudManager {
 
                this.drawClippedText(bold != null ? bold : semibold, matrix, title, textX, titleY, whiteText, titleSize, maxTextW);
                if (extendingRatio > 0.4F) {
-                  float artistAlpha = util.math.MathHelper.clamp((extendingRatio - 0.4F) / 0.6F, 0.0F, 1.0F) * this.animationProgress;
+                  float artistAlpha = MathHelper.clamp((extendingRatio - 0.4F) / 0.6F, 0.0F, 1.0F) * this.animationProgress;
                   Color artistColor = GuiUtils.withAlpha(grayText, artistAlpha);
                   this.drawClippedText(medium != null ? medium : semibold, matrix, artist, textX, this.y + 31.5F, artistColor, artistSize, maxTextW);
                }
@@ -200,7 +200,7 @@ public class MusicHudManager {
                }
 
                if (extendingRatio > 0.6F) {
-                  float expAlpha = util.math.MathHelper.clamp((extendingRatio - 0.6F) / 0.4F, 0.0F, 1.0F) * this.animationProgress;
+                  float expAlpha = MathHelper.clamp((extendingRatio - 0.6F) / 0.4F, 0.0F, 1.0F) * this.animationProgress;
                   float barWidth = this.lerp(0.0F, 78.0F, extendingRatio);
                   float barX = this.x + (this.currentWidth - barWidth) / 2.0F;
                   float barY = this.y + this.currentHeight - 15.0F;
@@ -390,7 +390,7 @@ public class MusicHudManager {
    }
 
    private float lerp(float start, float end, float delta) {
-      return start + (end - start) * util.math.MathHelper.clamp(delta, 0.0F, 1.0F);
+      return start + (end - start) * MathHelper.clamp(delta, 0.0F, 1.0F);
    }
 
    private String formatTime(long totalSeconds) {
@@ -447,7 +447,7 @@ public class MusicHudManager {
    }
 
    private float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;
@@ -457,7 +457,7 @@ public class MusicHudManager {
    }
 
    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       boolean isEditing = mc.currentScreen instanceof HudEditorScreen;
       InterfaceModule interfaceMod = (InterfaceModule)AstolfoclientClient.moduleManager.getModuleByName("Interface");
       boolean isSettingEnabled = interfaceMod != null && interfaceMod.musicHud.get();
@@ -514,7 +514,7 @@ public class MusicHudManager {
 
    public void onMouseDragged(double mouseX, double mouseY, int button) {
       if (this.dragging && button == 0) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          float scaleModifier = this.getScaleModifier();
          float screenW = mc.getWindow().getScaledWidth();
          float screenH = mc.getWindow().getScaledHeight();

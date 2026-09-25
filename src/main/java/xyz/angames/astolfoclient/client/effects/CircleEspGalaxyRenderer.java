@@ -26,7 +26,7 @@ import xyz.angames.astolfoclient.client.util.TargetUtils;
 
 @Environment(EnvType.CLIENT)
 public class CircleEspGalaxyRenderer {
-   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
+   private static final Identifier BLOOM_TEXTURE = Identifier.of("astolfoclient", "textures/effects/bloom.png");
    private final CircleEspManager manager;
 
    public CircleEspGalaxyRenderer(CircleEspManager manager) {
@@ -42,8 +42,8 @@ public class CircleEspGalaxyRenderer {
             RenderSystem.enableDepthTest();
             RenderSystem.depthFunc(515);
             RenderSystem.depthMask(false);
-            RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
-            client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+            RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+            Tessellator tessellator = Tessellator.getInstance();
             long currentTime = System.currentTimeMillis();
             int rgb = ThemeManager.getThemedColor(0L);
             Color c = new Color(rgb);
@@ -52,7 +52,7 @@ public class CircleEspGalaxyRenderer {
             float b = c.getBlue() / 255.0F;
 
             for (CircleEspManager.CircleEspEffect effect : validEffects) {
-               minecraft.entity.Entity target = effect.target;
+               Entity target = effect.target;
                if (target.isAlive() && !TargetUtils.isInvisible(target)) {
                   long timeSinceHit = currentTime - effect.lastHitTime;
                   float fadeProgress = (float)timeSinceHit / 450.0F;
@@ -76,27 +76,27 @@ public class CircleEspGalaxyRenderer {
                      float velocity = (float)Math.cos(animTime * scanSpeed);
                      float maxTailLength = height * 0.4F;
                      float tailOffset = -velocity * maxTailLength;
-                     util.math.MatrixStack matrices = context.matrixStack();
+                     MatrixStack matrices = context.matrixStack();
                      matrices.push();
                      matrices.translate(
                         tX - context.camera().getPos().x,
                         tY - context.camera().getPos().y,
                         tZ - context.camera().getPos().z
                      );
-                     matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(animTime * 45.0F));
+                     matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(animTime * 45.0F));
                      RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
-                     RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-                     client.render.BufferBuilder bbBloom = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                     RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+                     BufferBuilder bbBloom = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                      this.drawHorizontalBloom(matrices, bbBloom, scanY, radius * 2.5F, r, g, b, alpha * 0.5F);
-                     client.render.BufferRenderer.drawWithGlobalProgram(bbBloom.end());
-                     RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-                     client.render.BufferBuilder bbTail = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+                     BufferRenderer.drawWithGlobalProgram(bbBloom.end());
+                     RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+                     BufferBuilder bbTail = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
                      this.drawGradientCylinder(matrices, bbTail, radius, scanY, scanY + tailOffset, r, g, b, alpha * 0.45F, 0.0F);
-                     client.render.BufferRenderer.drawWithGlobalProgram(bbTail.end());
+                     BufferRenderer.drawWithGlobalProgram(bbTail.end());
                      RenderSystem.lineWidth(2.5F);
-                     client.render.BufferBuilder bbRing = tessellator.begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+                     BufferBuilder bbRing = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
                      this.drawCrispRing(matrices, bbRing, radius, scanY, r, g, b, alpha * 0.9F);
-                     client.render.BufferRenderer.drawWithGlobalProgram(bbRing.end());
+                     BufferRenderer.drawWithGlobalProgram(bbRing.end());
                      RenderSystem.lineWidth(1.0F);
                      matrices.pop();
                   }
@@ -112,7 +112,7 @@ public class CircleEspGalaxyRenderer {
       }
    }
 
-   private void drawHorizontalBloom(util.math.MatrixStack stack, client.render.BufferBuilder buffer, float y, float size, float r, float g, float b, float a) {
+   private void drawHorizontalBloom(MatrixStack stack, BufferBuilder buffer, float y, float size, float r, float g, float b, float a) {
       Matrix4f m = stack.peek().getPositionMatrix();
       buffer.vertex(m, -size, y, -size).texture(0.0F, 0.0F).color(r, g, b, a);
       buffer.vertex(m, -size, y, size).texture(0.0F, 1.0F).color(r, g, b, a);
@@ -121,7 +121,7 @@ public class CircleEspGalaxyRenderer {
    }
 
    private void drawGradientCylinder(
-      util.math.MatrixStack stack, client.render.BufferBuilder buffer, float radius, float yStart, float yEnd, float r, float g, float b, float aStart, float aEnd
+      MatrixStack stack, BufferBuilder buffer, float radius, float yStart, float yEnd, float r, float g, float b, float aStart, float aEnd
    ) {
       Matrix4f m = stack.peek().getPositionMatrix();
       int segments = 40;
@@ -140,7 +140,7 @@ public class CircleEspGalaxyRenderer {
       }
    }
 
-   private void drawCrispRing(util.math.MatrixStack stack, client.render.BufferBuilder buffer, float radius, float y, float r, float g, float b, float a) {
+   private void drawCrispRing(MatrixStack stack, BufferBuilder buffer, float radius, float y, float r, float g, float b, float a) {
       Matrix4f m = stack.peek().getPositionMatrix();
       int segments = 40;
 

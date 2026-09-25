@@ -14,11 +14,11 @@ public class HelpCommand extends Command {
 
    @Override
    public void execute(String[] args) {
-      sendMessage(minecraft.util.Formatting.BOLD + "--- Available Commands ---");
+      sendMessage(Formatting.BOLD + "--- Available Commands ---");
 
       for (Command c : AstolfoclientClient.commandManager.getCommands()) {
-         sendMessage(minecraft.util.Formatting.AQUA + c.getName() + minecraft.util.Formatting.GRAY + ": " + c.getDescription());
-         sendMessage(minecraft.util.Formatting.DARK_GRAY + "  " + c.getSyntax());
+         sendMessage(Formatting.AQUA + c.getName() + Formatting.GRAY + ": " + c.getDescription());
+         sendMessage(Formatting.DARK_GRAY + "  " + c.getSyntax());
       }
    }
 }

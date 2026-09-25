@@ -14,12 +14,12 @@ import xyz.angames.astolfoclient.client.gui.HudEditorScreen;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.client.Keyboard.class)
+@Mixin(Keyboard.class)
 public class KeyboardMixin {
    @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
    private void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
       if (key != -1 && key > 0) {
-         minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient client = MinecraftClient.getInstance();
          if (action == 1 && client.currentScreen == null) {
             if (key == AstolfoclientClient.clickGuiKeyCode || key == 260 || key == 344) {
                client.setScreen(new ClickGuiScreen());

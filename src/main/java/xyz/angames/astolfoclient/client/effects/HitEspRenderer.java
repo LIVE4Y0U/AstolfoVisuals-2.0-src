@@ -24,7 +24,7 @@ import xyz.angames.astolfoclient.client.module.modules.HitEspModule;
 
 @Environment(EnvType.CLIENT)
 public class HitEspRenderer {
-   private static final minecraft.util.Identifier TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/hit_effect.png");
+   private static final Identifier TEXTURE = Identifier.of("astolfoclient", "textures/effects/hit_effect.png");
    private final HitEspManager manager;
 
    public HitEspRenderer(HitEspManager manager) {
@@ -37,14 +37,14 @@ public class HitEspRenderer {
          List<HitEspEffect> validEffects = this.manager.getEffects();
          if (!validEffects.isEmpty()) {
             RenderSystem.enableBlend();
-            RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+            RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
             RenderSystem.disableCull();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.setShaderTexture(0, TEXTURE);
-            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-            client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
-            client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
             long currentTime = System.currentTimeMillis();
             double tickDelta = context.tickCounter().getTickDelta(true);
             int rgb = ThemeManager.getThemedColor(0L);
@@ -61,7 +61,7 @@ public class HitEspRenderer {
             boolean drewAnything = false;
 
             for (HitEspEffect effect : validEffects) {
-               util.math.MatrixStack matrixStack = context.matrixStack();
+               MatrixStack matrixStack = context.matrixStack();
                long age = currentTime - effect.creationTime;
                if (!effect.isShattered) {
                   float textureRotation = (float)age * rotSpeed * effect.rotationDirection;
@@ -88,7 +88,7 @@ public class HitEspRenderer {
                         effect.position.z - context.camera().getPos().z
                      );
                      matrixStack.multiply(effect.orientation);
-                     matrixStack.multiply(util.math.RotationAxis.POSITIVE_Z.rotation(textureRotation));
+                     matrixStack.multiply(RotationAxis.POSITIVE_Z.rotation(textureRotation));
                      matrixStack.scale(scale, scale, scale);
                      Matrix4f matrix = matrixStack.peek().getPositionMatrix();
                      buffer.vertex(matrix, -0.5F, -0.5F, 0.0F).texture(0.0F, 1.0F).color(r, g, b, alpha);
@@ -123,21 +123,21 @@ public class HitEspRenderer {
 
                      alpha *= a;
                      if (alpha > 0.01F && shardScale > 0.01F) {
-                        double renderX = util.math.MathHelper.lerp(tickDelta, shard.prevPos.x, shard.pos.x);
-                        double renderY = util.math.MathHelper.lerp(tickDelta, shard.prevPos.y, shard.pos.y);
-                        double renderZ = util.math.MathHelper.lerp(tickDelta, shard.prevPos.z, shard.pos.z);
-                        float renderRotX = (float)util.math.MathHelper.lerp(tickDelta, shard.prevRotX, shard.rotX);
-                        float renderRotY = (float)util.math.MathHelper.lerp(tickDelta, shard.prevRotY, shard.rotY);
-                        float renderRotZ = (float)util.math.MathHelper.lerp(tickDelta, shard.prevRotZ, shard.rotZ);
+                        double renderX = MathHelper.lerp(tickDelta, shard.prevPos.x, shard.pos.x);
+                        double renderY = MathHelper.lerp(tickDelta, shard.prevPos.y, shard.pos.y);
+                        double renderZ = MathHelper.lerp(tickDelta, shard.prevPos.z, shard.pos.z);
+                        float renderRotX = (float)MathHelper.lerp(tickDelta, shard.prevRotX, shard.rotX);
+                        float renderRotY = (float)MathHelper.lerp(tickDelta, shard.prevRotY, shard.rotY);
+                        float renderRotZ = (float)MathHelper.lerp(tickDelta, shard.prevRotZ, shard.rotZ);
                         matrixStack.push();
                         matrixStack.translate(
                            renderX - context.camera().getPos().x,
                            renderY - context.camera().getPos().y,
                            renderZ - context.camera().getPos().z
                         );
-                        matrixStack.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(renderRotX));
-                        matrixStack.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(renderRotY));
-                        matrixStack.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(renderRotZ));
+                        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(renderRotX));
+                        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(renderRotY));
+                        matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(renderRotZ));
                         matrixStack.scale(shardScale, shardScale, shardScale);
                         Matrix4f matrix = matrixStack.peek().getPositionMatrix();
                         buffer.vertex(matrix, -0.5F, -0.5F, 0.0F).texture(shard.u1, shard.v2).color(r, g, b, alpha);
@@ -159,7 +159,7 @@ public class HitEspRenderer {
                buffer.vertex(dummy, 0.0F, 0.0F, 0.0F).texture(0.0F, 0.0F).color(0, 0, 0, 0);
             }
 
-            client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
             RenderSystem.enableDepthTest();
             RenderSystem.depthMask(true);
             RenderSystem.enableCull();

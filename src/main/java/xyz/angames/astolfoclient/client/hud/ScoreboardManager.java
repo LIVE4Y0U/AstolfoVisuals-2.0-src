@@ -31,30 +31,30 @@ import xyz.angames.astolfoclient.client.module.Module;
 public class ScoreboardManager {
    public float x = 0.0F;
    public float y = 0.0F;
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private static final Supplier<MsdfFont> BOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("bold").data("bold").build());
    private static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
    private static final Supplier<MsdfFont> MEDIUM_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("medium").data("medium").build());
 
-   public void render(client.gui.DrawContext context) {
+   public void render(DrawContext context) {
       Module module = AstolfoclientClient.moduleManager.getModuleByName("Scoreboard");
       if (module != null && module.isEnabled()) {
          if (this.client.world != null && this.client.player != null) {
-            minecraft.scoreboard.Scoreboard scoreboard = this.client.world.getScoreboard();
-            minecraft.scoreboard.ScoreboardObjective objective = scoreboard.getObjectiveForSlot(minecraft.scoreboard.ScoreboardDisplaySlot.SIDEBAR);
+            Scoreboard scoreboard = this.client.world.getScoreboard();
+            ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
             if (objective != null) {
                List<String> lines = new ArrayList<>();
-               Collection<minecraft.scoreboard.ScoreboardEntry> scores = scoreboard.getScoreboardEntries(objective);
-               List<minecraft.scoreboard.ScoreboardEntry> list = scores.stream()
+               Collection<ScoreboardEntry> scores = scoreboard.getScoreboardEntries(objective);
+               List<ScoreboardEntry> list = scores.stream()
                   .filter(score -> score.comp_2127() != null && !score.comp_2127().startsWith("#"))
                   .sorted((s1, s2) -> Integer.compare(s2.comp_2128(), s1.comp_2128()))
                   .limit(15L)
                   .collect(Collectors.toList());
                String title = objective.getDisplayName().getString();
 
-               for (minecraft.scoreboard.ScoreboardEntry score : list) {
-                  minecraft.scoreboard.Team team = scoreboard.getScoreHolderTeam(score.comp_2127());
-                  minecraft.text.Text text = minecraft.scoreboard.Team.decorateName(team, minecraft.text.Text.literal(score.comp_2127()));
+               for (ScoreboardEntry score : list) {
+                  Team team = scoreboard.getScoreHolderTeam(score.comp_2127());
+                  Text text = Team.decorateName(team, Text.literal(score.comp_2127()));
                   lines.add(text.getString());
                }
 

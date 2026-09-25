@@ -36,7 +36,7 @@ public class GhostEspRenderer {
       Module targetEspModule = AstolfoclientClient.moduleManager.getModuleByName("TargetESP");
       if (targetEspModule != null && targetEspModule.isEnabled()) {
          if (!(targetEspModule instanceof TargetEspModule tem && !tem.mode.is("Ghost"))) {
-            Map<minecraft.entity.Entity, GhostEspEffect> allEffects = this.manager.getEffects();
+            Map<Entity, GhostEspEffect> allEffects = this.manager.getEffects();
             if (!allEffects.isEmpty()) {
                List<GhostEspEffect> validEffects = new ArrayList<>();
                long currentTime = System.currentTimeMillis();
@@ -56,9 +56,9 @@ public class GhostEspRenderer {
                   RenderSystem.enableDepthTest();
                   RenderSystem.depthFunc(515);
                   RenderSystem.depthMask(false);
-                  RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
-                  RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-                  client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+                  RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+                  RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+                  Tessellator tessellator = Tessellator.getInstance();
                   double safeTime = currentTime % 1000000L;
                   float speed = 0.006F;
                   int trailLength = 22;
@@ -67,7 +67,7 @@ public class GhostEspRenderer {
                   float trailSegmentSpacing = 10.0F;
 
                   for (GhostEspEffect effect : validEffects) {
-                     minecraft.entity.Entity target = effect.target;
+                     Entity target = effect.target;
                      if (target != null && target.isAlive() && !TargetUtils.isInvisible(target)) {
                         long age = currentTime - effect.lastHitTime;
                         float lifeProgress = (float)age / 450.0F;
@@ -118,14 +118,14 @@ public class GhostEspRenderer {
                                     float scanSpeed = 2.0F;
                                     float phase = (float)Math.sin(histAnimTime * scanSpeed);
                                     float scanY = (phase + 1.0F) / 2.0F * target.getHeight();
-                                    util.math.MatrixStack matrices = context.matrixStack();
+                                    MatrixStack matrices = context.matrixStack();
                                     matrices.push();
                                     matrices.translate(tX + localX - camX, tY + scanY + localY - camY, tZ + localZ - camZ);
                                     matrices.multiply(context.camera().getRotation());
                                     matrices.scale(scale, scale, scale);
-                                    client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.TRIANGLE_FAN, client.render.VertexFormats.POSITION_COLOR);
+                                    BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
                                     this.drawGlowingDot(matrices.peek().getPositionMatrix(), buffer, r, g, b, cr, cg, cb, alpha);
-                                    client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+                                    BufferRenderer.drawWithGlobalProgram(buffer.end());
                                     matrices.pop();
                                  }
                               }
@@ -145,7 +145,7 @@ public class GhostEspRenderer {
       }
    }
 
-   private void drawGlowingDot(Matrix4f matrix, client.render.BufferBuilder buffer, float r, float g, float b, float cr, float cg, float cb, float alpha) {
+   private void drawGlowingDot(Matrix4f matrix, BufferBuilder buffer, float r, float g, float b, float cr, float cg, float cb, float alpha) {
       buffer.vertex(matrix, 0.0F, 0.0F, 0.0F).color(cr, cg, cb, alpha);
 
       for (int i = 0; i <= 360; i += 20) {

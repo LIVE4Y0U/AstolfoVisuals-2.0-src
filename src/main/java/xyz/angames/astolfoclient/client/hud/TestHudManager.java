@@ -18,7 +18,7 @@ import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
 public class TestHudManager {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private static final Supplier<MsdfFont> BIKO_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("biko").data("biko").build());
    public double x = 100.0;
    public double y = 100.0;
@@ -28,8 +28,8 @@ public class TestHudManager {
    private double dragX;
    private double dragY;
 
-   public void render(client.gui.DrawContext context, float delta) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   public void render(DrawContext context, float delta) {
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.world != null) {
          Module testModule = AstolfoclientClient.moduleManager.getModuleByName("Test");
          boolean isModuleOn = testModule != null && testModule.isEnabled();
@@ -90,7 +90,7 @@ public class TestHudManager {
    }
 
    public float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;
@@ -100,7 +100,7 @@ public class TestHudManager {
    }
 
    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       Module testModule = AstolfoclientClient.moduleManager.getModuleByName("Test");
       boolean isModuleOn = testModule != null && testModule.isEnabled();
       if (!isModuleOn) {
@@ -122,7 +122,7 @@ public class TestHudManager {
 
    public void onMouseDragged(double mouseX, double mouseY, int button) {
       if (button == 0 && this.isDragging) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          float scaleModifier = this.getScaleModifier();
          float screenW = mc.getWindow().getScaledWidth();
          float screenH = mc.getWindow().getScaledHeight();

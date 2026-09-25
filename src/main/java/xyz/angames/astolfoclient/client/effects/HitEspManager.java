@@ -15,9 +15,9 @@ import xyz.angames.astolfoclient.client.module.modules.HitEspModule;
 @Environment(EnvType.CLIENT)
 public class HitEspManager {
    private final List<HitEspEffect> effects = new CopyOnWriteArrayList<>();
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient mc = MinecraftClient.getInstance();
 
-   public void addEffect(util.math.Vec3d position, float rotationDirection, Quaternionf orientation) {
+   public void addEffect(Vec3d position, float rotationDirection, Quaternionf orientation) {
       this.effects.add(new HitEspEffect(position, rotationDirection, orientation));
    }
 
@@ -67,18 +67,18 @@ public class HitEspManager {
                            double nextZ = shard.pos.z + shard.vz;
                            boolean collideX = !this.mc
                               .world
-                              .getBlockState(util.math.BlockPos.ofFloored(new util.math.Vec3d(nextX, shard.pos.y, shard.pos.z)))
-                              .getCollisionShape(this.mc.world, util.math.BlockPos.ofFloored(new util.math.Vec3d(nextX, shard.pos.y, shard.pos.z)))
+                              .getBlockState(BlockPos.ofFloored(new Vec3d(nextX, shard.pos.y, shard.pos.z)))
+                              .getCollisionShape(this.mc.world, BlockPos.ofFloored(new Vec3d(nextX, shard.pos.y, shard.pos.z)))
                               .isEmpty();
                            boolean collideY = !this.mc
                               .world
-                              .getBlockState(util.math.BlockPos.ofFloored(new util.math.Vec3d(shard.pos.x, nextY, shard.pos.z)))
-                              .getCollisionShape(this.mc.world, util.math.BlockPos.ofFloored(new util.math.Vec3d(shard.pos.x, nextY, shard.pos.z)))
+                              .getBlockState(BlockPos.ofFloored(new Vec3d(shard.pos.x, nextY, shard.pos.z)))
+                              .getCollisionShape(this.mc.world, BlockPos.ofFloored(new Vec3d(shard.pos.x, nextY, shard.pos.z)))
                               .isEmpty();
                            boolean collideZ = !this.mc
                               .world
-                              .getBlockState(util.math.BlockPos.ofFloored(new util.math.Vec3d(shard.pos.x, shard.pos.y, nextZ)))
-                              .getCollisionShape(this.mc.world, util.math.BlockPos.ofFloored(new util.math.Vec3d(shard.pos.x, shard.pos.y, nextZ)))
+                              .getBlockState(BlockPos.ofFloored(new Vec3d(shard.pos.x, shard.pos.y, nextZ)))
+                              .getCollisionShape(this.mc.world, BlockPos.ofFloored(new Vec3d(shard.pos.x, shard.pos.y, nextZ)))
                               .isEmpty();
                            if (bounceVal) {
                               if (collideX) {
@@ -153,7 +153,7 @@ public class HitEspManager {
             float localY = (y + 0.5F) * step - 0.5F;
             Vector3f localOffset = new Vector3f(localX, localY, 0.0F);
             effect.orientation.transform(localOffset);
-            util.math.Vec3d startPos = effect.position.add(localOffset.x * explosionRadius, localOffset.y * explosionRadius, localOffset.z * explosionRadius);
+            Vec3d startPos = effect.position.add(localOffset.x * explosionRadius, localOffset.y * explosionRadius, localOffset.z * explosionRadius);
             double vx = (localOffset.x * 0.5 + (Math.random() - 0.5) * 0.3) * explosionStrength;
             double vy = (localOffset.y * 0.5 + Math.random() * 0.4 + 0.2) * explosionStrength;
             double vz = (localOffset.z * 0.5 + (Math.random() - 0.5) * 0.3) * explosionStrength;

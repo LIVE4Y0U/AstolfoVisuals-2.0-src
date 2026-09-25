@@ -35,20 +35,20 @@ import xyz.angames.astolfoclient.client.module.setting.NumberSetting;
 @Environment(EnvType.CLIENT)
 public class DashTrailModule extends Module {
    public static DashTrailModule INSTANCE;
-   private static final minecraft.util.Identifier DASH_BLOOM = minecraft.util.Identifier.of("astolfoclient", "textures/effects/dashtrail/dashbloom.png");
+   private static final Identifier DASH_BLOOM = Identifier.of("astolfoclient", "textures/effects/dashtrail/dashbloom.png");
    private static final int MAX_CUBICS = 1000;
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient mc = MinecraftClient.getInstance();
    public final BooleanSetting firstPerson = new BooleanSetting("First Person", false);
    public final ModeSetting colorMode = new ModeSetting("Color", "Client", "Client", "Rainbow");
    public final BooleanSetting motionsSmoothing = new BooleanSetting("Motion Smoothing", false);
    public final BooleanSetting dashDots = new BooleanSetting("Sparks", true);
    public final BooleanSetting lighting = new BooleanSetting("Lighting", true);
    public final NumberSetting dashLength = new NumberSetting("Length", 0.75, 0.5, 2.0, 0.05);
-   private final List<minecraft.util.Identifier> dashCubicTextures = new ArrayList<>();
-   private final List<List<minecraft.util.Identifier>> dashCubicAnimatedTextures = new ArrayList<>();
+   private final List<Identifier> dashCubicTextures = new ArrayList<>();
+   private final List<List<Identifier>> dashCubicAnimatedTextures = new ArrayList<>();
    private final List<DashTrailModule.DashCubic> dashCubics = new ArrayList<>();
    private final Random random = new Random(1234567891L);
-   private util.math.Vec3d prevPlayerPos = null;
+   private Vec3d prevPlayerPos = null;
 
    public DashTrailModule() {
       super("DashTrail", "Dash trail behind player", Module.Category.RENDER);
@@ -60,16 +60,16 @@ public class DashTrailModule extends Module {
 
    private void loadTextures() {
       for (int i = 1; i <= 21; i++) {
-         this.dashCubicTextures.add(minecraft.util.Identifier.of("astolfoclient", "textures/effects/dashtrail/dashcubics/dashcubic" + i + ".png"));
+         this.dashCubicTextures.add(Identifier.of("astolfoclient", "textures/effects/dashtrail/dashcubics/dashcubic" + i + ".png"));
       }
 
       int[] groupCounts = new int[]{11, 23, 32, 16, 32};
 
       for (int g = 0; g < groupCounts.length; g++) {
-         List<minecraft.util.Identifier> group = new ArrayList<>();
+         List<Identifier> group = new ArrayList<>();
 
          for (int f = 1; f <= groupCounts[g]; f++) {
-            group.add(minecraft.util.Identifier.of("astolfoclient", "textures/effects/dashtrail/dashcubics/group_dashs/group" + (g + 1) + "/dashcubic" + f + ".png"));
+            group.add(Identifier.of("astolfoclient", "textures/effects/dashtrail/dashcubics/group_dashs/group" + (g + 1) + "/dashcubic" + f + ".png"));
          }
 
          this.dashCubicAnimatedTextures.add(group);
@@ -85,7 +85,7 @@ public class DashTrailModule extends Module {
    }
 
    private static int swapAlpha(int color, float alpha) {
-      return color & 16777215 | util.math.MathHelper.clamp((int)alpha, 0, 255) << 24;
+      return color & 16777215 | MathHelper.clamp((int)alpha, 0, 255) << 24;
    }
 
    private static int toDark(int color, float factor) {
@@ -97,7 +97,7 @@ public class DashTrailModule extends Module {
    }
 
    private static int getOverallColorFrom(int c1, int c2, float f) {
-      f = util.math.MathHelper.clamp(f, 0.0F, 1.0F);
+      f = MathHelper.clamp(f, 0.0F, 1.0F);
       int r = (int)((c1 >> 16 & 0xFF) + ((c2 >> 16 & 0xFF) - (c1 >> 16 & 0xFF)) * f);
       int g = (int)((c1 >> 8 & 0xFF) + ((c2 >> 8 & 0xFF) - (c1 >> 8 & 0xFF)) * f);
       int b = (int)((c1 & 0xFF) + ((c2 & 0xFF) - (c1 & 0xFF)) * f);
@@ -109,12 +109,12 @@ public class DashTrailModule extends Module {
       return t < 0.5F ? 2.0F * t * t : 1.0F - (-2.0F * t + 2.0F) * (-2.0F * t + 2.0F) / 2.0F;
    }
 
-   private static void addVertex(client.render.BufferBuilder bb, Matrix4f matrix, float x, float y, float z, float u, float v, int color) {
+   private static void addVertex(BufferBuilder bb, Matrix4f matrix, float x, float y, float z, float u, float v, int color) {
       bb.vertex(matrix, x, y, z).texture(u, v).color(color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF, color >> 24 & 0xFF);
    }
 
-   private static void bufferEnd(client.render.BufferBuilder bb) {
-      client.render.BufferRenderer.drawWithGlobalProgram(bb.end());
+   private static void bufferEnd(BufferBuilder bb) {
+      BufferRenderer.drawWithGlobalProgram(bb.end());
    }
 
    @Override
@@ -139,8 +139,8 @@ public class DashTrailModule extends Module {
             current.motionCubicProcess(next);
          }
 
-         entity.player.PlayerEntity player = this.mc.player;
-         util.math.Vec3d currentPos = player.getPos();
+         PlayerEntity player = this.mc.player;
+         Vec3d currentPos = player.getPos();
          if (this.prevPlayerPos != null) {
             double dx = currentPos.x - this.prevPlayerPos.x;
             double dy = currentPos.y - this.prevPlayerPos.y;
@@ -189,18 +189,18 @@ public class DashTrailModule extends Module {
          if (this.firstPerson.get() || !this.mc.options.getPerspective().isFirstPerson()) {
             float tickDelta = event.tickCounter().getTickDelta(true);
             float lightingPC = this.lighting.get() ? 1.0F : 0.0F;
-            client.render.Camera camera = event.camera();
-            util.math.Vec3d cam = camera.getPos();
+            Camera camera = event.camera();
+            Vec3d cam = camera.getPos();
             double camX = cam.x;
             double camY = cam.y;
             double camZ = cam.z;
-            util.math.MatrixStack matrices = event.matrixStack();
+            MatrixStack matrices = event.matrixStack();
             RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE, platform.GlStateManager.SrcFactor.ONE, platform.GlStateManager.DstFactor.ZERO);
+            RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
             RenderSystem.enableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.disableCull();
-            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
 
             for (DashTrailModule.DashCubic cubic : this.dashCubics) {
                if (!(cubic.alphaValue <= 0.05F)) {
@@ -226,7 +226,7 @@ public class DashTrailModule extends Module {
 
             if (this.dashDots.get()) {
                RenderSystem.setShaderTexture(0, DASH_BLOOM);
-               client.render.BufferBuilder bb = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+               BufferBuilder bb = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                boolean drew = false;
 
                for (DashTrailModule.DashCubic cubic : this.dashCubics) {
@@ -234,7 +234,7 @@ public class DashTrailModule extends Module {
                      float aPC = cubic.alphaValue;
 
                      for (DashTrailModule.DashSpark spark : cubic.sparks) {
-                        float sparkAPC = easeInOutQuadWave(util.math.MathHelper.clamp((float)spark.alphaPC() * aPC, 0.0F, 1.0F));
+                        float sparkAPC = easeInOutQuadWave(MathHelper.clamp((float)spark.alphaPC() * aPC, 0.0F, 1.0F));
                         if (!(sparkAPC <= 0.01F)) {
                            int c = getOverallColorFrom(cubic.color, swapAlpha(-1, cubic.color >> 24 & 0xFF), 1.0F - sparkAPC);
                            c = swapAlpha(c, (c >> 24 & 0xFF) * sparkAPC / 3.0F);
@@ -279,7 +279,7 @@ public class DashTrailModule extends Module {
 
    @Environment(EnvType.CLIENT)
    private class DashBase {
-      private final minecraft.entity.LivingEntity entity;
+      private final LivingEntity entity;
       private double motionX;
       private double motionY;
       private double motionZ;
@@ -292,7 +292,7 @@ public class DashTrailModule extends Module {
       private final int rMTime;
       private final DashTrailModule.DashTexture dashTexture;
 
-      private DashBase(minecraft.entity.LivingEntity entity, float speedDash, DashTrailModule.DashTexture dashTexture, float offsetTickPC, int rmTime) {
+      private DashBase(LivingEntity entity, float speedDash, DashTrailModule.DashTexture dashTexture, float offsetTickPC, int rmTime) {
          this.rMTime = rmTime;
          this.entity = entity;
          this.motionX = entity.getX() - entity.prevX;
@@ -327,7 +327,7 @@ public class DashTrailModule extends Module {
       }
 
       private float getTimePC() {
-         return util.math.MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / this.base.rMTime, 0.0F, 1.0F);
+         return MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / this.base.rMTime, 0.0F, 1.0F);
       }
 
       private double getRenderPosX(float tickDelta) {
@@ -370,9 +370,9 @@ public class DashTrailModule extends Module {
       }
 
       private void drawDash(
-         util.math.MatrixStack stack, float tickDelta, boolean isBloom, float alphaPC, float lightingPC, double camX, double camY, double camZ, client.render.Camera camera
+         MatrixStack stack, float tickDelta, boolean isBloom, float alphaPC, float lightingPC, double camX, double camY, double camZ, Camera camera
       ) {
-         minecraft.util.Identifier texId = isBloom ? DashTrailModule.DASH_BLOOM : this.base.dashTexture.getResource();
+         Identifier texId = isBloom ? DashTrailModule.DASH_BLOOM : this.base.dashTexture.getResource();
          if (texId != null) {
             float aPC = this.alphaValue * alphaPC;
             if (!(aPC < 0.01F)) {
@@ -389,7 +389,7 @@ public class DashTrailModule extends Module {
                   int color1 = DashTrailModule.getOverallColorFrom(this.color, -1, 0.15F);
                   int bloomColor = DashTrailModule.swapAlpha(color1, 55.0F * aPC);
                   RenderSystem.setShaderTexture(0, DashTrailModule.DASH_BLOOM);
-                  client.render.BufferBuilder bb = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                  BufferBuilder bb = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                   Matrix4f matrix = stack.peek().getPositionMatrix();
                   float s = extXY / 1.75F * 0.1F;
                   DashTrailModule.addVertex(bb, matrix, -s, -s, 0.0F, 0.0F, 1.0F, bloomColor);
@@ -402,7 +402,7 @@ public class DashTrailModule extends Module {
                      extXY *= 1.0F + 6.0F * timePcOf * aMul;
                      float s2 = extXY / 2.0F * 0.1F;
                      int glowColor = DashTrailModule.swapAlpha(DashTrailModule.toDark(color1, aMul / 4.0F), 90.0F * aMul);
-                     bb = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                     bb = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                      DashTrailModule.addVertex(bb, matrix, -s2, -s2, 0.0F, 0.0F, 1.0F, glowColor);
                      DashTrailModule.addVertex(bb, matrix, s2, -s2, 0.0F, 1.0F, 1.0F, glowColor);
                      DashTrailModule.addVertex(bb, matrix, s2, s2, 0.0F, 1.0F, 0.0F, glowColor);
@@ -422,7 +422,7 @@ public class DashTrailModule extends Module {
                   stack.multiply(camera.getRotation());
                   int mainColor = DashTrailModule.toDark(DashTrailModule.getOverallColorFrom(this.color, -1, 0.4F), aPC);
                   RenderSystem.setShaderTexture(0, texId);
-                  client.render.BufferBuilder bb = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                  BufferBuilder bb = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                   Matrix4f matrix = stack.peek().getPositionMatrix();
                   DashTrailModule.addVertex(bb, matrix, -halfX, -halfY, 0.0F, 0.0F, 1.0F, mainColor);
                   DashTrailModule.addVertex(bb, matrix, halfX, -halfY, 0.0F, 1.0F, 1.0F, mainColor);
@@ -453,7 +453,7 @@ public class DashTrailModule extends Module {
       }
 
       double timePC() {
-         return util.math.MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / 1000.0F, 0.0F, 1.0F);
+         return MathHelper.clamp((float)(System.currentTimeMillis() - this.startTime) / 1000.0F, 0.0F, 1.0F);
       }
 
       double alphaPC() {
@@ -489,7 +489,7 @@ public class DashTrailModule extends Module {
 
    @Environment(EnvType.CLIENT)
    private class DashTexture {
-      private final List<minecraft.util.Identifier> textures;
+      private final List<Identifier> textures;
       private final boolean animated;
       private final long timeAfterSpawn;
       private final long animationPerTime;
@@ -511,10 +511,10 @@ public class DashTrailModule extends Module {
          }
       }
 
-      private minecraft.util.Identifier getResource() {
+      private Identifier getResource() {
          if (this.animated && !this.textures.isEmpty()) {
             float timePC = (float)((System.currentTimeMillis() - this.timeAfterSpawn) % this.animationPerTime) / (float)this.animationPerTime;
-            int fragNumber = util.math.MathHelper.clamp((int)(timePC * this.textures.size()), 0, this.textures.size() - 1);
+            int fragNumber = MathHelper.clamp((int)(timePC * this.textures.size()), 0, this.textures.size() - 1);
             return this.textures.get(fragNumber);
          } else {
             return this.textures.isEmpty() ? null : this.textures.get(0);

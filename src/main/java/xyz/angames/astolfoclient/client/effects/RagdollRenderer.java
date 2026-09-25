@@ -31,19 +31,19 @@ import xyz.angames.astolfoclient.client.module.Module;
 @Environment(EnvType.CLIENT)
 public class RagdollRenderer {
    private final List<RagdollRenderer.Ragdoll> ragdolls = new ArrayList<>();
-   private client.world.ClientWorld lastWorld = null;
+   private ClientWorld lastWorld = null;
 
-   public void addRagdoll(minecraft.entity.LivingEntity entity) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   public void addRagdoll(LivingEntity entity) {
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.world != null && entity != null) {
          try {
-            render.entity.EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
-            render.entity.EntityRenderer<?, ?> renderer = dispatcher.getRenderer(entity);
+            EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
+            EntityRenderer<?, ?> renderer = dispatcher.getRenderer(entity);
             if (renderer == null) {
                return;
             }
 
-            entity.state.LivingEntityRenderState stateCopy = (entity.state.LivingEntityRenderState)renderer.createRenderState();
+            LivingEntityRenderState stateCopy = (LivingEntityRenderState)renderer.createRenderState();
 
             try {
                renderer.updateRenderState(entity, stateCopy, 1.0F);
@@ -52,8 +52,8 @@ public class RagdollRenderer {
             }
 
             RagdollRenderer.SnapshotVertexConsumer snapshotConsumer = new RagdollRenderer.SnapshotVertexConsumer();
-            client.render.VertexConsumerProvider captureProvider = layer -> snapshotConsumer;
-            util.math.MatrixStack matrices = new util.math.MatrixStack();
+            VertexConsumerProvider captureProvider = layer -> snapshotConsumer;
+            MatrixStack matrices = new MatrixStack();
 
             try {
                renderer.render(stateCopy, matrices, captureProvider, 15728880);
@@ -77,7 +77,7 @@ public class RagdollRenderer {
       }
    }
 
-   public static util.math.Vec3d rotateAroundAxis(util.math.Vec3d point, util.math.Vec3d axis, double angle) {
+   public static Vec3d rotateAroundAxis(Vec3d point, Vec3d axis, double angle) {
       double cos = Math.cos(angle);
       double sin = Math.sin(angle);
       double dot = point.x * axis.x + point.y * axis.y + point.z * axis.z;
@@ -87,11 +87,11 @@ public class RagdollRenderer {
       double rx = point.x * cos + crossX * sin + axis.x * dot * (1.0 - cos);
       double ry = point.y * cos + crossY * sin + axis.y * dot * (1.0 - cos);
       double rz = point.z * cos + crossZ * sin + axis.z * dot * (1.0 - cos);
-      return new util.math.Vec3d(rx, ry, rz);
+      return new Vec3d(rx, ry, rz);
    }
 
    public void render(WorldRenderContext context) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.world == null) {
          synchronized (this.ragdolls) {
             this.ragdolls.clear();
@@ -125,9 +125,9 @@ public class RagdollRenderer {
             }
 
             if (!active.isEmpty()) {
-               util.math.Vec3d cameraPos = context.camera().getPos();
-               util.math.MatrixStack matrices = context.matrixStack();
-               client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+               Vec3d cameraPos = context.camera().getPos();
+               MatrixStack matrices = context.matrixStack();
+               Tessellator tessellator = Tessellator.getInstance();
                RenderSystem.enableBlend();
                RenderSystem.defaultBlendFunc();
                RenderSystem.disableDepthTest();
@@ -135,7 +135,7 @@ public class RagdollRenderer {
                RenderSystem.enableCull();
                matrices.push();
                matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-               client.render.BufferBuilder[] bufferHolder = new client.render.BufferBuilder[]{tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR)};
+               BufferBuilder[] bufferHolder = new BufferBuilder[]{tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR)};
                Matrix4f m = matrices.peek().getPositionMatrix();
 
                for (RagdollRenderer.Ragdoll ragdoll : active) {
@@ -157,16 +157,16 @@ public class RagdollRenderer {
                   for (RagdollRenderer.Ragdoll.Shard shard : ragdoll.shards) {
                      for (int j = 0; j < 4; j++) {
                         RagdollRenderer.SnapshotVertexConsumer.CapturedVertex v = shard.vertices[j];
-                        util.math.Vec3d distortionOffset = shard.vertexDistortions[j].multiply(explosionProgress);
+                        Vec3d distortionOffset = shard.vertexDistortions[j].multiply(explosionProgress);
                         double vxLocal = v.x + distortionOffset.x;
                         double vyLocal = v.y + distortionOffset.y;
                         double vzLocal = v.z + distortionOffset.z;
-                        util.math.Vec3d localToCenter = new util.math.Vec3d(
+                        Vec3d localToCenter = new Vec3d(
                            vxLocal - shard.center.x, vyLocal - shard.center.y, vzLocal - shard.center.z
                         );
-                        util.math.Vec3d rotated = rotateAroundAxis(localToCenter, shard.rotationAxis, shard.rotationSpeed * explosionAgeSecs);
-                        util.math.Vec3d rotatedScaled = rotated.multiply(1.0 - explosionProgress);
-                        util.math.Vec3d finalLocalPos = shard.center.add(rotatedScaled).add(shard.velocity.multiply(explosionAgeSecs));
+                        Vec3d rotated = rotateAroundAxis(localToCenter, shard.rotationAxis, shard.rotationSpeed * explosionAgeSecs);
+                        Vec3d rotatedScaled = rotated.multiply(1.0 - explosionProgress);
+                        Vec3d finalLocalPos = shard.center.add(rotatedScaled).add(shard.velocity.multiply(explosionAgeSecs));
                         double vx = ragdoll.x + finalLocalPos.x;
                         double vy = ragdoll.y + finalLocalPos.y;
                         double vz = ragdoll.z + finalLocalPos.z;
@@ -174,7 +174,7 @@ public class RagdollRenderer {
                      }
                   }
 
-                  client.gl.ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.COSMOS_FILL_SHADER);
+                  ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.COSMOS_FILL_SHADER);
                   if (shader != null) {
                      float timeSecs = (float)(System.currentTimeMillis() % 1000000L) / 1000.0F;
                      if (shader.getUniform("uTime") != null) {
@@ -211,12 +211,12 @@ public class RagdollRenderer {
                   }
 
                   try {
-                     client.render.BufferRenderer.drawWithGlobalProgram(bufferHolder[0].end());
+                     BufferRenderer.drawWithGlobalProgram(bufferHolder[0].end());
                   } catch (Exception var42) {
                   }
 
                   if (ragdoll != active.get(active.size() - 1)) {
-                     bufferHolder[0] = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                     bufferHolder[0] = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                   }
                }
 
@@ -248,7 +248,7 @@ public class RagdollRenderer {
          this.y = y;
          this.z = z;
          this.spawnTime = System.currentTimeMillis();
-         util.math.Vec3d entityCenter = new util.math.Vec3d(0.0, entityHeight / 2.0, 0.0);
+         Vec3d entityCenter = new Vec3d(0.0, entityHeight / 2.0, 0.0);
 
          for (int i = 0; i + 3 < capturedVertices.size(); i += 4) {
             RagdollRenderer.SnapshotVertexConsumer.CapturedVertex v0 = capturedVertices.get(i);
@@ -263,10 +263,10 @@ public class RagdollRenderer {
       @Environment(EnvType.CLIENT)
       public static class Shard {
          public final RagdollRenderer.SnapshotVertexConsumer.CapturedVertex[] vertices = new RagdollRenderer.SnapshotVertexConsumer.CapturedVertex[4];
-         public final util.math.Vec3d[] vertexDistortions = new util.math.Vec3d[4];
-         public final util.math.Vec3d center;
-         public final util.math.Vec3d velocity;
-         public final util.math.Vec3d rotationAxis;
+         public final Vec3d[] vertexDistortions = new Vec3d[4];
+         public final Vec3d center;
+         public final Vec3d velocity;
+         public final Vec3d rotationAxis;
          public final float rotationSpeed;
 
          public Shard(
@@ -274,7 +274,7 @@ public class RagdollRenderer {
             RagdollRenderer.SnapshotVertexConsumer.CapturedVertex v1,
             RagdollRenderer.SnapshotVertexConsumer.CapturedVertex v2,
             RagdollRenderer.SnapshotVertexConsumer.CapturedVertex v3,
-            util.math.Vec3d entityCenter
+            Vec3d entityCenter
          ) {
             this.vertices[0] = v0;
             this.vertices[1] = v1;
@@ -283,10 +283,10 @@ public class RagdollRenderer {
             double cx = (v0.x + v1.x + v2.x + v3.x) / 4.0;
             double cy = (v0.y + v1.y + v2.y + v3.y) / 4.0;
             double cz = (v0.z + v1.z + v2.z + v3.z) / 4.0;
-            this.center = new util.math.Vec3d(cx, cy, cz);
+            this.center = new Vec3d(cx, cy, cz);
 
             for (int i = 0; i < 4; i++) {
-               this.vertexDistortions[i] = new util.math.Vec3d((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25);
+               this.vertexDistortions[i] = new Vec3d((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25);
             }
 
             double dx = cx - entityCenter.x;
@@ -301,22 +301,22 @@ public class RagdollRenderer {
             }
 
             double speed = 0.4 + Math.random() * 0.8;
-            this.velocity = new util.math.Vec3d(
+            this.velocity = new Vec3d(
                dx / len * speed + (Math.random() - 0.5) * 0.2, dy / len * speed + Math.random() * 0.5 + 0.3, dz / len * speed + (Math.random() - 0.5) * 0.2
             );
-            this.rotationAxis = new util.math.Vec3d(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+            this.rotationAxis = new Vec3d(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
             this.rotationSpeed = (float)(Math.random() * 8.0 + 3.0);
          }
       }
    }
 
    @Environment(EnvType.CLIENT)
-   public static class SnapshotVertexConsumer implements client.render.VertexConsumer {
+   public static class SnapshotVertexConsumer implements VertexConsumer {
       public final List<RagdollRenderer.SnapshotVertexConsumer.CapturedVertex> vertices = new ArrayList<>();
       private RagdollRenderer.SnapshotVertexConsumer.CapturedVertex currentVertex = new RagdollRenderer.SnapshotVertexConsumer.CapturedVertex();
       private boolean hasVertex = false;
 
-      public client.render.VertexConsumer vertex(float x, float y, float z) {
+      public VertexConsumer vertex(float x, float y, float z) {
          if (this.hasVertex) {
             this.vertices.add(this.currentVertex);
          }
@@ -329,7 +329,7 @@ public class RagdollRenderer {
          return this;
       }
 
-      public client.render.VertexConsumer color(int r, int g, int b, int a) {
+      public VertexConsumer color(int r, int g, int b, int a) {
          this.currentVertex.r = r / 255.0F;
          this.currentVertex.g = g / 255.0F;
          this.currentVertex.b = b / 255.0F;
@@ -337,7 +337,7 @@ public class RagdollRenderer {
          return this;
       }
 
-      public client.render.VertexConsumer color(float r, float g, float b, float a) {
+      public VertexConsumer color(float r, float g, float b, float a) {
          this.currentVertex.r = r;
          this.currentVertex.g = g;
          this.currentVertex.b = b;
@@ -345,21 +345,21 @@ public class RagdollRenderer {
          return this;
       }
 
-      public client.render.VertexConsumer texture(float u, float v) {
+      public VertexConsumer texture(float u, float v) {
          this.currentVertex.u = u;
          this.currentVertex.v = v;
          return this;
       }
 
-      public client.render.VertexConsumer overlay(int u, int v) {
+      public VertexConsumer overlay(int u, int v) {
          return this;
       }
 
-      public client.render.VertexConsumer light(int u, int v) {
+      public VertexConsumer light(int u, int v) {
          return this;
       }
 
-      public client.render.VertexConsumer normal(float x, float y, float z) {
+      public VertexConsumer normal(float x, float y, float z) {
          return this;
       }
 

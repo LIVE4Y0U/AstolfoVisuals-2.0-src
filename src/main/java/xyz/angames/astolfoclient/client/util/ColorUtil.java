@@ -23,10 +23,10 @@ public class ColorUtil {
    }
 
    public static int makeColor(int red, int green, int blue, int alpha) {
-      return util.math.MathHelper.clamp(alpha, 0, 255) << 24
-         | util.math.MathHelper.clamp(red, 0, 255) << 16
-         | util.math.MathHelper.clamp(green, 0, 255) << 8
-         | util.math.MathHelper.clamp(blue, 0, 255);
+      return MathHelper.clamp(alpha, 0, 255) << 24
+         | MathHelper.clamp(red, 0, 255) << 16
+         | MathHelper.clamp(green, 0, 255) << 8
+         | MathHelper.clamp(blue, 0, 255);
    }
 
    public static int multAlpha(int color, float alphaPercent) {

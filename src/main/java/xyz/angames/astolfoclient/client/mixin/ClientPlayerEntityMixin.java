@@ -16,21 +16,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.module.modules.render.NoRenderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.network.ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityMixin extends client.network.AbstractClientPlayerEntity {
-   public ClientPlayerEntityMixin(client.world.ClientWorld world, GameProfile profile) {
+@Mixin(ClientPlayerEntity.class)
+public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
+   public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
       super(world, profile);
    }
 
    @Inject(method = "tickMovement", at = @At("HEAD"))
    public void onTickMovement(CallbackInfo ci) {
-      client.network.ClientPlayerEntity player = (client.network.ClientPlayerEntity)this;
+      ClientPlayerEntity player = (ClientPlayerEntity)this;
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.blindness.get()) {
          boolean actuallyBlind = false;
 
-         for (entity.effect.StatusEffectInstance effect : player.getStatusEffects()) {
-            if (effect.getEffectType().equals(entity.effect.StatusEffects.BLINDNESS)) {
+         for (StatusEffectInstance effect : player.getStatusEffects()) {
+            if (effect.getEffectType().equals(StatusEffects.BLINDNESS)) {
                actuallyBlind = true;
                break;
             }
@@ -38,7 +38,7 @@ public abstract class ClientPlayerEntityMixin extends client.network.AbstractCli
 
          if (actuallyBlind) {
             player.setSprinting(false);
-            minecraft.client.MinecraftClient.getInstance().options.sprintKey.setPressed(false);
+            MinecraftClient.getInstance().options.sprintKey.setPressed(false);
          }
       }
    }

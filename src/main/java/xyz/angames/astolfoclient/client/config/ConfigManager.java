@@ -138,7 +138,7 @@ public class ConfigManager {
                return false;
             }
 
-            minecraft.client.MinecraftClient.getInstance().execute(() -> {
+            MinecraftClient.getInstance().execute(() -> {
                this.applyModuleData(config);
                if (config.specialBinds != null) {
                   AstolfoclientClient.clickGuiKeyCode = config.specialBinds.getOrDefault("clickgui", 260);

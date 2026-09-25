@@ -19,14 +19,14 @@ import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.module.modules.render.ShaderHand;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.client.MinecraftClient.class)
+@Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
    @Inject(method = "getResourcePackDir", at = @At("HEAD"), cancellable = true)
    private void onGetResourcePackDir(CallbackInfoReturnable<Path> cir) {
    }
 
    @Inject(method = "getFramebuffer", at = @At("HEAD"), cancellable = true)
-   private void onGetFramebuffer(CallbackInfoReturnable<client.gl.Framebuffer> cir) {
+   private void onGetFramebuffer(CallbackInfoReturnable<Framebuffer> cir) {
       if (ShaderHand.rendering) {
          ShaderHand mod = ShaderHand.getInstance();
          if (mod != null && mod.getHandsBuffer() != null) {
@@ -38,25 +38,25 @@ public class MinecraftClientMixin {
    @Inject(method = "doAttack", at = @At("HEAD"))
    private void onDoAttack(CallbackInfoReturnable<Boolean> cir) {
       if (AstolfoclientClient.moduleManager != null) {
-         minecraft.client.MinecraftClient client = (minecraft.client.MinecraftClient)this;
-         if (client.crosshairTarget instanceof util.hit.EntityHitResult hitResult) {
-            minecraft.entity.Entity target = hitResult.getEntity();
+         MinecraftClient client = (MinecraftClient)this;
+         if (client.crosshairTarget instanceof EntityHitResult hitResult) {
+            Entity target = hitResult.getEntity();
             Module hitEspModule = AstolfoclientClient.moduleManager.getModuleByName("HitESP");
             if (hitEspModule != null && hitEspModule.isEnabled() && client.player != null) {
-               client.render.Camera camera = client.gameRenderer.getCamera();
+               Camera camera = client.gameRenderer.getCamera();
                Quaternionf orientation = new Quaternionf(camera.getRotation());
-               util.math.Vec3d viewVec = client.player.getRotationVec(0.0F);
-               util.math.Vec3d targetVec = target.getPos().subtract(client.player.getPos());
+               Vec3d viewVec = client.player.getRotationVec(0.0F);
+               Vec3d targetVec = target.getPos().subtract(client.player.getPos());
                float rotationDirection = (float)Math.signum(viewVec.crossProduct(targetVec).y);
                if (rotationDirection == 0.0F) {
                   rotationDirection = 1.0F;
                }
 
-               util.math.Vec3d playerEyePos = client.player.getEyePos();
-               util.math.Vec3d hitPos = hitResult.getPos();
-               util.math.Vec3d direction = hitPos.subtract(playerEyePos).normalize();
-               util.math.Vec3d offset = direction.multiply(0.3);
-               util.math.Vec3d spawnPos = hitPos.subtract(offset);
+               Vec3d playerEyePos = client.player.getEyePos();
+               Vec3d hitPos = hitResult.getPos();
+               Vec3d direction = hitPos.subtract(playerEyePos).normalize();
+               Vec3d offset = direction.multiply(0.3);
+               Vec3d spawnPos = hitPos.subtract(offset);
                if (AstolfoclientClient.hitEspManager != null) {
                   AstolfoclientClient.hitEspManager.addEffect(spawnPos, rotationDirection, orientation);
                }

@@ -34,10 +34,10 @@ import xyz.angames.astolfoclient.client.module.modules.render.RagdollModule;
 import xyz.angames.astolfoclient.client.util.FakePlayerEntity;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.network.ClientPlayerInteractionManager.class)
+@Mixin(ClientPlayerInteractionManager.class)
 public class ClientPlayerInteractionManagerMixin {
    @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
-   public void onAttackEntity(entity.player.PlayerEntity player, minecraft.entity.Entity target, CallbackInfo ci) {
+   public void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo ci) {
       if (AstolfoclientClient.killEffectManager != null && AstolfoclientClient.moduleManager != null) {
          Module mod = AstolfoclientClient.moduleManager.getModuleByName("KillEffect");
          if (mod != null && mod.isEnabled()) {
@@ -50,7 +50,7 @@ public class ClientPlayerInteractionManagerMixin {
          if (ragdollModule != null
             && ragdollModule.isEnabled()
             && ((RagdollModule)ragdollModule).hit.get()
-            && target instanceof minecraft.entity.LivingEntity livingTarget
+            && target instanceof LivingEntity livingTarget
             && AstolfoclientClient.ragdollRenderer != null) {
             AstolfoclientClient.ragdollRenderer.addRagdoll(livingTarget);
          }
@@ -65,9 +65,9 @@ public class ClientPlayerInteractionManagerMixin {
             && !player.isOnGround()
             && !player.isClimbing()
             && !player.isTouchingWater()
-            && !player.hasStatusEffect(entity.effect.StatusEffects.BLINDNESS)
+            && !player.hasStatusEffect(StatusEffects.BLINDNESS)
             && !player.hasVehicle();
-         double baseDamage = player.getAttributeValue(entity.attribute.EntityAttributes.ATTACK_DAMAGE);
+         double baseDamage = player.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
          if (baseDamage <= 1.0 && player.getMainHandStack() != null && !player.getMainHandStack().isEmpty()) {
             String name = player.getMainHandStack().getItem().toString().toLowerCase();
             if (name.contains("sword")) {
@@ -102,10 +102,10 @@ public class ClientPlayerInteractionManagerMixin {
 
          int fireAspectLevel = 0;
          if (player.getMainHandStack() != null && !player.getMainHandStack().isEmpty()) {
-            component.type.ItemEnchantmentsComponent enchants = minecraft.enchantment.EnchantmentHelper.getEnchantments(player.getMainHandStack());
+            ItemEnchantmentsComponent enchants = EnchantmentHelper.getEnchantments(player.getMainHandStack());
 
-            for (Entry<registry.entry.RegistryEntry<minecraft.enchantment.Enchantment>> entry : enchants.getEnchantmentEntries()) {
-               String id = ((registry.entry.RegistryEntry)entry.getKey()).getKey().map(k -> k.getValue().toString()).orElse("");
+            for (Entry<RegistryEntry<Enchantment>> entry : enchants.getEnchantmentEntries()) {
+               String id = ((RegistryEntry)entry.getKey()).getKey().map(k -> k.getValue().toString()).orElse("");
                if (id.contains("fire_aspect")) {
                   fireAspectLevel = entry.getIntValue();
                   break;
@@ -117,34 +117,34 @@ public class ClientPlayerInteractionManagerMixin {
             fake.setOnFireFor(fireAspectLevel * 4);
          }
 
-         boolean isSword = player.getMainHandStack() != null && player.getMainHandStack().getItem() instanceof minecraft.item.SwordItem;
+         boolean isSword = player.getMainHandStack() != null && player.getMainHandStack().getItem() instanceof SwordItem;
          boolean isSweep = fullyCharged && !isCrit && player.isOnGround() && !player.isSprinting() && isSword;
          boolean isKnockback = fullyCharged && player.isSprinting();
-         player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_HURT, 1.0F, 1.0F);
+         player.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1.0F, 1.0F);
          if (isCrit) {
-            minecraft.client.MinecraftClient.getInstance().particleManager.addEmitter(target, minecraft.particle.ParticleTypes.CRIT);
-            player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 1.0F, 1.0F);
+            MinecraftClient.getInstance().particleManager.addEmitter(target, ParticleTypes.CRIT);
+            player.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 1.0F, 1.0F);
          } else if (isSweep) {
             double d = -Math.sin(player.getYaw() * (float) (Math.PI / 180.0));
             double e = Math.cos(player.getYaw() * (float) (Math.PI / 180.0));
-            if (player.getWorld() instanceof client.world.ClientWorld) {
+            if (player.getWorld() instanceof ClientWorld) {
                player.getWorld()
-                  .addParticle(minecraft.particle.ParticleTypes.SWEEP_ATTACK, target.getX() + d, target.getBodyY(0.5), target.getZ() + e, d, 0.0, e);
+                  .addParticle(ParticleTypes.SWEEP_ATTACK, target.getX() + d, target.getBodyY(0.5), target.getZ() + e, d, 0.0, e);
             }
 
-            player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.0F);
+            player.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.0F);
             if (player.getWorld() != null) {
                float sweepDamage = 1.0F + 0.5F * (float)baseDamage;
 
-               for (minecraft.entity.Entity entity : player.getWorld()
+               for (Entity entity : player.getWorld()
                   .getEntitiesByClass(FakePlayerEntity.class, target.getBoundingBox().expand(1.0, 0.25, 1.0), ent -> ent != target && ent != player)) {
                   entity.handleStatus((byte)2);
-                  player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_HURT, 1.0F, 1.0F);
+                  player.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1.0F, 1.0F);
                   float otherHealth = ((FakePlayerEntity)entity).getHealth() - sweepDamage;
                   if (otherHealth <= 0.0F) {
                      entity.handleStatus((byte)35);
-                     minecraft.client.MinecraftClient.getInstance().particleManager.addEmitter(entity, minecraft.particle.ParticleTypes.TOTEM_OF_UNDYING, 30);
-                     player.playSound(minecraft.sound.SoundEvents.ITEM_TOTEM_USE, 1.0F, 1.0F);
+                     MinecraftClient.getInstance().particleManager.addEmitter(entity, ParticleTypes.TOTEM_OF_UNDYING, 30);
+                     player.playSound(SoundEvents.ITEM_TOTEM_USE, 1.0F, 1.0F);
                      ((FakePlayerEntity)entity).setHealth(20.0F);
                   } else {
                      ((FakePlayerEntity)entity).setHealth(otherHealth);
@@ -152,23 +152,23 @@ public class ClientPlayerInteractionManagerMixin {
                }
             }
          } else if (isKnockback) {
-            player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, 1.0F, 1.0F);
+            player.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, 1.0F, 1.0F);
          } else if (fullyCharged) {
-            player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, 1.0F, 1.0F);
+            player.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, 1.0F, 1.0F);
          } else {
-            player.playSound(minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.0F, 1.0F);
+            player.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 1.0F, 1.0F);
          }
 
          if (player.getMainHandStack() != null && !player.getMainHandStack().isEmpty() && player.getMainHandStack().hasEnchantments()) {
-            minecraft.client.MinecraftClient.getInstance().particleManager.addEmitter(target, minecraft.particle.ParticleTypes.ENCHANTED_HIT);
+            MinecraftClient.getInstance().particleManager.addEmitter(target, ParticleTypes.ENCHANTED_HIT);
          }
 
          float newHealth = fake.getHealth() - damage;
          if (newHealth <= 0.0F) {
             fake.handleStatus((byte)35);
-            minecraft.client.MinecraftClient.getInstance().particleManager.addEmitter(fake, minecraft.particle.ParticleTypes.TOTEM_OF_UNDYING, 30);
-            minecraft.client.MinecraftClient.getInstance().gameRenderer.showFloatingItem(new minecraft.item.ItemStack(minecraft.item.Items.TOTEM_OF_UNDYING));
-            player.playSound(minecraft.sound.SoundEvents.ITEM_TOTEM_USE, 1.0F, 1.0F);
+            MinecraftClient.getInstance().particleManager.addEmitter(fake, ParticleTypes.TOTEM_OF_UNDYING, 30);
+            MinecraftClient.getInstance().gameRenderer.showFloatingItem(new ItemStack(Items.TOTEM_OF_UNDYING));
+            player.playSound(SoundEvents.ITEM_TOTEM_USE, 1.0F, 1.0F);
             fake.setHealth(20.0F);
          } else {
             fake.setHealth(newHealth);
@@ -179,16 +179,16 @@ public class ClientPlayerInteractionManagerMixin {
    }
 
    @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true)
-   public void onInteractEntity(entity.player.PlayerEntity player, minecraft.entity.Entity entity, minecraft.util.Hand hand, CallbackInfoReturnable<minecraft.util.ActionResult> cir) {
+   public void onInteractEntity(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
       if (entity instanceof FakePlayerEntity) {
-         cir.setReturnValue(minecraft.util.ActionResult.PASS);
+         cir.setReturnValue(ActionResult.PASS);
       }
    }
 
    @Inject(method = "interactEntityAtLocation", at = @At("HEAD"), cancellable = true)
-   public void onInteractEntityAtLocation(entity.player.PlayerEntity player, minecraft.entity.Entity entity, util.hit.EntityHitResult hitResult, minecraft.util.Hand hand, CallbackInfoReturnable<minecraft.util.ActionResult> cir) {
+   public void onInteractEntityAtLocation(PlayerEntity player, Entity entity, EntityHitResult hitResult, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
       if (entity instanceof FakePlayerEntity) {
-         cir.setReturnValue(minecraft.util.ActionResult.PASS);
+         cir.setReturnValue(ActionResult.PASS);
       }
    }
 }

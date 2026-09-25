@@ -16,11 +16,11 @@ import xyz.angames.astolfoclient.client.module.modules.render.CrosshairModule;
 
 @Environment(EnvType.CLIENT)
 public class CrosshairManager {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private final Color entityColor = new Color(255, 50, 50);
 
-   public void render(client.gui.DrawContext context) {
-      if (this.client.player != null && this.client.options.getPerspective() == client.option.Perspective.FIRST_PERSON) {
+   public void render(DrawContext context) {
+      if (this.client.player != null && this.client.options.getPerspective() == Perspective.FIRST_PERSON) {
          CrosshairModule module = (CrosshairModule)AstolfoclientClient.moduleManager.getModuleByName("Crosshair");
          if (module != null && module.isEnabled()) {
             Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
@@ -34,7 +34,7 @@ public class CrosshairManager {
 
             float thickness = module.getThickness();
             float length = module.getLength();
-            Color color = module.usesEntityColor() && this.client.crosshairTarget != null && this.client.crosshairTarget.getType() == hit.HitResult.Type.ENTITY
+            Color color = module.usesEntityColor() && this.client.crosshairTarget != null && this.client.crosshairTarget.getType() == HitResult.Type.ENTITY
                ? this.entityColor
                : Color.WHITE;
             Builder.rectangle()

@@ -79,8 +79,8 @@ public class ColorPickerComponent {
          .color(new QuadColorState(cBlackTrans, cBlack, cBlack, cBlackTrans))
          .build()
          .render(matrix, padX, padY);
-      float curX = padX + util.math.MathHelper.clamp(this.animSat, 0.0F, 1.0F) * padW;
-      float curY = padY + (1.0F - util.math.MathHelper.clamp(this.animBri, 0.0F, 1.0F)) * padH;
+      float curX = padX + MathHelper.clamp(this.animSat, 0.0F, 1.0F) * padW;
+      float curY = padY + (1.0F - MathHelper.clamp(this.animBri, 0.0F, 1.0F)) * padH;
       Builder.border()
          .size(new SizeState(8.5F, 8.5F))
          .radius(new QuadRadiusState(4.25F))
@@ -119,7 +119,7 @@ public class ColorPickerComponent {
             .render(matrix, hueBarX + i * sliceW, hueBarY);
       }
 
-      float hueHandleX = hueBarX + util.math.MathHelper.clamp(this.animHue, 0.0F, 1.0F) * hueBarW;
+      float hueHandleX = hueBarX + MathHelper.clamp(this.animHue, 0.0F, 1.0F) * hueBarW;
       float hueHandleY = hueBarY + hueBarH / 2.0F;
       Builder.border()
          .size(new SizeState(8.5F, 8.5F))
@@ -171,13 +171,13 @@ public class ColorPickerComponent {
       float hueBarX = padX;
       float hueBarW = padW;
       if (this.draggingPad) {
-         this.sat = util.math.MathHelper.clamp((float)(mx - padX) / padW, 0.0F, 1.0F);
-         this.bri = 1.0F - util.math.MathHelper.clamp((float)(my - padY) / padH, 0.0F, 1.0F);
+         this.sat = MathHelper.clamp((float)(mx - padX) / padW, 0.0F, 1.0F);
+         this.bri = 1.0F - MathHelper.clamp((float)(my - padY) / padH, 0.0F, 1.0F);
          this.updateTheme();
       }
 
       if (this.draggingHue) {
-         this.hue = util.math.MathHelper.clamp((float)(mx - hueBarX) / hueBarW, 0.0F, 1.0F);
+         this.hue = MathHelper.clamp((float)(mx - hueBarX) / hueBarW, 0.0F, 1.0F);
          this.updateTheme();
       }
    }

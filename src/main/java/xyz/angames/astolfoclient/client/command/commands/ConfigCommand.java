@@ -27,11 +27,11 @@ public class ConfigCommand extends Command {
                }
 
                String saveName = args[1];
-               sendMessage(minecraft.util.Formatting.GRAY + "Saving local config...");
+               sendMessage(Formatting.GRAY + "Saving local config...");
                new Thread(() -> {
                   String error = AstolfoclientClient.configManager.saveConfig(saveName);
                   if (error == null) {
-                     sendMessage(minecraft.util.Formatting.GREEN + "Successfully saved config: " + minecraft.util.Formatting.AQUA + saveName);
+                     sendMessage(Formatting.GREEN + "Successfully saved config: " + Formatting.AQUA + saveName);
                   } else {
                      this.sendError("Failed to save config: " + error);
                   }
@@ -44,26 +44,26 @@ public class ConfigCommand extends Command {
                }
 
                String loadName = args[1];
-               sendMessage(minecraft.util.Formatting.GRAY + "Loading local config...");
+               sendMessage(Formatting.GRAY + "Loading local config...");
                new Thread(() -> {
                   if (AstolfoclientClient.configManager.loadConfig(loadName)) {
-                     sendMessage(minecraft.util.Formatting.GREEN + "Successfully loaded config: " + minecraft.util.Formatting.AQUA + loadName);
+                     sendMessage(Formatting.GREEN + "Successfully loaded config: " + Formatting.AQUA + loadName);
                   } else {
                      this.sendError("Could not find a config named: " + loadName);
                   }
                }).start();
                break;
             case "list":
-               sendMessage(minecraft.util.Formatting.GRAY + "Fetching your local configs...");
+               sendMessage(Formatting.GRAY + "Fetching your local configs...");
                new Thread(() -> {
                   List<String> configs = AstolfoclientClient.configManager.getLocalConfigs();
                   if (configs.isEmpty()) {
-                     sendMessage(minecraft.util.Formatting.GRAY + "You have no saved configs.");
+                     sendMessage(Formatting.GRAY + "You have no saved configs.");
                   } else {
-                     sendMessage(minecraft.util.Formatting.GOLD + "--- Your Configs ---");
+                     sendMessage(Formatting.GOLD + "--- Your Configs ---");
 
                      for (String cfg : configs) {
-                        sendMessage(minecraft.util.Formatting.GRAY + "- " + minecraft.util.Formatting.AQUA + cfg);
+                        sendMessage(Formatting.GRAY + "- " + Formatting.AQUA + cfg);
                      }
                   }
                }).start();
@@ -80,10 +80,10 @@ public class ConfigCommand extends Command {
                   return;
                }
 
-               sendMessage(minecraft.util.Formatting.GRAY + "Deleting config: " + deleteName + "...");
+               sendMessage(Formatting.GRAY + "Deleting config: " + deleteName + "...");
                new Thread(() -> {
                   if (AstolfoclientClient.configManager.deleteConfig(deleteName)) {
-                     sendMessage(minecraft.util.Formatting.GREEN + "Successfully deleted config: " + minecraft.util.Formatting.AQUA + deleteName);
+                     sendMessage(Formatting.GREEN + "Successfully deleted config: " + Formatting.AQUA + deleteName);
                   } else {
                      this.sendError("Failed to delete config: " + deleteName + ". Ensure it exists.");
                   }

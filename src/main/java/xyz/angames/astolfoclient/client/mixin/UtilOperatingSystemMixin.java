@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Environment(EnvType.CLIENT)
-@Mixin(util.Util.OperatingSystem.class)
+@Mixin(Util.OperatingSystem.class)
 public class UtilOperatingSystemMixin {
    @ModifyVariable(method = "open(Ljava/io/File;)V", at = @At("HEAD"), argsOnly = true)
    private File modifyOpenParam(File file) {

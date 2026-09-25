@@ -16,7 +16,7 @@ import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 @Mixin(RenderSystem.class)
 public class RenderSystemMixin {
    @ModifyVariable(method = "setShaderFog", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-   private static client.render.Fog modifyFog(client.render.Fog originalFog) {
+   private static Fog modifyFog(Fog originalFog) {
       if (AstolfoclientClient.moduleManager == null) {
          return originalFog;
       }
@@ -44,7 +44,7 @@ public class RenderSystemMixin {
             }
          }
 
-         return new client.render.Fog(start, end, originalFog.comp_3011(), r, g, b, a);
+         return new Fog(start, end, originalFog.comp_3011(), r, g, b, a);
       } else {
          return originalFog;
       }

@@ -39,19 +39,19 @@ import xyz.angames.astolfoclient.client.util.DiscordAvatarManager;
 
 @Environment(EnvType.CLIENT)
 public class LogoRenderer {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    public static final Supplier<MsdfFont> ASTOLFO_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("astolfo_logo")
-         .data(minecraft.util.Identifier.of("mre", "fonts/astolfo.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "fonts/astolfo.png"))
+         .data(Identifier.of("mre", "fonts/astolfo.json"))
+         .atlas(Identifier.of("mre", "fonts/astolfo.png"))
          .build()
    );
    public static final Supplier<MsdfFont> WATERMARK_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("watermark_icons")
-         .data(minecraft.util.Identifier.of("mre", "icons/watermark/watermark.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "icons/watermark/watermark.png"))
+         .data(Identifier.of("mre", "icons/watermark/watermark.json"))
+         .atlas(Identifier.of("mre", "icons/watermark/watermark.png"))
          .glyphMapper(g -> {
             int idx = g.index();
             if (idx == 4) {
@@ -83,8 +83,8 @@ public class LogoRenderer {
    public static final Supplier<MsdfFont> SP_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("watermark_sp_icons")
-         .data(minecraft.util.Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
-         .atlas(minecraft.util.Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
+         .data(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
+         .atlas(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
          .glyphMapper(g -> {
             int idx = g.index();
             if (idx == 4) {
@@ -233,7 +233,7 @@ public class LogoRenderer {
       return AstolfoclientClient.moduleManager == null ? null : (InterfaceModule)AstolfoclientClient.moduleManager.getModuleByName("Interface");
    }
 
-   public void render(client.gui.DrawContext context) {
+   public void render(DrawContext context) {
       if (this.client.world != null && this.client.player != null) {
          InterfaceModule interfaceMod = this.getInterfaceModule();
          if (interfaceMod == null || interfaceMod.logo.get() || this.client.currentScreen instanceof HudEditorScreen) {
@@ -609,10 +609,10 @@ public class LogoRenderer {
 
                if (hasAvatar) {
                   boolean drawnAvatar = false;
-                  minecraft.util.Identifier avatarTex = DiscordAvatarManager.getAvatarTexture();
+                  Identifier avatarTex = DiscordAvatarManager.getAvatarTexture();
                   if (avatarTex != null) {
                      try {
-                        client.texture.AbstractTexture tex = this.client.getTextureManager().getTexture(avatarTex);
+                        AbstractTexture tex = this.client.getTextureManager().getTexture(avatarTex);
                         if (tex != null) {
                            Builder.texture()
                               .size(new SizeState(avatarSize, avatarSize))
@@ -629,9 +629,9 @@ public class LogoRenderer {
 
                   if (!drawnAvatar && this.client.player != null) {
                      try {
-                        minecraft.util.Identifier skinTex = this.client.player.getSkinTextures().comp_1626();
+                        Identifier skinTex = this.client.player.getSkinTextures().comp_1626();
                         if (skinTex != null) {
-                           client.texture.AbstractTexture tex = this.client.getTextureManager().getTexture(skinTex);
+                           AbstractTexture tex = this.client.getTextureManager().getTexture(skinTex);
                            if (tex != null) {
                               Builder.texture()
                                  .size(new SizeState(avatarSize, avatarSize))
@@ -700,7 +700,7 @@ public class LogoRenderer {
    }
 
    private void drawCrashAlerts(
-      client.gui.DrawContext context,
+      DrawContext context,
       float wX,
       float wY,
       float wTotalW,
@@ -837,7 +837,7 @@ public class LogoRenderer {
    }
 
    private void drawAnimatedContextPanel(
-      client.gui.DrawContext context,
+      DrawContext context,
       float wX,
       float wY,
       float wTotalW,
@@ -1406,7 +1406,7 @@ public class LogoRenderer {
 
    private int getPing() {
       if (this.client.getNetworkHandler() != null && this.client.player != null) {
-         client.network.PlayerListEntry info = this.client.getNetworkHandler().getPlayerListEntry(this.client.player.getUuid());
+         PlayerListEntry info = this.client.getNetworkHandler().getPlayerListEntry(this.client.player.getUuid());
          if (info != null) {
             return info.getLatency();
          }

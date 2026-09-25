@@ -58,7 +58,7 @@ public class CameraUtilsModule extends Module {
    private void resetSmoothCamera() {
       if (this.zoomActive) {
          this.zoomActive = false;
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc != null && mc.options != null) {
             mc.options.smoothCameraEnabled = this.originalSmoothCamera;
          }
@@ -74,10 +74,10 @@ public class CameraUtilsModule extends Module {
          this.zoomProgress = 0.0F;
          return baseFov;
       } else {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          boolean isKeyDown = false;
          if (mc != null && mc.currentScreen == null && this.zoomKey.getKey() != -1 && this.zoomKey.getKey() != 0) {
-            isKeyDown = client.util.InputUtil.isKeyPressed(mc.getWindow().getHandle(), this.zoomKey.getKey());
+            isKeyDown = InputUtil.isKeyPressed(mc.getWindow().getHandle(), this.zoomKey.getKey());
          }
 
          if (this.smoothMouse.get() && mc != null && mc.options != null) {
@@ -117,7 +117,7 @@ public class CameraUtilsModule extends Module {
          }
 
          double targetFov = this.zoomFov.get();
-         return util.math.MathHelper.lerp(this.zoomProgress, baseFov, targetFov);
+         return MathHelper.lerp(this.zoomProgress, baseFov, targetFov);
       }
    }
 

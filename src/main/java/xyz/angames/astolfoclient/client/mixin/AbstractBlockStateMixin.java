@@ -12,13 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.module.modules.render.NoRenderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(block.AbstractBlock.AbstractBlockState.class)
+@Mixin(AbstractBlock.AbstractBlockState.class)
 public abstract class AbstractBlockStateMixin {
    @Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
-   private void onGetRenderType(CallbackInfoReturnable<minecraft.block.BlockRenderType> cir) {
+   private void onGetRenderType(CallbackInfoReturnable<BlockRenderType> cir) {
       NoRenderModule noRender = NoRenderModule.getInstance();
-      if (noRender != null && noRender.isEnabled() && noRender.grass.get() && NoRenderModule.isGrass((minecraft.block.BlockState)this)) {
-         cir.setReturnValue(minecraft.block.BlockRenderType.INVISIBLE);
+      if (noRender != null && noRender.isEnabled() && noRender.grass.get() && NoRenderModule.isGrass((BlockState)this)) {
+         cir.setReturnValue(BlockRenderType.INVISIBLE);
       }
    }
 }

@@ -41,20 +41,20 @@ public class BindCommand extends Command {
                this.setBind(moduleName, keyCode, keyName);
                break;
             case "list":
-               sendMessage(minecraft.util.Formatting.GOLD + "--- Key Binds ---");
+               sendMessage(Formatting.GOLD + "--- Key Binds ---");
                if (AstolfoclientClient.clickGuiKeyCode != -1) {
-                  sendMessage(minecraft.util.Formatting.GRAY + "ClickGUI: " + minecraft.util.Formatting.AQUA + KeyUtils.getKeyName(AstolfoclientClient.clickGuiKeyCode));
+                  sendMessage(Formatting.GRAY + "ClickGUI: " + Formatting.AQUA + KeyUtils.getKeyName(AstolfoclientClient.clickGuiKeyCode));
                }
 
                if (AstolfoclientClient.hudEditorKeyCode != -1) {
-                  sendMessage(minecraft.util.Formatting.GRAY + "HudEditor: " + minecraft.util.Formatting.AQUA + KeyUtils.getKeyName(AstolfoclientClient.hudEditorKeyCode));
+                  sendMessage(Formatting.GRAY + "HudEditor: " + Formatting.AQUA + KeyUtils.getKeyName(AstolfoclientClient.hudEditorKeyCode));
                }
 
                AstolfoclientClient.moduleManager
                   .getModules()
                   .stream()
                   .filter(m -> m.getKeyCode() != -1)
-                  .forEach(m -> sendMessage(minecraft.util.Formatting.GRAY + m.getName() + ": " + minecraft.util.Formatting.AQUA + KeyUtils.getKeyName(m.getKeyCode())));
+                  .forEach(m -> sendMessage(Formatting.GRAY + m.getName() + ": " + Formatting.AQUA + KeyUtils.getKeyName(m.getKeyCode())));
                break;
             case "reset":
                if (args.length != 2) {
@@ -66,7 +66,7 @@ public class BindCommand extends Command {
                break;
             case "clear":
                AstolfoclientClient.moduleManager.getModules().forEach(m -> m.setKeyCode(-1));
-               sendMessage(minecraft.util.Formatting.GREEN + "Cleared all module keybinds! (ClickGUI and HudEditor were kept safe)");
+               sendMessage(Formatting.GREEN + "Cleared all module keybinds! (ClickGUI and HudEditor were kept safe)");
                break;
             default:
                this.sendError("Unknown action: " + action);
@@ -78,17 +78,17 @@ public class BindCommand extends Command {
       boolean found = false;
       if (name.equalsIgnoreCase("clickgui")) {
          AstolfoclientClient.clickGuiKeyCode = key;
-         sendMessage(minecraft.util.Formatting.GREEN + "Bound ClickGUI to " + (key == -1 ? "NONE" : keyName));
+         sendMessage(Formatting.GREEN + "Bound ClickGUI to " + (key == -1 ? "NONE" : keyName));
          found = true;
       } else if (name.equalsIgnoreCase("hudeditor")) {
          AstolfoclientClient.hudEditorKeyCode = key;
-         sendMessage(minecraft.util.Formatting.GREEN + "Bound HudEditor to " + (key == -1 ? "NONE" : keyName));
+         sendMessage(Formatting.GREEN + "Bound HudEditor to " + (key == -1 ? "NONE" : keyName));
          found = true;
       } else {
          Module module = AstolfoclientClient.moduleManager.getModuleByName(name);
          if (module != null) {
             module.setKeyCode(key);
-            sendMessage(minecraft.util.Formatting.GREEN + "Bound " + module.getName() + " to " + (key == -1 ? "NONE" : keyName));
+            sendMessage(Formatting.GREEN + "Bound " + module.getName() + " to " + (key == -1 ? "NONE" : keyName));
             found = true;
          } else {
             this.sendError("Module not found: " + name);

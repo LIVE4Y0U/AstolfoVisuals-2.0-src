@@ -12,11 +12,11 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.client.Mouse.class)
+@Mixin(Mouse.class)
 public class MouseMixin {
    @Inject(method = "onMouseButton", at = @At("HEAD"))
    private void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient client = MinecraftClient.getInstance();
       if (action == 1 && client.currentScreen == null && AstolfoclientClient.moduleManager != null) {
          int mappedKey = -(button + 100);
 

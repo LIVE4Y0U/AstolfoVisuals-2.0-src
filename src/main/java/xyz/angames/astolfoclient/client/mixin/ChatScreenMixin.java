@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.module.modules.misc.PasswordHiderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.screen.ChatScreen.class)
+@Mixin(ChatScreen.class)
 public class ChatScreenMixin {
    @Shadow
-   protected gui.widget.TextFieldWidget chatField;
+   protected TextFieldWidget chatField;
 
    @Inject(method = "init", at = @At("TAIL"))
    private void onInit(CallbackInfo ci) {
@@ -26,7 +26,7 @@ public class ChatScreenMixin {
    }
 
    @Inject(method = "render", at = @At("TAIL"))
-   private void onRender(client.gui.DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+   private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
       if (this.chatField != null) {
          PasswordHiderModule.renderChatFieldOverlay(context, this.chatField);
       }

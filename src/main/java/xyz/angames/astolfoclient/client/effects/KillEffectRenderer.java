@@ -25,7 +25,7 @@ import xyz.angames.astolfoclient.client.module.Module;
 @Environment(EnvType.CLIENT)
 public class KillEffectRenderer {
    private final KillEffectManager manager;
-   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
+   private static final Identifier BLOOM_TEXTURE = Identifier.of("astolfoclient", "textures/effects/bloom.png");
 
    public KillEffectRenderer(KillEffectManager manager) {
       this.manager = manager;
@@ -40,8 +40,8 @@ public class KillEffectRenderer {
             RenderSystem.disableCull();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
-            RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
-            client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+            RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+            Tessellator tessellator = Tessellator.getInstance();
             double camX = context.camera().getPos().x;
             double camY = context.camera().getPos().y;
             double camZ = context.camera().getPos().z;
@@ -56,18 +56,18 @@ public class KillEffectRenderer {
                if (age <= 3000L) {
                   float progress = (float)age / 3000.0F;
                   float globalAlpha = 1.0F - progress;
-                  util.math.MatrixStack matrices = context.matrixStack();
+                  MatrixStack matrices = context.matrixStack();
                   matrices.push();
                   matrices.translate(effect.pos.x - camX, effect.pos.y - camY, effect.pos.z - camZ);
                   if (effect.mode.equals("Zap")) {
-                     RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+                     RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
                      float zapAlpha = 1.0F - (float)age / 800.0F;
                      if (zapAlpha > 0.0F) {
-                        client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.TRIANGLES, client.render.VertexFormats.POSITION_COLOR);
+                        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
 
                         for (int i = 0; i < effect.zapPoints.size() - 1; i++) {
-                           util.math.Vec3d p1 = effect.zapPoints.get(i);
-                           util.math.Vec3d p2 = effect.zapPoints.get(i + 1);
+                           Vec3d p1 = effect.zapPoints.get(i);
+                           Vec3d p2 = effect.zapPoints.get(i + 1);
                            double distance = p1.distanceTo(p2);
                            int bubbles = (int)(distance / 0.25);
 
@@ -86,13 +86,13 @@ public class KillEffectRenderer {
                            }
                         }
 
-                        client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+                        BufferRenderer.drawWithGlobalProgram(buffer.end());
                      }
                   } else if (effect.mode.equals("Thanos")) {
-                     RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
+                     RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
                      RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
                      Quaternionf cameraRot = context.camera().getRotation();
-                     client.render.BufferBuilder buffer = null;
+                     BufferBuilder buffer = null;
 
                      for (KillEffectManager.ThanosParticle p : effect.thanosParticles) {
                         float currentY = p.startY;
@@ -108,7 +108,7 @@ public class KillEffectRenderer {
 
                         if (!(pAlpha <= 0.05F)) {
                            if (buffer == null) {
-                              buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+                              buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                            }
 
                            matrices.push();
@@ -126,7 +126,7 @@ public class KillEffectRenderer {
                      }
 
                      if (buffer != null) {
-                        client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+                        BufferRenderer.drawWithGlobalProgram(buffer.end());
                      }
                   }
 
@@ -143,7 +143,7 @@ public class KillEffectRenderer {
       }
    }
 
-   private void drawBatchedGlowingDot(Matrix4f matrix, client.render.BufferBuilder buffer, float r, float g, float b, float alpha) {
+   private void drawBatchedGlowingDot(Matrix4f matrix, BufferBuilder buffer, float r, float g, float b, float alpha) {
       for (int i = 0; i < 360; i += 30) {
          double rad1 = Math.toRadians(i);
          double rad2 = Math.toRadians(i + 30);

@@ -70,28 +70,28 @@ public class NoRenderModule extends Module {
    }
 
    private void reloadWorldRenderer() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.worldRenderer != null) {
          mc.worldRenderer.reload();
       }
    }
 
-   public static boolean isGrass(minecraft.block.BlockState state) {
+   public static boolean isGrass(BlockState state) {
       if (state == null) {
          return false;
       }
 
-      minecraft.block.Block block = state.getBlock();
-      return block == minecraft.block.Blocks.SHORT_GRASS
-         || block == minecraft.block.Blocks.TALL_GRASS
-         || block == minecraft.block.Blocks.FERN
-         || block == minecraft.block.Blocks.LARGE_FERN
-         || block == minecraft.block.Blocks.SEAGRASS
-         || block == minecraft.block.Blocks.TALL_SEAGRASS
-         || block == minecraft.block.Blocks.DEAD_BUSH
-         || block == minecraft.block.Blocks.HANGING_ROOTS
-         || block == minecraft.block.Blocks.NETHER_SPROUTS
-         || block == minecraft.block.Blocks.CRIMSON_ROOTS
-         || block == minecraft.block.Blocks.WARPED_ROOTS;
+      Block block = state.getBlock();
+      return block == Blocks.SHORT_GRASS
+         || block == Blocks.TALL_GRASS
+         || block == Blocks.FERN
+         || block == Blocks.LARGE_FERN
+         || block == Blocks.SEAGRASS
+         || block == Blocks.TALL_SEAGRASS
+         || block == Blocks.DEAD_BUSH
+         || block == Blocks.HANGING_ROOTS
+         || block == Blocks.NETHER_SPROUTS
+         || block == Blocks.CRIMSON_ROOTS
+         || block == Blocks.WARPED_ROOTS;
    }
 }

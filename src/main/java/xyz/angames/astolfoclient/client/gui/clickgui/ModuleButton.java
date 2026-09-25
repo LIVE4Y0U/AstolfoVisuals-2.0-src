@@ -53,7 +53,7 @@ public class ModuleButton {
       return 24.0F + this.settingsPanel.getTotalHeight();
    }
 
-   public void render(client.gui.DrawContext context, ClickGuiScreen parentGui, int mouseX, int mouseY, float alpha, float deltaTime) {
+   public void render(DrawContext context, ClickGuiScreen parentGui, int mouseX, int mouseY, float alpha, float deltaTime) {
       float effectiveAlpha = alpha * this.renderAlpha;
       if (!(effectiveAlpha <= 0.02F)) {
          this.settingsPanel.updateRows();

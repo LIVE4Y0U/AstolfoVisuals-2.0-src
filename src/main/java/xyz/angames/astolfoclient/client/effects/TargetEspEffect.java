@@ -8,11 +8,11 @@ import net.minecraft.entity.Entity;
 public class TargetEspEffect {
    public long lastHitTime;
    public long startTime;
-   public final minecraft.entity.Entity target;
+   public final Entity target;
    public float currentAngle = 0.0F;
    public long lastRenderTime = 0L;
 
-   public TargetEspEffect(minecraft.entity.Entity target) {
+   public TargetEspEffect(Entity target) {
       this.target = target;
       this.startTime = System.currentTimeMillis();
       this.registerHit();

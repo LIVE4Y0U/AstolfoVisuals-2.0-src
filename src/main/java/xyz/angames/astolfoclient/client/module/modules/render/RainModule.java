@@ -39,7 +39,7 @@ import xyz.angames.astolfoclient.client.render.WetSurfaceRenderer;
 
 @Environment(EnvType.CLIENT)
 public class RainModule extends Module {
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient mc = MinecraftClient.getInstance();
    public final ModeSetting preset = new ModeSetting("Preset", "Rain", "Drizzle", "Rain", "Downpour", "Storm");
    public final NumberSetting density = new NumberSetting("Density", 1.0, 0.1, 3.0, 0.1);
    public final NumberSetting radius = new NumberSetting("Radius", 26.0, 8.0, 64.0, 1.0);
@@ -131,7 +131,7 @@ public class RainModule extends Module {
    private final List<RainModule.Droplet> dropletList = new ArrayList<>();
    private final List<RainModule.Mist> mistList = new ArrayList<>();
    private final Map<Long, Integer> groundCache = new HashMap<>();
-   private final math.BlockPos.Mutable scratchPos = new math.BlockPos.Mutable();
+   private final BlockPos.Mutable scratchPos = new BlockPos.Mutable();
    private final Random random = new Random();
    private long lastFrameNanos;
    private float clock;
@@ -247,15 +247,15 @@ public class RainModule extends Module {
       float r = (float)this.radius.get();
       float area = r * r * 0.0155F;
       int count = (int)(area * (float)this.density.get() * this.presetDensity() * 26.0F);
-      return util.math.MathHelper.clamp(count, 40, 4500);
+      return MathHelper.clamp(count, 40, 4500);
    }
 
    private float[] resolveColor() {
       int color;
       if (this.colorMode.is("Custom")) {
-         int r = (int)util.math.MathHelper.clamp((float)this.customRed.get(), 0.0F, 255.0F);
-         int g = (int)util.math.MathHelper.clamp((float)this.customGreen.get(), 0.0F, 255.0F);
-         int b = (int)util.math.MathHelper.clamp((float)this.customBlue.get(), 0.0F, 255.0F);
+         int r = (int)MathHelper.clamp((float)this.customRed.get(), 0.0F, 255.0F);
+         int g = (int)MathHelper.clamp((float)this.customGreen.get(), 0.0F, 255.0F);
+         int b = (int)MathHelper.clamp((float)this.customBlue.get(), 0.0F, 255.0F);
          color = r << 16 | g << 8 | b;
       } else if (this.colorMode.is("Theme")) {
          color = ThemeManager.getThemedColor(0L);
@@ -282,7 +282,7 @@ public class RainModule extends Module {
 
       int top;
       try {
-         top = this.mc.world.getTopY(world.Heightmap.Type.WORLD_SURFACE, x, z);
+         top = this.mc.world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z);
       } catch (Throwable ignored) {
          top = this.mc.world.getBottomY();
       }
@@ -299,12 +299,12 @@ public class RainModule extends Module {
          return false;
       }
 
-      this.scratchPos.set(util.math.MathHelper.floor(x), util.math.MathHelper.floor(y), util.math.MathHelper.floor(z));
+      this.scratchPos.set(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
       if (!this.mc.world.getChunkManager().isChunkLoaded(this.scratchPos.getX() >> 4, this.scratchPos.getZ() >> 4)) {
          return false;
       }
 
-      minecraft.block.BlockState state = this.mc.world.getBlockState(this.scratchPos);
+      BlockState state = this.mc.world.getBlockState(this.scratchPos);
       if (!state.getFluidState().isEmpty()) {
          return true;
       }
@@ -325,7 +325,7 @@ public class RainModule extends Module {
          return false;
       }
 
-      this.scratchPos.set(util.math.MathHelper.floor(x), util.math.MathHelper.floor(y), util.math.MathHelper.floor(z));
+      this.scratchPos.set(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
 
       try {
          return !this.mc.world.getBlockState(this.scratchPos).getFluidState().isEmpty();
@@ -336,7 +336,7 @@ public class RainModule extends Module {
 
    private boolean skyVisible(double x, double y, double z) {
       if (this.skyCheck.get() && this.mc.world != null) {
-         this.scratchPos.set(util.math.MathHelper.floor(x), util.math.MathHelper.floor(y), util.math.MathHelper.floor(z));
+         this.scratchPos.set(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
 
          try {
             return this.mc.world.isSkyVisible(this.scratchPos);
@@ -348,7 +348,7 @@ public class RainModule extends Module {
       }
    }
 
-   private void spawnDrop(util.math.Vec3d center, boolean fromTop) {
+   private void spawnDrop(Vec3d center, boolean fromTop) {
       float r = (float)this.radius.get();
       double angle = this.random.nextDouble() * Math.PI * 2.0;
       double dist = Math.sqrt(this.random.nextDouble()) * r;
@@ -366,12 +366,12 @@ public class RainModule extends Module {
          drop.vy = -this.random(6.0F, 11.0F) * drop.mass;
          drop.phase = this.random(0.0F, 62.8F);
          drop.brightness = this.random(0.6F, 1.0F);
-         drop.ground = this.surfaceY(util.math.MathHelper.floor(x), util.math.MathHelper.floor(z));
+         drop.ground = this.surfaceY(MathHelper.floor(x), MathHelper.floor(z));
          this.drops.add(drop);
       }
    }
 
-   private void updateDrops(util.math.Vec3d center, float dt) {
+   private void updateDrops(Vec3d center, float dt) {
       int target = this.targetDropCount();
       this.drops.removeIf(dx -> {
          double dxx = dx.x - center.x;
@@ -492,11 +492,11 @@ public class RainModule extends Module {
       }
    }
 
-   private void updateMist(util.math.Vec3d center, float dt) {
+   private void updateMist(Vec3d center, float dt) {
       if (!this.groundMist.get()) {
          this.mistList.clear();
       } else {
-         int target = (int)util.math.MathHelper.clamp(22.0F * (float)this.density.get() * this.presetDensity(), 6.0F, 100.0F);
+         int target = (int)MathHelper.clamp(22.0F * (float)this.density.get() * this.presetDensity(), 6.0F, 100.0F);
          this.mistList.removeIf(mx -> {
             mx.life += dt;
             double dx = mx.x - center.x;
@@ -512,7 +512,7 @@ public class RainModule extends Module {
             double dist = Math.sqrt(this.random.nextDouble()) * (float)this.radius.get() * 0.85;
             double x = center.x + Math.cos(angle) * dist;
             double z = center.z + Math.sin(angle) * dist;
-            int ground = this.surfaceY(util.math.MathHelper.floor(x), util.math.MathHelper.floor(z));
+            int ground = this.surfaceY(MathHelper.floor(x), MathHelper.floor(z));
             RainModule.Mist m = new RainModule.Mist();
             m.x = x;
             m.z = z;
@@ -540,7 +540,7 @@ public class RainModule extends Module {
       }
    }
 
-   public void renderWetSurfaceFrame(client.render.Camera camera, Matrix4f viewMatrix, Matrix4f projectionMatrix, float tickDelta) {
+   public void renderWetSurfaceFrame(Camera camera, Matrix4f viewMatrix, Matrix4f projectionMatrix, float tickDelta) {
       if (this.isEnabled() && this.wetGround.get() && this.mc.player != null && this.mc.world != null) {
          if (!this.onlyWhenRaining.get() || this.mc.world.isRaining()) {
             float[] rgb = this.resolveColor();
@@ -550,7 +550,7 @@ public class RainModule extends Module {
             parameters.reflectionStrength = (float)this.reflectionStrength.get();
             parameters.maxDistance = (float)this.reflectionDistance.get();
             parameters.rippleStrength = (float)this.rippleStrength.get();
-            parameters.rainAmount = util.math.MathHelper.clamp(0.55F + (float)this.density.get() * this.presetDensity() * 0.28F, 0.55F, 1.45F);
+            parameters.rainAmount = MathHelper.clamp(0.55F + (float)this.density.get() * this.presetDensity() * 0.28F, 0.55F, 1.45F);
             parameters.ripples = this.puddleRipples.get();
             parameters.reflectionSteps = this.reflectionQuality.is("High") ? 16 : (this.reflectionQuality.is("Performance") ? 6 : 10);
             parameters.themeR = rgb[0];
@@ -574,13 +574,13 @@ public class RainModule extends Module {
          if (this.onlyWhenRaining.get() && !this.mc.world.isRaining()) {
             this.clearAll();
          } else {
-            client.render.Camera camera = context.camera();
+            Camera camera = context.camera();
             if (camera != null) {
                float tickDelta = context.tickCounter().getTickDelta(false);
                if (this.wetGround.get()) {
-                  util.math.MatrixStack viewStack = new util.math.MatrixStack();
-                  viewStack.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-                  viewStack.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+                  MatrixStack viewStack = new MatrixStack();
+                  viewStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+                  viewStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
                   Matrix4f viewMatrix = viewStack.peek().getPositionMatrix();
                   Matrix4f projectionMatrix = context.projectionMatrix();
                   this.renderWetSurfaceFrame(camera, viewMatrix, projectionMatrix, tickDelta);
@@ -593,9 +593,9 @@ public class RainModule extends Module {
 
                float dt = (float)((now - this.lastFrameNanos) / 1.0E9);
                this.lastFrameNanos = now;
-               dt = util.math.MathHelper.clamp(dt, 0.0F, 0.05F);
+               dt = MathHelper.clamp(dt, 0.0F, 0.05F);
                this.clock += dt;
-               util.math.Vec3d cam = camera.getPos();
+               Vec3d cam = camera.getPos();
                this.updateDrops(cam, dt);
                this.updateSplashes(dt);
                this.updateDroplets(dt);
@@ -604,15 +604,15 @@ public class RainModule extends Module {
                if (!this.drops.isEmpty() || !this.splashList.isEmpty() || !this.dropletList.isEmpty() || !this.mistList.isEmpty()) {
                   float[] rgb = this.resolveColor();
                   float ambient = this.ambientLight(camera);
-                  float brightnessMul = util.math.MathHelper.clamp(ambient + this.flash * 0.95F, 0.0F, 1.75F);
+                  float brightnessMul = MathHelper.clamp(ambient + this.flash * 0.95F, 0.0F, 1.75F);
                   float alphaMul = (float)this.opacity.get() * brightnessMul;
-                  util.math.MatrixStack matrices = context.matrixStack();
+                  MatrixStack matrices = context.matrixStack();
                   RenderSystem.enableBlend();
                   RenderSystem.enableDepthTest();
                   RenderSystem.depthMask(false);
                   RenderSystem.disableCull();
-                  RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-                  RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+                  RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+                  RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
                   if (this.groundMist.get()) {
                      this.drawMist(matrices, camera, cam, rgb, alphaMul);
                   }
@@ -622,7 +622,7 @@ public class RainModule extends Module {
                      this.drawRipples(matrices, cam, rgb, alphaMul);
                   }
 
-                  RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+                  RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
                   this.drawStreaks(matrices, camera, cam, rgb, alphaMul, true);
                   if (this.splashes.get()) {
                      this.drawCrowns(matrices, camera, cam, rgb, alphaMul);
@@ -641,9 +641,9 @@ public class RainModule extends Module {
       }
    }
 
-   private void drawStreaks(util.math.MatrixStack ms, client.render.Camera camera, util.math.Vec3d cam, float[] rgb, float alphaMul, boolean highlight) {
+   private void drawStreaks(MatrixStack ms, Camera camera, Vec3d cam, float[] rgb, float alphaMul, boolean highlight) {
       if (!this.drops.isEmpty()) {
-         client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+         BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
          float sizeMul = (float)this.dropSize.get();
          float r = (float)this.radius.get();
          float fadeStart = r * 0.62F;
@@ -657,12 +657,12 @@ public class RainModule extends Module {
             double distSq = dx * dx + dy * dy + dz * dz;
             double dist = Math.sqrt(distSq);
             if (!(dist > r + 4.0)) {
-               float distanceFade = dist <= fadeStart ? 1.0F : 1.0F - util.math.MathHelper.clamp((float)((dist - fadeStart) / (r - fadeStart + 1.0F)), 0.0F, 1.0F);
+               float distanceFade = dist <= fadeStart ? 1.0F : 1.0F - MathHelper.clamp((float)((dist - fadeStart) / (r - fadeStart + 1.0F)), 0.0F, 1.0F);
                if (!(distanceFade <= 0.02F)) {
                   float nearFade = dist < 0.7 ? (float)(dist / 0.7) : 1.0F;
                   double speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy + d.vz * d.vz);
                   if (!(speed < 1.0E-4)) {
-                     float length = (float)util.math.MathHelper.clamp(speed * 0.055 * sizeMul, 0.16, 2.6);
+                     float length = (float)MathHelper.clamp(speed * 0.055 * sizeMul, 0.16, 2.6);
                      float width = (float)(0.014 + 0.019 * d.mass) * sizeMul * (highlight ? 0.45F : 1.0F);
                      float alpha = alphaMul * d.brightness * distanceFade * nearFade * (highlight ? 0.35F : 0.45F);
                      if (!(alpha <= 0.006F)) {
@@ -672,11 +672,11 @@ public class RainModule extends Module {
                         double rightZ = Math.sin(yawRad);
                         double horizontal = d.vx * rightX + d.vz * rightZ;
                         float tilt = (float)Math.toDegrees(Math.atan2(horizontal, Math.abs(d.vy) + 1.0E-4));
-                        tilt = util.math.MathHelper.clamp(tilt, -55.0F, 55.0F);
+                        tilt = MathHelper.clamp(tilt, -55.0F, 55.0F);
                         ms.push();
                         ms.translate(dx, dy, dz);
-                        ms.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
-                        ms.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(-tilt));
+                        ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
+                        ms.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-tilt));
                         Matrix4f m = ms.peek().getPositionMatrix();
                         float half = width * 0.5F;
                         float top = length * 0.5F;
@@ -712,21 +712,21 @@ public class RainModule extends Module {
             }
          }
 
-         client.render.BuiltBuffer built = buffer.endNullable();
+         BuiltBuffer built = buffer.endNullable();
          if (built != null) {
-            client.render.BufferRenderer.drawWithGlobalProgram(built);
+            BufferRenderer.drawWithGlobalProgram(built);
          }
       }
    }
 
-   private void drawRipples(util.math.MatrixStack ms, util.math.Vec3d cam, float[] rgb, float alphaMul) {
+   private void drawRipples(MatrixStack ms, Vec3d cam, float[] rgb, float alphaMul) {
       if (!this.splashList.isEmpty()) {
-         client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+         BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
          int i = 0;
 
          for (int size = this.splashList.size(); i < size; i++) {
             RainModule.Splash s = this.splashList.get(i);
-            float progress = util.math.MathHelper.clamp(s.life / s.maxLife, 0.0F, 1.0F);
+            float progress = MathHelper.clamp(s.life / s.maxLife, 0.0F, 1.0F);
             float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
             float outer = s.scale * (0.18F + eased * (s.water ? 1.35F : 0.85F));
             float inner = outer * (0.55F + 0.35F * eased);
@@ -760,21 +760,21 @@ public class RainModule extends Module {
             }
          }
 
-         client.render.BuiltBuffer built = buffer.endNullable();
+         BuiltBuffer built = buffer.endNullable();
          if (built != null) {
-            client.render.BufferRenderer.drawWithGlobalProgram(built);
+            BufferRenderer.drawWithGlobalProgram(built);
          }
       }
    }
 
-   private void drawCrowns(util.math.MatrixStack ms, client.render.Camera camera, util.math.Vec3d cam, float[] rgb, float alphaMul) {
+   private void drawCrowns(MatrixStack ms, Camera camera, Vec3d cam, float[] rgb, float alphaMul) {
       if (!this.splashList.isEmpty()) {
-         client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+         BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
          int i = 0;
 
          for (int size = this.splashList.size(); i < size; i++) {
             RainModule.Splash s = this.splashList.get(i);
-            float progress = util.math.MathHelper.clamp(s.life / s.maxLife, 0.0F, 1.0F);
+            float progress = MathHelper.clamp(s.life / s.maxLife, 0.0F, 1.0F);
             if (!(progress > 0.55F)) {
                float local = progress / 0.55F;
                float height = s.scale * (0.55F * (float)Math.sin(local * Math.PI));
@@ -782,7 +782,7 @@ public class RainModule extends Module {
                if (!(alpha <= 0.01F) && !(height <= 0.005F)) {
                   ms.push();
                   ms.translate(s.x - cam.x, s.y - cam.y + 0.02, s.z - cam.z);
-                  ms.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
+                  ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
                   Matrix4f m = ms.peek().getPositionMatrix();
                   float base = s.scale * 0.16F;
                   buffer.vertex(m, -base * 0.25F, height, 0.0F).color(rgb[0], rgb[1], rgb[2], 0.0F);
@@ -794,34 +794,34 @@ public class RainModule extends Module {
             }
          }
 
-         client.render.BuiltBuffer built = buffer.endNullable();
+         BuiltBuffer built = buffer.endNullable();
          if (built != null) {
-            client.render.BufferRenderer.drawWithGlobalProgram(built);
+            BufferRenderer.drawWithGlobalProgram(built);
          }
       }
    }
 
-   private void drawDroplets(util.math.MatrixStack ms, client.render.Camera camera, util.math.Vec3d cam, float[] rgb, float alphaMul) {
+   private void drawDroplets(MatrixStack ms, Camera camera, Vec3d cam, float[] rgb, float alphaMul) {
       if (!this.dropletList.isEmpty()) {
-         client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+         BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
          float sizeMul = (float)this.dropSize.get();
          int i = 0;
 
          for (int size = this.dropletList.size(); i < size; i++) {
             RainModule.Droplet d = this.dropletList.get(i);
-            float progress = util.math.MathHelper.clamp(d.life / d.maxLife, 0.0F, 1.0F);
+            float progress = MathHelper.clamp(d.life / d.maxLife, 0.0F, 1.0F);
             float alpha = alphaMul * (1.0F - progress) * 0.55F;
             if (!(alpha <= 0.01F)) {
                double speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy + d.vz * d.vz);
-               float length = (float)util.math.MathHelper.clamp(speed * 0.03 * sizeMul, 0.04, 0.4);
+               float length = (float)MathHelper.clamp(speed * 0.03 * sizeMul, 0.04, 0.4);
                float width = 0.016F * sizeMul;
                float yawRad = (float)Math.toRadians(camera.getYaw());
                double horizontal = d.vx * Math.cos(yawRad) + d.vz * Math.sin(yawRad);
                float tilt = (float)Math.toDegrees(Math.atan2(horizontal, -d.vy + 1.0E-4));
                ms.push();
                ms.translate(d.x - cam.x, d.y - cam.y, d.z - cam.z);
-               ms.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
-               ms.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(-tilt));
+               ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
+               ms.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-tilt));
                Matrix4f m = ms.peek().getPositionMatrix();
                buffer.vertex(m, -width * 0.4F, length * 0.5F, 0.0F).color(rgb[0], rgb[1], rgb[2], 0.0F);
                buffer.vertex(m, width * 0.4F, length * 0.5F, 0.0F).color(rgb[0], rgb[1], rgb[2], 0.0F);
@@ -831,27 +831,27 @@ public class RainModule extends Module {
             }
          }
 
-         client.render.BuiltBuffer built = buffer.endNullable();
+         BuiltBuffer built = buffer.endNullable();
          if (built != null) {
-            client.render.BufferRenderer.drawWithGlobalProgram(built);
+            BufferRenderer.drawWithGlobalProgram(built);
          }
       }
    }
 
-   private void drawMist(util.math.MatrixStack ms, client.render.Camera camera, util.math.Vec3d cam, float[] rgb, float alphaMul) {
+   private void drawMist(MatrixStack ms, Camera camera, Vec3d cam, float[] rgb, float alphaMul) {
       if (!this.mistList.isEmpty()) {
-         client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+         BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
          int i = 0;
 
          for (int size = this.mistList.size(); i < size; i++) {
             RainModule.Mist mist = this.mistList.get(i);
-            float progress = util.math.MathHelper.clamp(mist.life / mist.maxLife, 0.0F, 1.0F);
+            float progress = MathHelper.clamp(mist.life / mist.maxLife, 0.0F, 1.0F);
             float fade = (float)Math.sin(progress * Math.PI);
             float alpha = alphaMul * fade * 0.055F;
             if (!(alpha <= 0.004F)) {
                ms.push();
                ms.translate(mist.x - cam.x, mist.y - cam.y, mist.z - cam.z);
-               ms.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
+               ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
                Matrix4f m = ms.peek().getPositionMatrix();
                float half = mist.size * 0.5F;
                float top = mist.size * 0.42F;
@@ -863,17 +863,17 @@ public class RainModule extends Module {
             }
          }
 
-         client.render.BuiltBuffer built = buffer.endNullable();
+         BuiltBuffer built = buffer.endNullable();
          if (built != null) {
-            client.render.BufferRenderer.drawWithGlobalProgram(built);
+            BufferRenderer.drawWithGlobalProgram(built);
          }
       }
    }
 
-   private float ambientLight(client.render.Camera camera) {
+   private float ambientLight(Camera camera) {
       try {
          int light = this.mc.world.getLightLevel(camera.getBlockPos());
-         return util.math.MathHelper.clamp(light / 15.0F, 0.3F, 1.0F);
+         return MathHelper.clamp(light / 15.0F, 0.3F, 1.0F);
       } catch (Throwable ignored) {
          return 1.0F;
       }

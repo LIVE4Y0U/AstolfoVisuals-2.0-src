@@ -57,14 +57,14 @@ public class FakePlayerCommand extends Command {
       fakePlayer.setId(fakeId);
       this.mc.world.addEntity(fakePlayer);
       FakePlayerEntity.instance = fakePlayer;
-      sendMessage("Spawned fake player: " + minecraft.util.Formatting.AQUA + name + minecraft.util.Formatting.GRAY + " (ID: " + fakeId + ")");
+      sendMessage("Spawned fake player: " + Formatting.AQUA + name + Formatting.GRAY + " (ID: " + fakeId + ")");
    }
 
    private void despawn() {
       if (FakePlayerEntity.instance != null) {
          int id = FakePlayerEntity.instance.getId();
          FakePlayerEntity.instance.discard();
-         this.mc.world.removeEntity(id, entity.Entity.RemovalReason.DISCARDED);
+         this.mc.world.removeEntity(id, Entity.RemovalReason.DISCARDED);
          FakePlayerEntity.instance = null;
          sendMessage("Despawned fake player.");
       } else {

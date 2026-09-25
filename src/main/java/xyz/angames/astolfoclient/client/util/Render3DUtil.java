@@ -28,28 +28,28 @@ import org.joml.Vector4i;
 @Environment(EnvType.CLIENT)
 public class Render3DUtil {
    private static final List<Render3DUtil.Texture> GLOW_TEXTURES = new ArrayList<>();
-   private static final client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+   private static final Tessellator tessellator = Tessellator.getInstance();
 
-   public static void onRenderWorld(util.math.MatrixStack matrix) {
-      math.MatrixStack.Entry entry = matrix.peek();
+   public static void onRenderWorld(MatrixStack matrix) {
+      MatrixStack.Entry entry = matrix.peek();
       if (!GLOW_TEXTURES.isEmpty()) {
-         Set<minecraft.util.Identifier> identifiers = GLOW_TEXTURES.stream().map(texture -> texture.id).collect(Collectors.toCollection(LinkedHashSet::new));
+         Set<Identifier> identifiers = GLOW_TEXTURES.stream().map(texture -> texture.id).collect(Collectors.toCollection(LinkedHashSet::new));
          RenderSystem.enableBlend();
          RenderSystem.disableDepthTest();
          RenderSystem.depthMask(false);
-         RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
          identifiers.forEach(
             id -> {
                RenderSystem.setShaderTexture(0, id);
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-               client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+               BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                GLOW_TEXTURES.stream()
                   .filter(texture -> texture.id.equals(id))
                   .forEach(tex -> quadTexture(tex.entry, buffer, tex.x, tex.y, tex.width, tex.height, tex.color));
-               client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+               BufferRenderer.drawWithGlobalProgram(buffer.end());
             }
          );
-         RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
          RenderSystem.enableDepthTest();
          RenderSystem.depthMask(true);
          RenderSystem.disableBlend();
@@ -57,7 +57,7 @@ public class Render3DUtil {
       }
    }
 
-   public static void drawGlowTexture(math.MatrixStack.Entry entry, minecraft.util.Identifier id, float x, float y, float width, float height, int color) {
+   public static void drawGlowTexture(MatrixStack.Entry entry, Identifier id, float x, float y, float width, float height, int color) {
       GLOW_TEXTURES.add(
          new Render3DUtil.Texture(
             entry, id, x, y, width, height, new Vector4i(ColorUtil.red(color), ColorUtil.green(color), ColorUtil.blue(color), ColorUtil.alpha(color))
@@ -65,7 +65,7 @@ public class Render3DUtil {
       );
    }
 
-   private static void quadTexture(math.MatrixStack.Entry entry, client.render.BufferBuilder buffer, float x, float y, float width, float height, Vector4i color) {
+   private static void quadTexture(MatrixStack.Entry entry, BufferBuilder buffer, float x, float y, float width, float height, Vector4i color) {
       Matrix4f matrix = entry != null ? entry.getPositionMatrix() : new Matrix4f();
       int r = color.x;
       int g = color.y;
@@ -77,13 +77,13 @@ public class Render3DUtil {
       buffer.vertex(matrix, x, y, 0.0F).texture(0.0F, 0.0F).color(r, g, b, a);
    }
 
-   public static void drawGlowTexture(math.MatrixStack.Entry peek, minecraft.util.Identifier texture, float v, float v1, float v2, float v3, Vector4i vector4i, boolean b) {
+   public static void drawGlowTexture(MatrixStack.Entry peek, Identifier texture, float v, float v1, float v2, float v3, Vector4i vector4i, boolean b) {
    }
 
-   public static void drawBox(@Nullable util.math.MatrixStack matrixStack, util.math.Box box, Color color) {
+   public static void drawBox(@Nullable MatrixStack matrixStack, Box box, Color color) {
    }
 
    @Environment(EnvType.CLIENT)
-   public record Texture(math.MatrixStack.Entry entry, minecraft.util.Identifier id, float x, float y, float width, float height, Vector4i color) {
+   public record Texture(MatrixStack.Entry entry, Identifier id, float x, float y, float width, float height, Vector4i color) {
    }
 }

@@ -132,20 +132,20 @@ public class AstolfoclientClient implements ClientModInitializer {
    public static DiamondEspRenderer diamondEspRenderer;
    public static TrajectoriesRenderer trajectoriesRenderer;
    public static ActiveBindsManager activeBindsManager;
-   public static final client.gl.ShaderProgramKey CHAMS_OUTLINE_SHADER = new client.gl.ShaderProgramKey(
-      minecraft.util.Identifier.of("astolfoclient", "core/chams_outline"), client.render.VertexFormats.POSITION_TEXTURE, client.gl.Defines.EMPTY
+   public static final ShaderProgramKey CHAMS_OUTLINE_SHADER = new ShaderProgramKey(
+      Identifier.of("astolfoclient", "core/chams_outline"), VertexFormats.POSITION_TEXTURE, Defines.EMPTY
    );
-   public static final client.gl.ShaderProgramKey LIQUID_GLASS_SHADER = new client.gl.ShaderProgramKey(
-      minecraft.util.Identifier.of("astolfoclient", "core/liquid_glass"), client.render.VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, client.gl.Defines.EMPTY
+   public static final ShaderProgramKey LIQUID_GLASS_SHADER = new ShaderProgramKey(
+      Identifier.of("astolfoclient", "core/liquid_glass"), VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, Defines.EMPTY
    );
-   public static final client.gl.ShaderProgramKey COSMOS_FILL_SHADER = new client.gl.ShaderProgramKey(
-      minecraft.util.Identifier.of("astolfoclient", "core/cosmos_fill"), client.render.VertexFormats.POSITION_TEXTURE_COLOR, client.gl.Defines.EMPTY
+   public static final ShaderProgramKey COSMOS_FILL_SHADER = new ShaderProgramKey(
+      Identifier.of("astolfoclient", "core/cosmos_fill"), VertexFormats.POSITION_TEXTURE_COLOR, Defines.EMPTY
    );
-   public static final client.gl.ShaderProgramKey CHINA_HAT_SHADER = new client.gl.ShaderProgramKey(
-      minecraft.util.Identifier.of("astolfoclient", "core/china_hat"), client.render.VertexFormats.POSITION_TEXTURE_COLOR, client.gl.Defines.EMPTY
+   public static final ShaderProgramKey CHINA_HAT_SHADER = new ShaderProgramKey(
+      Identifier.of("astolfoclient", "core/china_hat"), VertexFormats.POSITION_TEXTURE_COLOR, Defines.EMPTY
    );
-   public static final client.gl.ShaderProgramKey BLOCK_OUTLINE_SHADER = new client.gl.ShaderProgramKey(
-      minecraft.util.Identifier.of("astolfoclient", "core/block_outline"), client.render.VertexFormats.POSITION_TEXTURE_COLOR, client.gl.Defines.EMPTY
+   public static final ShaderProgramKey BLOCK_OUTLINE_SHADER = new ShaderProgramKey(
+      Identifier.of("astolfoclient", "core/block_outline"), VertexFormats.POSITION_TEXTURE_COLOR, Defines.EMPTY
    );
    private DiscordRpcManager discordRpcManager;
    public static int clickGuiKeyCode = 260;
@@ -312,7 +312,7 @@ public class AstolfoclientClient implements ClientModInitializer {
          if (client.player != null && client.world != null) {
             if (!(client.currentScreen instanceof HudEditorScreen)) {
                try {
-                  minecraft.entity.LivingEntity lookedTarget = TargetUtils.getLookedAtTarget(client, 40.0);
+                  LivingEntity lookedTarget = TargetUtils.getLookedAtTarget(client, 40.0);
                   if (lookedTarget != null) {
                      if (targetHudManager != null && isModuleEnabled("TargetHUD")) {
                         targetHudManager.setTarget(lookedTarget);
@@ -369,7 +369,7 @@ public class AstolfoclientClient implements ClientModInitializer {
       });
       LivingEntityFeatureRendererRegistrationCallback.EVENT
          .register((LivingEntityFeatureRendererRegistrationCallback)(entityType, entityRenderer, registrationHelper, context) -> {
-            if (entityType == minecraft.entity.EntityType.PLAYER) {
+            if (entityType == EntityType.PLAYER) {
                registrationHelper.register(new ChinaHatFeatureRenderer(entityRenderer));
             }
          });
@@ -459,7 +459,7 @@ public class AstolfoclientClient implements ClientModInitializer {
          }
       });
       HudRenderCallback.EVENT.register((HudRenderCallback)(drawContext, tickDelta) -> {
-         minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient client = MinecraftClient.getInstance();
 
          for (Module module : moduleManager.getModules()) {
             if (module.isEnabled()) {

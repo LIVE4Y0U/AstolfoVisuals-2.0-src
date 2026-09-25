@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.item.HeldItemRenderer.class)
+@Mixin(HeldItemRenderer.class)
 public interface HeldItemRendererAccessor {
    @Invoker("renderArmHoldingItem")
-   void invokeRenderArmHoldingItem(util.math.MatrixStack var1, client.render.VertexConsumerProvider var2, int var3, float var4, float var5, minecraft.util.Arm var6);
+   void invokeRenderArmHoldingItem(MatrixStack var1, VertexConsumerProvider var2, int var3, float var4, float var5, Arm var6);
 }

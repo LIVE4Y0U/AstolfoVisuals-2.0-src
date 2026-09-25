@@ -18,14 +18,14 @@ import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.module.modules.render.InterfaceModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.hud.InGameHud.class)
+@Mixin(InGameHud.class)
 public class InGameHudMixin {
    @Shadow
    @Final
-   private minecraft.client.MinecraftClient client;
+   private MinecraftClient client;
 
    @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
-   private void onRenderStatusEffectOverlay(client.gui.DrawContext context, client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+   private void onRenderStatusEffectOverlay(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
       if (AstolfoclientClient.moduleManager != null
          && AstolfoclientClient.moduleManager.getModuleByName("Interface") instanceof InterfaceModule iface
          && iface.isEnabled()
@@ -35,7 +35,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
-   private void onRenderCrosshair(client.gui.DrawContext context, client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+   private void onRenderCrosshair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
       Module crosshairModule = AstolfoclientClient.moduleManager.getModuleByName("Crosshair");
       if (crosshairModule != null && crosshairModule.isEnabled()) {
          ci.cancel();
@@ -43,7 +43,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderHotbar", at = @At("HEAD"), cancellable = true)
-   private void onRenderHotbar(client.gui.DrawContext context, client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+   private void onRenderHotbar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
       Module hotbarModule = AstolfoclientClient.moduleManager.getModuleByName("CustomHotbar");
       if (hotbarModule != null && hotbarModule.isEnabled()) {
          ci.cancel();
@@ -57,7 +57,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderHotbar", at = @At("RETURN"))
-   private void onAfterRenderHotbar(client.gui.DrawContext context, client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+   private void onAfterRenderHotbar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
       Module hotbarModule = AstolfoclientClient.moduleManager.getModuleByName("CustomHotbar");
       if (hotbarModule == null || !hotbarModule.isEnabled()) {
          float offset = LogoRenderer.getHotbarYOffset();
@@ -68,7 +68,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderStatusBars", at = @At("HEAD"))
-   private void onBeforeRenderStatusBars(client.gui.DrawContext context, CallbackInfo ci) {
+   private void onBeforeRenderStatusBars(DrawContext context, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().push();
@@ -77,7 +77,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderStatusBars", at = @At("RETURN"))
-   private void onAfterRenderStatusBars(client.gui.DrawContext context, CallbackInfo ci) {
+   private void onAfterRenderStatusBars(DrawContext context, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().pop();
@@ -85,7 +85,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderExperienceBar", at = @At("HEAD"))
-   private void onBeforeRenderExperienceBar(client.gui.DrawContext context, int x, CallbackInfo ci) {
+   private void onBeforeRenderExperienceBar(DrawContext context, int x, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().push();
@@ -94,7 +94,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderExperienceBar", at = @At("RETURN"))
-   private void onAfterRenderExperienceBar(client.gui.DrawContext context, int x, CallbackInfo ci) {
+   private void onAfterRenderExperienceBar(DrawContext context, int x, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().pop();
@@ -102,7 +102,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderExperienceLevel", at = @At("HEAD"))
-   private void onBeforeRenderExperienceLevel(client.gui.DrawContext context, client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+   private void onBeforeRenderExperienceLevel(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().push();
@@ -111,7 +111,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderExperienceLevel", at = @At("RETURN"))
-   private void onAfterRenderExperienceLevel(client.gui.DrawContext context, client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+   private void onAfterRenderExperienceLevel(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().pop();
@@ -119,7 +119,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"))
-   private void onBeforeRenderHeldItemTooltip(client.gui.DrawContext context, CallbackInfo ci) {
+   private void onBeforeRenderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().push();
@@ -128,7 +128,7 @@ public class InGameHudMixin {
    }
 
    @Inject(method = "renderHeldItemTooltip", at = @At("RETURN"))
-   private void onAfterRenderHeldItemTooltip(client.gui.DrawContext context, CallbackInfo ci) {
+   private void onAfterRenderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
       float offset = LogoRenderer.getHotbarYOffset();
       if (offset > 0.01F) {
          context.getMatrices().pop();

@@ -24,11 +24,11 @@ public class AutoRespawnModule extends Module {
       });
    }
 
-   private void onTick(minecraft.client.MinecraftClient mc) {
+   private void onTick(MinecraftClient mc) {
       if (mc.player == null) {
          this.deathTime = 0L;
       } else {
-         boolean isDead = mc.currentScreen instanceof gui.screen.DeathScreen || mc.player.isDead() || mc.player.getHealth() <= 0.0F;
+         boolean isDead = mc.currentScreen instanceof DeathScreen || mc.player.isDead() || mc.player.getHealth() <= 0.0F;
          if (isDead) {
             long now = System.currentTimeMillis();
             if (this.deathTime == 0L) {
@@ -37,7 +37,7 @@ public class AutoRespawnModule extends Module {
 
             if (now - this.deathTime >= (long)this.delay.get()) {
                mc.player.requestRespawn();
-               if (mc.currentScreen instanceof gui.screen.DeathScreen) {
+               if (mc.currentScreen instanceof DeathScreen) {
                   mc.setScreen(null);
                }
 

@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.module.modules.render.NoRenderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.render.GameRenderer.class)
+@Mixin(GameRenderer.class)
 public class MixinGameRenderer {
    @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
-   private void onShowFloatingItem(minecraft.item.ItemStack floatingItem, CallbackInfo ci) {
+   private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.totem.get()) {
          ci.cancel();
@@ -23,7 +23,7 @@ public class MixinGameRenderer {
    }
 
    @Inject(method = "tiltViewWhenHurt", at = @At("HEAD"), cancellable = true)
-   private void onTiltViewWhenHurt(util.math.MatrixStack matrices, float tickDelta, CallbackInfo ci) {
+   private void onTiltViewWhenHurt(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.hurtCam.get()) {
          ci.cancel();

@@ -32,7 +32,7 @@ import xyz.angames.astolfoclient.client.util.FriendManager;
 
 @Environment(EnvType.CLIENT)
 public class WingsModule extends Module {
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient mc = MinecraftClient.getInstance();
    private static final float DEFAULT_SPREAD = 8.0F;
    private static final int DEFAULT_ALPHA = 220;
    private static final WingsModule.WingPoint[] SHAPE = new WingsModule.WingPoint[]{
@@ -65,15 +65,15 @@ public class WingsModule extends Module {
          .register(
             (Last)context -> {
                if (this.isEnabled() && this.mc.player != null && this.mc.world != null && this.mc.gameRenderer != null) {
-                  util.math.MatrixStack stack = context.matrixStack();
+                  MatrixStack stack = context.matrixStack();
                   float tickDelta = context.tickCounter().getTickDelta(true);
-                  util.math.Vec3d camera = this.mc.gameRenderer.getCamera().getPos();
+                  Vec3d camera = this.mc.gameRenderer.getCamera().getPos();
                   stack.push();
                   RenderSystem.enableBlend();
                   RenderSystem.disableCull();
                   RenderSystem.enableDepthTest();
                   RenderSystem.depthMask(false);
-                  RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
+                  RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
                   if (this.self.get()
                      && !this.mc.options.getPerspective().isFirstPerson()
                      && this.mc.player.isAlive()
@@ -85,8 +85,8 @@ public class WingsModule extends Module {
                   }
 
                   if (this.players.get()) {
-                     for (minecraft.entity.Entity entity : this.mc.world.getEntities()) {
-                        if (entity instanceof entity.player.PlayerEntity player && player != this.mc.player && player.isAlive() && !this.hasElytra(player)) {
+                     for (Entity entity : this.mc.world.getEntities()) {
+                        if (entity instanceof PlayerEntity player && player != this.mc.player && player.isAlive() && !this.hasElytra(player)) {
                            try {
                               this.renderWings(stack, player, tickDelta, camera);
                            } catch (Exception var9) {
@@ -98,7 +98,7 @@ public class WingsModule extends Module {
                   RenderSystem.depthMask(true);
                   RenderSystem.enableCull();
                   RenderSystem.disableBlend();
-                  RenderSystem.blendFuncSeparate(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, platform.GlStateManager.SrcFactor.ONE, platform.GlStateManager.DstFactor.ZERO);
+                  RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
                   RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                   stack.pop();
                }
@@ -111,12 +111,12 @@ public class WingsModule extends Module {
       this.selfBodyYawInitialized = false;
    }
 
-   private void renderWings(util.math.MatrixStack stack, entity.player.PlayerEntity player, float tickDelta, util.math.Vec3d camera) {
-      double x = util.math.MathHelper.lerp(tickDelta, player.prevX, player.getX()) - camera.x;
-      double y = util.math.MathHelper.lerp(tickDelta, player.prevY, player.getY()) - camera.y;
-      double z = util.math.MathHelper.lerp(tickDelta, player.prevZ, player.getZ()) - camera.z;
+   private void renderWings(MatrixStack stack, PlayerEntity player, float tickDelta, Vec3d camera) {
+      double x = MathHelper.lerp(tickDelta, player.prevX, player.getX()) - camera.x;
+      double y = MathHelper.lerp(tickDelta, player.prevY, player.getY()) - camera.y;
+      double z = MathHelper.lerp(tickDelta, player.prevZ, player.getZ()) - camera.z;
       float bodyYaw = this.resolveBodyYaw(player, tickDelta);
-      float move = util.math.MathHelper.clamp(player.limbAnimator.getSpeed(tickDelta), 0.0F, 1.0F);
+      float move = MathHelper.clamp(player.limbAnimator.getSpeed(tickDelta), 0.0F, 1.0F);
       WingsModule.WingPose pose = this.resolvePose(player, tickDelta);
       if (pose != null) {
          float flap = (float)Math.sin((player.age + tickDelta) * pose.flapSpeed) * pose.flapAmplitude;
@@ -140,17 +140,17 @@ public class WingsModule extends Module {
             stack.scale(0.5F, 0.5F, 0.5F);
          }
 
-         stack.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - bodyYaw));
+         stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - bodyYaw));
          if (pose.preTranslateY != 0.0F || pose.preTranslateZ != 0.0F) {
             stack.translate(0.0F, pose.preTranslateY, pose.preTranslateZ);
          }
 
          if (pose.pitchRotation != 0.0F) {
-            stack.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(pose.pitchRotation));
+            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(pose.pitchRotation));
          }
 
          if (pose.rollRotation != 0.0F) {
-            stack.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(pose.rollRotation));
+            stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(pose.rollRotation));
          }
 
          stack.translate(0.0F, pose.anchorY, pose.anchorZ);
@@ -161,26 +161,26 @@ public class WingsModule extends Module {
       }
    }
 
-   private void renderWingSide(util.math.MatrixStack stack, float side, float open, int baseColor, int glowColor, int coreColor, WingsModule.WingPose pose) {
+   private void renderWingSide(MatrixStack stack, float side, float open, int baseColor, int glowColor, int coreColor, WingsModule.WingPose pose) {
       stack.push();
       stack.translate(side * pose.sideOffset, pose.sideYOffset, pose.sideZOffset);
-      stack.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(side * open));
-      stack.multiply(util.math.RotationAxis.POSITIVE_Z.rotationDegrees(side * pose.sideRoll));
-      stack.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(pose.sidePitch));
-      RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+      stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(side * open));
+      stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(side * pose.sideRoll));
+      stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(pose.sidePitch));
+      RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
       this.drawWingLayer(stack, side, 1.22F, setAlpha(glowColor, 48), setAlpha(glowColor, 0));
       this.drawWingLayer(stack, side, 0.84F, setAlpha(coreColor, 57), setAlpha(coreColor, 0));
-      RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+      RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
       this.drawWingLayer(stack, side, 1.0F, setAlpha(baseColor, 220), setAlpha(baseColor, 10));
-      RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+      RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
       this.drawWingOutline(stack, side, 1.0F, setAlpha(baseColor, 136));
       this.drawWingRibs(stack, side, 0.96F, setAlpha(glowColor, 44));
       stack.pop();
    }
 
-   private void drawWingLayer(util.math.MatrixStack stack, float side, float scale, int rootColor, int edgeColor) {
+   private void drawWingLayer(MatrixStack stack, float side, float scale, int rootColor, int edgeColor) {
       Matrix4f matrix = stack.peek().getPositionMatrix();
-      client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.TRIANGLES, client.render.VertexFormats.POSITION_COLOR);
+      BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
 
       for (int i = 0; i < SHAPE.length; i++) {
          WingsModule.WingPoint cur = SHAPE[i];
@@ -190,29 +190,29 @@ public class WingsModule extends Module {
          this.vertex(buffer, matrix, side * next.x * scale, next.y * scale, 0.0F, this.applyPointAlpha(edgeColor, next.alphaMul));
       }
 
-      client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+      BufferRenderer.drawWithGlobalProgram(buffer.end());
    }
 
-   private void drawWingOutline(util.math.MatrixStack stack, float side, float scale, int color) {
+   private void drawWingOutline(MatrixStack stack, float side, float scale, int color) {
       Matrix4f matrix = stack.peek().getPositionMatrix();
       RenderSystem.lineWidth(1.35F);
       GL11.glEnable(2848);
-      client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.DEBUG_LINE_STRIP, client.render.VertexFormats.POSITION_COLOR);
+      BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
 
       for (WingsModule.WingPoint point : SHAPE) {
          this.vertex(buffer, matrix, side * point.x * scale, point.y * scale, 0.0F, color);
       }
 
       this.vertex(buffer, matrix, side * SHAPE[0].x * scale, SHAPE[0].y * scale, 0.0F, color);
-      client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+      BufferRenderer.drawWithGlobalProgram(buffer.end());
       GL11.glDisable(2848);
    }
 
-   private void drawWingRibs(util.math.MatrixStack stack, float side, float scale, int color) {
+   private void drawWingRibs(MatrixStack stack, float side, float scale, int color) {
       Matrix4f matrix = stack.peek().getPositionMatrix();
       int[] ribIndices = new int[]{2, 4, 7, 9, 11};
       RenderSystem.lineWidth(0.9F);
-      client.render.BufferBuilder buffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.LINES, client.render.VertexFormats.POSITION_COLOR);
+      BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR);
 
       for (int idx : ribIndices) {
          WingsModule.WingPoint point = SHAPE[idx];
@@ -220,7 +220,7 @@ public class WingsModule extends Module {
          this.vertex(buffer, matrix, side * point.x * scale, point.y * scale, 0.0F, this.applyPointAlpha(color, point.alphaMul));
       }
 
-      client.render.BufferRenderer.drawWithGlobalProgram(buffer.end());
+      BufferRenderer.drawWithGlobalProgram(buffer.end());
    }
 
    private int resolveBaseColor() {
@@ -254,11 +254,11 @@ public class WingsModule extends Module {
    }
 
    private static int packARGB(int r, int g, int b, int a) {
-      return util.math.MathHelper.clamp(a, 0, 255) << 24 | r << 16 | g << 8 | b;
+      return MathHelper.clamp(a, 0, 255) << 24 | r << 16 | g << 8 | b;
    }
 
    private static int setAlpha(int color, int a) {
-      return util.math.MathHelper.clamp(a, 0, 255) << 24 | color & 16777215;
+      return MathHelper.clamp(a, 0, 255) << 24 | color & 16777215;
    }
 
    private static int alpha(int color) {
@@ -281,12 +281,12 @@ public class WingsModule extends Module {
       return setAlpha(color, Math.max(0, Math.min(255, (int)(alpha(color) * multiplier))));
    }
 
-   private void vertex(client.render.BufferBuilder buffer, Matrix4f matrix, float x, float y, float z, int color) {
+   private void vertex(BufferBuilder buffer, Matrix4f matrix, float x, float y, float z, int color) {
       buffer.vertex(matrix, x, y, z).color(red(color) / 255.0F, green(color) / 255.0F, blue(color) / 255.0F, alpha(color) / 255.0F);
    }
 
-   private float resolveBodyYaw(entity.player.PlayerEntity player, float tickDelta) {
-      float target = util.math.MathHelper.lerpAngleDegrees(tickDelta, player.prevBodyYaw, player.bodyYaw);
+   private float resolveBodyYaw(PlayerEntity player, float tickDelta) {
+      float target = MathHelper.lerpAngleDegrees(tickDelta, player.prevBodyYaw, player.bodyYaw);
       if (player != this.mc.player) {
          return target;
       } else if (this.selfBodyYawInitialized && player.age >= 2) {
@@ -300,16 +300,16 @@ public class WingsModule extends Module {
    }
 
    private static float approachDegrees(float current, float target, float maxDelta) {
-      float delta = util.math.MathHelper.wrapDegrees(target - current);
-      delta = util.math.MathHelper.clamp(delta, -maxDelta, maxDelta);
+      float delta = MathHelper.wrapDegrees(target - current);
+      delta = MathHelper.clamp(delta, -maxDelta, maxDelta);
       return current + delta;
    }
 
-   private WingsModule.WingPose resolvePose(entity.player.PlayerEntity player, float tickDelta) {
-      float pitch = util.math.MathHelper.lerp(tickDelta, player.prevPitch, player.getPitch());
+   private WingsModule.WingPose resolvePose(PlayerEntity player, float tickDelta) {
+      float pitch = MathHelper.lerp(tickDelta, player.prevPitch, player.getPitch());
       if (player.isGliding()) {
          float flightTicks = player.getGlidingTicks() + tickDelta;
-         float flightProgress = util.math.MathHelper.clamp(flightTicks * flightTicks / 100.0F, 0.0F, 1.0F);
+         float flightProgress = MathHelper.clamp(flightTicks * flightTicks / 100.0F, 0.0F, 1.0F);
          float pitchRotation = flightProgress * (-90.0F - pitch);
          return new WingsModule.WingPose(0.34F, 0.46F, 0.0F, 0.0F, pitchRotation, 0.0F, 0.76F, 0.92F, 0.1F, 0.58F, 0.05F, 0.06F, -5.0F, -2.0F, 0.13F);
       } else if (player.isTouchingWater()) {
@@ -321,8 +321,8 @@ public class WingsModule extends Module {
       }
    }
 
-   private boolean hasElytra(entity.player.PlayerEntity player) {
-      return player.getEquippedStack(minecraft.entity.EquipmentSlot.CHEST).isOf(minecraft.item.Items.ELYTRA);
+   private boolean hasElytra(PlayerEntity player) {
+      return player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA);
    }
 
    @Override

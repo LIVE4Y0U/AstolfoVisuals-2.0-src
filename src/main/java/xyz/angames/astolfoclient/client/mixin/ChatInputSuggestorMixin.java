@@ -23,14 +23,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.screen.ChatInputSuggestor.class)
+@Mixin(ChatInputSuggestor.class)
 public abstract class ChatInputSuggestorMixin {
    @Shadow
-   private gui.widget.TextFieldWidget textField;
+   private TextFieldWidget textField;
    @Shadow
    private CompletableFuture<Suggestions> pendingSuggestions;
    @Shadow
-   private ParseResults<minecraft.command.CommandSource> parse;
+   private ParseResults<CommandSource> parse;
 
    @Shadow
    public abstract void showCommandSuggestions();
@@ -50,12 +50,12 @@ public abstract class ChatInputSuggestorMixin {
          }
 
          this.pendingSuggestions = builder.buildFuture();
-         minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient client = MinecraftClient.getInstance();
          if (client.player != null && client.player.networkHandler != null) {
-            CommandDispatcher<minecraft.command.CommandSource> dummyDispatcher = new CommandDispatcher();
+            CommandDispatcher<CommandSource> dummyDispatcher = new CommandDispatcher();
             StringReader reader = new StringReader(text);
             reader.setCursor(text.length());
-            CommandContextBuilder<minecraft.command.CommandSource> contextBuilder = new CommandContextBuilder(
+            CommandContextBuilder<CommandSource> contextBuilder = new CommandContextBuilder(
                dummyDispatcher, client.player.networkHandler.getCommandSource(), dummyDispatcher.getRoot(), 0
             );
             this.parse = new ParseResults(contextBuilder, reader, Collections.emptyMap());

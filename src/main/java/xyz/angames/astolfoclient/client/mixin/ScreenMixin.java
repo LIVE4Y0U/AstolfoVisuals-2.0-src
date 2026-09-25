@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.util.IASAccountHelper;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.screen.Screen.class)
+@Mixin(Screen.class)
 public abstract class ScreenMixin {
    @Shadow
-   protected abstract <T extends client.gui.Element & client.gui.Drawable & client.gui.Selectable> T addDrawableChild(T var1);
+   protected abstract <T extends Element & Drawable & Selectable> T addDrawableChild(T var1);
 
    @Inject(method = "init", at = @At("TAIL"))
    private void onInit(CallbackInfo ci) {
-      gui.screen.Screen screen = (gui.screen.Screen)this;
+      Screen screen = (Screen)this;
       IASAccountHelper.onScreenInit(screen, this::addDrawableChild);
    }
 }

@@ -115,12 +115,12 @@ public class SubSettingsPopupState {
       }
 
       float sY = ACTIVE.triggerY - 2.0F;
-      sY = util.math.MathHelper.clamp(sY, winY + 38.0F, winY + winH - subH - 8.0F);
+      sY = MathHelper.clamp(sY, winY + 38.0F, winY + winH - subH - 8.0F);
       return new float[]{sX, sY, subW, subH, bodyH, totalContentH};
    }
 
    public static void renderActive(
-      client.gui.DrawContext context, float winX, float winY, float winW, float winH, int mouseX, int mouseY, float deltaTime, float masterAlpha, Color themeColor
+      DrawContext context, float winX, float winY, float winW, float winH, int mouseX, int mouseY, float deltaTime, float masterAlpha, Color themeColor
    ) {
       if (ACTIVE != null) {
          ACTIVE.anim = GuiUtils.animate(ACTIVE.anim, ACTIVE.isClosing ? 0.0F : 1.0F, 18.0F, deltaTime);
@@ -151,7 +151,7 @@ public class SubSettingsPopupState {
             float bodyH = bounds[4];
             float totalContentH = bounds[5];
             float maxScroll = Math.max(0.0F, totalContentH + 8.0F - bodyH);
-            ACTIVE.targetScrollY = util.math.MathHelper.clamp(ACTIVE.targetScrollY, -maxScroll, 0.0F);
+            ACTIVE.targetScrollY = MathHelper.clamp(ACTIVE.targetScrollY, -maxScroll, 0.0F);
             ACTIVE.scrollY = GuiUtils.animate(ACTIVE.scrollY, ACTIVE.targetScrollY, 20.0F, deltaTime);
             context.getMatrices().push();
             if (scale < 0.999F) {
@@ -229,7 +229,7 @@ public class SubSettingsPopupState {
                float scrollTrackH = bodyH - 8.0F;
                float scrollThumbH = Math.max(16.0F, bodyH / (totalContentH + 8.0F) * scrollTrackH);
                float scrollProgress = -ACTIVE.scrollY / maxScroll;
-               scrollProgress = util.math.MathHelper.clamp(scrollProgress, 0.0F, 1.0F);
+               scrollProgress = MathHelper.clamp(scrollProgress, 0.0F, 1.0F);
                float scrollThumbY = contentTop + 4.0F + scrollProgress * (scrollTrackH - scrollThumbH);
                Builder.rectangle()
                   .size(new SizeState(2.5F, scrollThumbH))
@@ -250,7 +250,7 @@ public class SubSettingsPopupState {
       float sx = x + 10.0F;
       float sw = w - 20.0F;
       float val = (float)ns.get();
-      float targetRatio = util.math.MathHelper.clamp((val - (float)ns.getMin()) / ((float)ns.getMax() - (float)ns.getMin()), 0.0F, 1.0F);
+      float targetRatio = MathHelper.clamp((val - (float)ns.getMin()) / ((float)ns.getMax() - (float)ns.getMin()), 0.0F, 1.0F);
       float animRatio = this.sliderRatioAnimMap.getOrDefault(ns, targetRatio);
       animRatio = GuiUtils.animate(animRatio, targetRatio, 20.0F, deltaTime);
       this.sliderRatioAnimMap.put(ns, animRatio);
@@ -414,7 +414,7 @@ public class SubSettingsPopupState {
          float totalContentH = bounds[5];
          if (GuiUtils.isMouseOver((float)mouseX, (float)mouseY, sX, sY, subW, subH)) {
             float maxScroll = Math.max(0.0F, totalContentH + 8.0F - bodyH);
-            ACTIVE.targetScrollY = util.math.MathHelper.clamp(ACTIVE.targetScrollY + (float)amount * 28.0F, -maxScroll, 0.0F);
+            ACTIVE.targetScrollY = MathHelper.clamp(ACTIVE.targetScrollY + (float)amount * 28.0F, -maxScroll, 0.0F);
             return true;
          } else {
             return false;
@@ -426,7 +426,7 @@ public class SubSettingsPopupState {
 
    private void applySlider(double mx, float startX, float w, NumberSetting ns) {
       float sw = w - 20.0F;
-      float ratio = (float)util.math.MathHelper.clamp((mx - (startX + 10.0F)) / sw, 0.0, 1.0);
+      float ratio = (float)MathHelper.clamp((mx - (startX + 10.0F)) / sw, 0.0, 1.0);
       double range = ns.getMax() - ns.getMin();
       double rawVal = ns.getMin() + ratio * range;
       double inc = ns.getIncrement();
@@ -435,7 +435,7 @@ public class SubSettingsPopupState {
       }
 
       double oldVal = ns.get();
-      double newVal = util.math.MathHelper.clamp(rawVal, ns.getMin(), ns.getMax());
+      double newVal = MathHelper.clamp(rawVal, ns.getMin(), ns.getMax());
       if (Double.compare(oldVal, newVal) != 0) {
          ns.set(newVal);
          ModSounds.playSliderMove();

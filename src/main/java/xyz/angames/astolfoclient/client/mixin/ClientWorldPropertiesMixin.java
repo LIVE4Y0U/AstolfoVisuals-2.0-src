@@ -11,7 +11,7 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(world.ClientWorld.Properties.class)
+@Mixin(ClientWorld.Properties.class)
 public class ClientWorldPropertiesMixin {
    @Inject(method = "getTimeOfDay", at = @At("HEAD"), cancellable = true)
    private void onGetTimeOfDay(CallbackInfoReturnable<Long> cir) {

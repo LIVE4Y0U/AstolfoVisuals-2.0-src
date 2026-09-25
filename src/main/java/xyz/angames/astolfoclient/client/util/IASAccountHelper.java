@@ -20,7 +20,7 @@ import ru.vidtu.ias.config.IASStorage;
 
 @Environment(EnvType.CLIENT)
 public class IASAccountHelper {
-   public static void onScreenInit(gui.screen.Screen screen, Consumer<gui.widget.ButtonWidget> buttonAdder) {
+   public static void onScreenInit(Screen screen, Consumer<ButtonWidget> buttonAdder) {
       if (screen != null && buttonAdder != null) {
          String className = screen.getClass().getName();
          if (className.contains("ias") && (className.contains("Account") || className.contains("Switcher"))) {
@@ -29,34 +29,34 @@ public class IASAccountHelper {
       }
    }
 
-   private static void rebalanceAndAddRandomButton(gui.screen.Screen screen, Consumer<gui.widget.ButtonWidget> buttonAdder) {
+   private static void rebalanceAndAddRandomButton(Screen screen, Consumer<ButtonWidget> buttonAdder) {
       int targetRowY = screen.height - 48;
       int btnHeight = 20;
       int btnWidth = 74;
       int gap = 4;
       int startX = screen.width / 2 - 154;
-      List<gui.widget.ClickableWidget> topRowWidgets = new ArrayList<>();
+      List<ClickableWidget> topRowWidgets = new ArrayList<>();
 
       try {
-         for (client.gui.Element child : screen.children()) {
-            if (child instanceof gui.widget.ClickableWidget widget && widget.getY() >= screen.height - 60 && widget.getY() <= screen.height - 35) {
+         for (Element child : screen.children()) {
+            if (child instanceof ClickableWidget widget && widget.getY() >= screen.height - 60 && widget.getY() <= screen.height - 35) {
                topRowWidgets.add(widget);
             }
          }
       } catch (Throwable var11) {
       }
 
-      topRowWidgets.sort(Comparator.comparingInt(gui.widget.ClickableWidget::getX));
+      topRowWidgets.sort(Comparator.comparingInt(ClickableWidget::getX));
       if (topRowWidgets.size() >= 3) {
-         gui.widget.ClickableWidget btn0 = topRowWidgets.get(0);
+         ClickableWidget btn0 = topRowWidgets.get(0);
          btn0.setX(startX);
          btn0.setY(targetRowY);
          btn0.setWidth(btnWidth);
-         gui.widget.ClickableWidget btn1 = topRowWidgets.get(1);
+         ClickableWidget btn1 = topRowWidgets.get(1);
          btn1.setX(startX + btnWidth + gap);
          btn1.setY(targetRowY);
          btn1.setWidth(btnWidth);
-         gui.widget.ClickableWidget btn2 = topRowWidgets.get(2);
+         ClickableWidget btn2 = topRowWidgets.get(2);
          btn2.setX(startX + (btnWidth + gap) * 2);
          btn2.setY(targetRowY);
          btn2.setWidth(btnWidth);
@@ -64,13 +64,13 @@ public class IASAccountHelper {
 
       int randomBtnX = startX + (btnWidth + gap) * 3;
       int randomBtnY = targetRowY;
-      gui.widget.ButtonWidget randomBtn = gui.widget.ButtonWidget.builder(minecraft.text.Text.literal("Random"), btn -> addRandomOfflineAccount(screen))
+      ButtonWidget randomBtn = ButtonWidget.builder(Text.literal("Random"), btn -> addRandomOfflineAccount(screen))
          .dimensions(randomBtnX, randomBtnY, btnWidth, btnHeight)
          .build();
       buttonAdder.accept(randomBtn);
    }
 
-   public static void addRandomOfflineAccount(gui.screen.Screen screen) {
+   public static void addRandomOfflineAccount(Screen screen) {
       try {
          String randomName = RandomNameGenerator.generateUniqueName();
          OfflineAccount account = new OfflineAccount(randomName, null);
@@ -88,9 +88,9 @@ public class IASAccountHelper {
                   String searchText = "";
 
                   for (Field sField : screen.getClass().getDeclaredFields()) {
-                     if (gui.widget.TextFieldWidget.class.isAssignableFrom(sField.getType())) {
+                     if (TextFieldWidget.class.isAssignableFrom(sField.getType())) {
                         sField.setAccessible(true);
-                        gui.widget.TextFieldWidget tf = (gui.widget.TextFieldWidget)sField.get(screen);
+                        TextFieldWidget tf = (TextFieldWidget)sField.get(screen);
                         if (tf != null) {
                            searchText = tf.getText();
                            break;

@@ -10,9 +10,9 @@ import xyz.angames.astolfoclient.client.util.TargetUtils;
 @Environment(EnvType.CLIENT)
 public class GhostEspManager {
    public static final long LIFESPAN = 450L;
-   private final Map<minecraft.entity.Entity, GhostEspEffect> effects = new ConcurrentHashMap<>();
+   private final Map<Entity, GhostEspEffect> effects = new ConcurrentHashMap<>();
 
-   public void addEffect(minecraft.entity.Entity target) {
+   public void addEffect(Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          this.effects.compute(target, (entity, effect) -> {
             if (effect == null) {
@@ -25,7 +25,7 @@ public class GhostEspManager {
       }
    }
 
-   public void addAttack(minecraft.entity.Entity target) {
+   public void addAttack(Entity target) {
       if (target != null && !TargetUtils.isInvisible(target)) {
          this.effects.computeIfPresent(target, (entity, effect) -> {
             effect.lastAttackTime = System.currentTimeMillis();
@@ -44,7 +44,7 @@ public class GhostEspManager {
          );
    }
 
-   public Map<minecraft.entity.Entity, GhostEspEffect> getEffects() {
+   public Map<Entity, GhostEspEffect> getEffects() {
       return this.effects;
    }
 }

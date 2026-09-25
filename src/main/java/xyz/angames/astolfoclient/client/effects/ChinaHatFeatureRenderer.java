@@ -31,21 +31,21 @@ import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<entity.state.PlayerEntityRenderState, entity.model.PlayerEntityModel> {
-   public static entity.player.PlayerEntity currentlyRenderingPlayer;
+public class ChinaHatFeatureRenderer extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
+   public static PlayerEntity currentlyRenderingPlayer;
    private static final float RADIUS = 0.65F;
    private static final float HEIGHT = 0.28F;
    private static final int SEGMENTS = 40;
-   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/dashtrail/dashbloom.png");
+   private static final Identifier BLOOM_TEXTURE = Identifier.of("astolfoclient", "textures/effects/dashtrail/dashbloom.png");
    private float spinAngle = 0.0F;
    private long lastRenderTime = 0L;
 
-   public ChinaHatFeatureRenderer(entity.feature.FeatureRendererContext<entity.state.PlayerEntityRenderState, entity.model.PlayerEntityModel> context) {
+   public ChinaHatFeatureRenderer(FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel> context) {
       super(context);
    }
 
-   public void render(util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, entity.state.PlayerEntityRenderState state, float limbAngle, float limbDistance) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, PlayerEntityRenderState state, float limbAngle, float limbDistance) {
+      MinecraftClient mc = MinecraftClient.getInstance();
       Module module = AstolfoclientClient.moduleManager.getModuleByName("ChinaHat");
       if (module != null && module.isEnabled() && mc.player != null) {
          if (currentlyRenderingPlayer != null && currentlyRenderingPlayer.getId() == mc.player.getId()) {
@@ -60,13 +60,13 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
 
                this.lastRenderTime = now;
                matrices.push();
-               ((entity.model.PlayerEntityModel)this.getContextModel()).head.rotate(matrices);
+               ((PlayerEntityModel)this.getContextModel()).head.rotate(matrices);
                matrices.translate(0.0F, -0.4F, 0.0F);
                matrices.scale(1.0F, -1.0F, 1.0F);
-               matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(this.spinAngle));
+               matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(this.spinAngle));
                Matrix4f matrix = matrices.peek().getPositionMatrix();
-               client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
-               if (vertexConsumers instanceof render.VertexConsumerProvider.Immediate immediate) {
+               Tessellator tessellator = Tessellator.getInstance();
+               if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) {
                   immediate.draw();
                }
 
@@ -74,8 +74,8 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
                RenderSystem.disableCull();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(true);
-               RenderSystem.blendFuncSeparate(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, platform.GlStateManager.SrcFactor.ONE, platform.GlStateManager.DstFactor.ZERO);
-               client.gl.ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.CHINA_HAT_SHADER);
+               RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+               ShaderProgram shader = RenderSystem.setShader(AstolfoclientClient.CHINA_HAT_SHADER);
                if (shader != null) {
                   float timeSecs = (float)(System.currentTimeMillis() % 1000000L) / 1000.0F;
                   if (shader.getUniform("uTime") != null) {
@@ -98,7 +98,7 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
                Color cInner = new Color(ThemeManager.getThemedColor((int)(now / 10L)));
                Color cOuter = new Color(ThemeManager.getThemedColor((int)(now / 10L) + 60));
                int optimizedLayers = 16;
-               client.render.BufferBuilder bufBody = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+               BufferBuilder bufBody = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
 
                for (int layer = 1; layer < optimizedLayers; layer++) {
                   float t0 = (float)(layer - 1) / (optimizedLayers - 1);
@@ -141,7 +141,7 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
                   }
                }
 
-               client.render.BufferRenderer.drawWithGlobalProgram(bufBody.end());
+               BufferRenderer.drawWithGlobalProgram(bufBody.end());
                float r = cOuter.getRed() / 255.0F;
                float g = cOuter.getGreen() / 255.0F;
                float b = cOuter.getBlue() / 255.0F;
@@ -149,7 +149,7 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
                float innerR = 0.65F - rimW;
                float innerH = 0.28F * (rimW / 0.65F);
                float innerT = (0.65F - rimW) / 0.65F;
-               client.render.BufferBuilder bufRim = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+               BufferBuilder bufRim = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
 
                for (int i = 0; i < 40; i++) {
                   double a0 = (Math.PI * 2) * i / 40.0;
@@ -176,17 +176,17 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
                      .color(r, g, b, 1.0F);
                }
 
-               client.render.BufferRenderer.drawWithGlobalProgram(bufRim.end());
+               BufferRenderer.drawWithGlobalProgram(bufRim.end());
                RenderSystem.enableBlend();
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
                RenderSystem.disableCull();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(false);
                r = cOuter.getRed() / 255.0F;
                g = cOuter.getGreen() / 255.0F;
                b = cOuter.getBlue() / 255.0F;
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-               client.render.BufferBuilder glowRimBuf = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+               BufferBuilder glowRimBuf = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
                innerR = 0.598F;
                innerH = 0.68899995F;
                innerT = 0.7F;
@@ -209,16 +209,16 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
                   glowRimBuf.vertex(matrix, x0_out, 0.001F, z0_out).color(r, g, b, outerAlpha);
                }
 
-               client.render.BufferRenderer.drawWithGlobalProgram(glowRimBuf.end());
+               BufferRenderer.drawWithGlobalProgram(glowRimBuf.end());
                RenderSystem.setShaderTexture(0, BLOOM_TEXTURE);
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-               client.render.BufferBuilder bloomBaseBuf = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+               BufferBuilder bloomBaseBuf = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                float bSize = 0.663F;
                bloomBaseBuf.vertex(matrix, -bSize, 0.005F, bSize).texture(0.0F, 1.0F).color(r, g, b, 0.4F);
                bloomBaseBuf.vertex(matrix, bSize, 0.005F, bSize).texture(1.0F, 1.0F).color(r, g, b, 0.4F);
                bloomBaseBuf.vertex(matrix, bSize, 0.005F, -bSize).texture(1.0F, 0.0F).color(r, g, b, 0.4F);
                bloomBaseBuf.vertex(matrix, -bSize, 0.005F, -bSize).texture(0.0F, 0.0F).color(r, g, b, 0.4F);
-               client.render.BufferRenderer.drawWithGlobalProgram(bloomBaseBuf.end());
+               BufferRenderer.drawWithGlobalProgram(bloomBaseBuf.end());
                matrices.pop();
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(true);
@@ -231,7 +231,7 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
    }
 
    private Color lerpColor(Color a, Color b, float t) {
-      t = util.math.MathHelper.clamp(t, 0.0F, 1.0F);
+      t = MathHelper.clamp(t, 0.0F, 1.0F);
       return new Color(
          (int)(a.getRed() + (b.getRed() - a.getRed()) * t),
          (int)(a.getGreen() + (b.getGreen() - a.getGreen()) * t),
@@ -240,7 +240,7 @@ public class ChinaHatFeatureRenderer extends entity.feature.FeatureRenderer<enti
    }
 
    private float smoothstep(float t) {
-      t = util.math.MathHelper.clamp(t, 0.0F, 1.0F);
+      t = MathHelper.clamp(t, 0.0F, 1.0F);
       return t * t * (3.0F - 2.0F * t);
    }
 }

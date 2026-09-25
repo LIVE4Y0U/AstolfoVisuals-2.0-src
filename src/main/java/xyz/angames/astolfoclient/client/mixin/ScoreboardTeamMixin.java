@@ -12,21 +12,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.scoreboard.Team.class)
+@Mixin(Team.class)
 public class ScoreboardTeamMixin {
    @Inject(method = "getPrefix", at = @At("RETURN"), cancellable = true)
-   public void onGetPrefix(CallbackInfoReturnable<minecraft.text.Text> cir) {
-      cir.setReturnValue(NameProtectModule.getProtectedText((minecraft.text.Text)cir.getReturnValue()));
+   public void onGetPrefix(CallbackInfoReturnable<Text> cir) {
+      cir.setReturnValue(NameProtectModule.getProtectedText((Text)cir.getReturnValue()));
    }
 
    @Inject(method = "getSuffix", at = @At("RETURN"), cancellable = true)
-   public void onGetSuffix(CallbackInfoReturnable<minecraft.text.Text> cir) {
-      cir.setReturnValue(NameProtectModule.getProtectedText((minecraft.text.Text)cir.getReturnValue()));
+   public void onGetSuffix(CallbackInfoReturnable<Text> cir) {
+      cir.setReturnValue(NameProtectModule.getProtectedText((Text)cir.getReturnValue()));
    }
 
    @Inject(method = "decorateName", at = @At("RETURN"), cancellable = true)
-   public void onDecorateName(CallbackInfoReturnable<minecraft.text.MutableText> cir) {
-      minecraft.text.Text protectedText = NameProtectModule.getProtectedText((minecraft.text.Text)cir.getReturnValue());
+   public void onDecorateName(CallbackInfoReturnable<MutableText> cir) {
+      Text protectedText = NameProtectModule.getProtectedText((Text)cir.getReturnValue());
       if (protectedText != null) {
          cir.setReturnValue(protectedText.copy());
       }

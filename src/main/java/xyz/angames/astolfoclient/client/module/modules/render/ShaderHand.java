@@ -41,11 +41,11 @@ public class ShaderHand extends Module {
    public final BooleanSetting handColor = new BooleanSetting("Hand Color", false);
    public final BooleanSetting motion = new BooleanSetting("Motion", false);
    public final NumberSetting motionStrength = new NumberSetting("Motion Strength", 0.8, 0.0, 0.99, 0.05);
-   private client.gl.Framebuffer handsBuffer;
-   private client.gl.Framebuffer motionBuffer;
-   private client.gl.Framebuffer tempMotionBuffer;
-   private final List<client.gl.Framebuffer> bloomBuffers = new ArrayList<>();
-   private final minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private Framebuffer handsBuffer;
+   private Framebuffer motionBuffer;
+   private Framebuffer tempMotionBuffer;
+   private final List<Framebuffer> bloomBuffers = new ArrayList<>();
+   private final MinecraftClient mc = MinecraftClient.getInstance();
    private int kawaseDownProgram = -1;
    private int kawaseUpProgram = -1;
    private int innerGlowProgram = -1;
@@ -104,11 +104,11 @@ public class ShaderHand extends Module {
          this.tempMotionBuffer = null;
       }
 
-      this.bloomBuffers.forEach(client.gl.Framebuffer::delete);
+      this.bloomBuffers.forEach(Framebuffer::delete);
       this.bloomBuffers.clear();
    }
 
-   private void setLinearFilter(client.gl.Framebuffer buffer) {
+   private void setLinearFilter(Framebuffer buffer) {
       if (buffer != null) {
          GL11.glBindTexture(3553, buffer.getColorAttachment());
          GL11.glTexParameteri(3553, 10241, 9729);
@@ -116,7 +116,7 @@ public class ShaderHand extends Module {
       }
    }
 
-   public client.gl.Framebuffer getHandsBuffer() {
+   public Framebuffer getHandsBuffer() {
       int width = this.mc.getWindow().getFramebufferWidth();
       int height = this.mc.getWindow().getFramebufferHeight();
       if (this.handsBuffer == null || this.handsBuffer.textureWidth != width || this.handsBuffer.textureHeight != height) {
@@ -124,7 +124,7 @@ public class ShaderHand extends Module {
             this.handsBuffer.delete();
          }
 
-         this.handsBuffer = new client.gl.SimpleFramebuffer(width, height, true);
+         this.handsBuffer = new SimpleFramebuffer(width, height, true);
          this.handsBuffer.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
          this.setLinearFilter(this.handsBuffer);
       }
@@ -133,7 +133,7 @@ public class ShaderHand extends Module {
    }
 
    public void beginRender() {
-      client.gl.Framebuffer fbo = this.getHandsBuffer();
+      Framebuffer fbo = this.getHandsBuffer();
       fbo.clear();
       fbo.beginWrite(true);
    }
@@ -148,7 +148,7 @@ public class ShaderHand extends Module {
             int prevProgram = GL11.glGetInteger(35725);
             int prevActiveTexture = GL11.glGetInteger(34016);
             int prevTexture = GL11.glGetInteger(32873);
-            client.gl.Framebuffer inputBuffer = this.handsBuffer;
+            Framebuffer inputBuffer = this.handsBuffer;
             if (this.motion.get() && this.motionStrength.getFloat() > 0.0F) {
                long now = System.currentTimeMillis();
                double dt = this.lastDrawTime == 0L ? 0.016 : (now - this.lastDrawTime) / 1000.0;
@@ -174,7 +174,7 @@ public class ShaderHand extends Module {
                      this.motionBuffer.delete();
                   }
 
-                  this.motionBuffer = new client.gl.SimpleFramebuffer(width, height, true);
+                  this.motionBuffer = new SimpleFramebuffer(width, height, true);
                   this.motionBuffer.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
                   this.setLinearFilter(this.motionBuffer);
                   this.motionBuffer.clear();
@@ -185,7 +185,7 @@ public class ShaderHand extends Module {
                      this.tempMotionBuffer.delete();
                   }
 
-                  this.tempMotionBuffer = new client.gl.SimpleFramebuffer(width, height, true);
+                  this.tempMotionBuffer = new SimpleFramebuffer(width, height, true);
                   this.tempMotionBuffer.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
                   this.setLinearFilter(this.tempMotionBuffer);
                   this.tempMotionBuffer.clear();
@@ -206,7 +206,7 @@ public class ShaderHand extends Module {
                GL11.glTexParameteri(3553, 10241, 9729);
                GL11.glTexParameteri(3553, 10240, 9729);
                this.drawQuads();
-               client.gl.Framebuffer temp = this.motionBuffer;
+               Framebuffer temp = this.motionBuffer;
                this.motionBuffer = this.tempMotionBuffer;
                this.tempMotionBuffer = temp;
                inputBuffer = this.motionBuffer;
@@ -227,9 +227,9 @@ public class ShaderHand extends Module {
             RenderSystem.disableDepthTest();
             RenderSystem.disableCull();
             if (!this.glass.get() && !this.blur.get()) {
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.ONE, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
             } else {
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
             }
 
             int color = ThemeManager.getThemedColor(0L);
@@ -281,7 +281,7 @@ public class ShaderHand extends Module {
       }
    }
 
-   private void renderKawaseBloom(client.gl.Framebuffer inputBuffer) {
+   private void renderKawaseBloom(Framebuffer inputBuffer) {
       int iterations = this.glowRadius.getInt();
       this.setupBloomBuffers(iterations);
       int currentTexture = inputBuffer.getColorAttachment();
@@ -293,7 +293,7 @@ public class ShaderHand extends Module {
       GL20.glUniform1i(GL20.glGetUniformLocation(this.kawaseDownProgram, "inTexture"), 0);
 
       for (int i = 0; i < iterations; i++) {
-         client.gl.Framebuffer buffer = this.bloomBuffers.get(i);
+         Framebuffer buffer = this.bloomBuffers.get(i);
          buffer.clear();
          buffer.beginWrite(true);
          GL20.glUniform2f(GL20.glGetUniformLocation(this.kawaseDownProgram, "uHalfPixel"), 0.5F / buffer.textureWidth, 0.5F / buffer.textureHeight);
@@ -311,7 +311,7 @@ public class ShaderHand extends Module {
       GL20.glUniform3f(GL20.glGetUniformLocation(this.kawaseUpProgram, "color"), 1.0F, 1.0F, 1.0F);
 
       for (int i = iterations - 1; i >= 0 && i != 0; i--) {
-         client.gl.Framebuffer buffer = this.bloomBuffers.get(i - 1);
+         Framebuffer buffer = this.bloomBuffers.get(i - 1);
          buffer.beginWrite(true);
          GL20.glUniform2f(GL20.glGetUniformLocation(this.kawaseUpProgram, "uHalfPixel"), 0.5F / buffer.textureWidth, 0.5F / buffer.textureHeight);
          GL20.glUniform2f(GL20.glGetUniformLocation(this.kawaseUpProgram, "uOffset"), 1 + i, 1 + i);
@@ -369,13 +369,13 @@ public class ShaderHand extends Module {
 
    private void setupBloomBuffers(int iterations) {
       if (this.bloomBuffers.size() < iterations) {
-         this.bloomBuffers.forEach(client.gl.Framebuffer::delete);
+         this.bloomBuffers.forEach(Framebuffer::delete);
          this.bloomBuffers.clear();
 
          for (int i = 0; i < iterations; i++) {
             int w = (int)Math.max(2.0, this.mc.getWindow().getFramebufferWidth() / Math.pow(2.0, i + 1));
             int h = (int)Math.max(2.0, this.mc.getWindow().getFramebufferHeight() / Math.pow(2.0, i + 1));
-            client.gl.Framebuffer fbo = new client.gl.SimpleFramebuffer(w, h, false);
+            Framebuffer fbo = new SimpleFramebuffer(w, h, false);
             fbo.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
             this.bloomBuffers.add(fbo);
             this.setLinearFilter(fbo);
@@ -385,7 +385,7 @@ public class ShaderHand extends Module {
       for (int i = 0; i < iterations; i++) {
          int w = (int)Math.max(2.0, this.mc.getWindow().getFramebufferWidth() / Math.pow(2.0, i + 1));
          int h = (int)Math.max(2.0, this.mc.getWindow().getFramebufferHeight() / Math.pow(2.0, i + 1));
-         client.gl.Framebuffer fbo = this.bloomBuffers.get(i);
+         Framebuffer fbo = this.bloomBuffers.get(i);
          if (fbo.textureWidth != w || fbo.textureHeight != h) {
             fbo.resize(w, h);
             this.setLinearFilter(fbo);
@@ -452,17 +452,17 @@ public class ShaderHand extends Module {
          return false;
       }
 
-      minecraft.item.ItemStack mainHand = this.mc.player.getMainHandStack();
-      minecraft.item.ItemStack offHand = this.mc.player.getOffHandStack();
+      ItemStack mainHand = this.mc.player.getMainHandStack();
+      ItemStack offHand = this.mc.player.getOffHandStack();
       return !this.isMap(mainHand) && !this.isMap(offHand);
    }
 
-   private boolean isMap(minecraft.item.ItemStack stack) {
+   private boolean isMap(ItemStack stack) {
       if (stack.isEmpty()) {
          return false;
       }
 
-      String path = minecraft.registry.Registries.ITEM.getId(stack.getItem()).getPath();
+      String path = Registries.ITEM.getId(stack.getItem()).getPath();
       return "map".equals(path) || "filled_map".equals(path);
    }
 }

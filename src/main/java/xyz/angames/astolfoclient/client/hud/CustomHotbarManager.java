@@ -19,7 +19,7 @@ import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
 public class CustomHotbarManager {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private Module cachedModule;
    private static final float SLOT_SIZE = 26.0F;
    private static final float SPACING = 4.0F;
@@ -37,13 +37,13 @@ public class CustomHotbarManager {
    private float animatedSlotPosition = 0.0F;
    private long lastUpdateTimeNs = -1L;
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
+   public void render(DrawContext context, float tickDelta) {
       if (this.cachedModule == null) {
          this.cachedModule = AstolfoclientClient.moduleManager.getModuleByName("CustomHotbar");
       }
 
       if (this.cachedModule != null && this.cachedModule.isEnabled()) {
-         client.network.ClientPlayerEntity player = this.client.player;
+         ClientPlayerEntity player = this.client.player;
          if (player != null && !this.client.options.hudHidden && !player.isSpectator()) {
             Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
             int screenWidth = context.getScaledWindowWidth();
@@ -107,14 +107,14 @@ public class CustomHotbarManager {
             float itemBaseY = startY + 0.0F + 5.0F;
 
             for (int i = 0; i < 9; i++) {
-               minecraft.item.ItemStack stack = (minecraft.item.ItemStack)player.getInventory().main.get(i);
+               ItemStack stack = (ItemStack)player.getInventory().main.get(i);
                if (!stack.isEmpty()) {
                   float itemX = startX + 0.0F + i * 30.0F + 5.0F;
                   this.renderItem(context, stack, (int)itemX, (int)itemBaseY);
                }
             }
 
-            minecraft.item.ItemStack offhandStack = player.getOffHandStack();
+            ItemStack offhandStack = player.getOffHandStack();
             if (!offhandStack.isEmpty()) {
                float offhandX = startX - 26.0F - 8.0F;
                float offhandY = startY;
@@ -140,7 +140,7 @@ public class CustomHotbarManager {
       }
    }
 
-   private void renderItem(client.gui.DrawContext context, minecraft.item.ItemStack stack, int x, int y) {
+   private void renderItem(DrawContext context, ItemStack stack, int x, int y) {
       context.drawItem(stack, x, y);
       context.drawStackOverlay(this.client.textRenderer, stack, x, y);
    }
@@ -168,7 +168,7 @@ public class CustomHotbarManager {
    }
 
    private float getScaleModifier() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       float baseScale = 0.8F;
       float referenceWidth = 2560.0F;

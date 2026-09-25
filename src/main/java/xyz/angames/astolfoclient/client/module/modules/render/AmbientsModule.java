@@ -133,10 +133,10 @@ public class AmbientsModule extends Module {
    private int sphereBlurProgram = -1;
    private int sphereBlurVao = -1;
    private int sphereBlurVbo = -1;
-   private client.gl.Framebuffer sphereBlurFbo = null;
-   private util.math.Vec3d smoothSphereCenter = null;
+   private Framebuffer sphereBlurFbo = null;
+   private Vec3d smoothSphereCenter = null;
    private long lastSphereUpdateTime = 0L;
-   private client.gl.Framebuffer saturationFbo = null;
+   private Framebuffer saturationFbo = null;
    private int saturationProgram = -1;
    private int saturationVao = -1;
    private int saturationVbo = -1;
@@ -415,7 +415,7 @@ public class AmbientsModule extends Module {
 
    private String loadShaderSource(String path) {
       try (
-         InputStream is = minecraft.client.MinecraftClient.getInstance().getResourceManager().open(minecraft.util.Identifier.of("astolfoclient", path));
+         InputStream is = MinecraftClient.getInstance().getResourceManager().open(Identifier.of("astolfoclient", path));
          BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
       ) {
          return reader.lines().collect(Collectors.joining("\n"));
@@ -522,7 +522,7 @@ public class AmbientsModule extends Module {
       if (context.matrixStack() != null) {
          int program = -1;
          boolean isTextureMode = false;
-         minecraft.util.Identifier textureId = null;
+         Identifier textureId = null;
          String mode = this.skyboxMode.get();
          if (mode.equals("Smoke")) {
             this.initSmokeShader();
@@ -560,11 +560,11 @@ public class AmbientsModule extends Module {
                textureIndex = 5;
             }
 
-            textureId = minecraft.util.Identifier.of("astolfoclient", "sky/" + textureIndex + ".png");
+            textureId = Identifier.of("astolfoclient", "sky/" + textureIndex + ".png");
          }
 
          if (program != -1) {
-            minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+            MinecraftClient mc = MinecraftClient.getInstance();
             if (mc.player != null) {
                int prevProgram = GL11.glGetInteger(35725);
                int prevVao = GL11.glGetInteger(34229);
@@ -597,7 +597,7 @@ public class AmbientsModule extends Module {
                if (isTextureMode) {
                   if (textureId != null) {
                      RenderSystem.setShaderTexture(0, textureId);
-                     client.texture.AbstractTexture texture = mc.getTextureManager().getTexture(textureId);
+                     AbstractTexture texture = mc.getTextureManager().getTexture(textureId);
                      int glId = texture != null ? texture.getGlId() : 0;
                      RenderSystem.activeTexture(33984);
                      GL11.glBindTexture(3553, glId);
@@ -701,7 +701,7 @@ public class AmbientsModule extends Module {
          this.initSkyboxGeometry();
          this.initBlackShader();
          if (this.blackProgram != -1) {
-            minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+            MinecraftClient mc = MinecraftClient.getInstance();
             if (mc.player != null) {
                int prevProgram = GL11.glGetInteger(35725);
                int prevVao = GL11.glGetInteger(34229);
@@ -810,7 +810,7 @@ public class AmbientsModule extends Module {
 
    private void renderShaderFog(WorldRenderContext context) {
       if (context.matrixStack() != null) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc.player != null) {
             int program = -1;
             String mode = this.fogShaderMode.get();
@@ -986,7 +986,7 @@ public class AmbientsModule extends Module {
             this.sphereBlurFbo.delete();
          }
 
-         this.sphereBlurFbo = new client.gl.SimpleFramebuffer(width, height, false);
+         this.sphereBlurFbo = new SimpleFramebuffer(width, height, false);
          this.sphereBlurFbo.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
          GL11.glBindTexture(3553, this.sphereBlurFbo.getColorAttachment());
          GL11.glTexParameteri(3553, 10241, 9729);
@@ -997,16 +997,16 @@ public class AmbientsModule extends Module {
       }
    }
 
-   private util.math.Vec3d getSmoothSphereCenter(float tickDelta) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+   private Vec3d getSmoothSphereCenter(float tickDelta) {
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.player == null) {
-         return util.math.Vec3d.ZERO;
+         return Vec3d.ZERO;
       }
 
-      double targetX = util.math.MathHelper.lerp(tickDelta, mc.player.lastRenderX, mc.player.getX());
-      double targetY = util.math.MathHelper.lerp(tickDelta, mc.player.lastRenderY, mc.player.getY()) + mc.player.getHeight() * 0.5;
-      double targetZ = util.math.MathHelper.lerp(tickDelta, mc.player.lastRenderZ, mc.player.getZ());
-      util.math.Vec3d targetPos = new util.math.Vec3d(targetX, targetY, targetZ);
+      double targetX = MathHelper.lerp(tickDelta, mc.player.lastRenderX, mc.player.getX());
+      double targetY = MathHelper.lerp(tickDelta, mc.player.lastRenderY, mc.player.getY()) + mc.player.getHeight() * 0.5;
+      double targetZ = MathHelper.lerp(tickDelta, mc.player.lastRenderZ, mc.player.getZ());
+      Vec3d targetPos = new Vec3d(targetX, targetY, targetZ);
       if (this.smoothSphereCenter != null && this.smoothFollow.get()) {
          if (this.smoothSphereCenter.squaredDistanceTo(targetPos) > 40000.0) {
             this.smoothSphereCenter = targetPos;
@@ -1014,14 +1014,14 @@ public class AmbientsModule extends Module {
          } else {
             long now = System.currentTimeMillis();
             float dt = this.lastSphereUpdateTime == 0L ? 0.016F : (float)(now - this.lastSphereUpdateTime) / 1000.0F;
-            dt = util.math.MathHelper.clamp(dt, 0.001F, 0.1F);
+            dt = MathHelper.clamp(dt, 0.001F, 0.1F);
             this.lastSphereUpdateTime = now;
             float speed = (float)this.blurFollowSpeed.get();
             float t = 1.0F - (float)Math.exp(-speed * dt);
-            this.smoothSphereCenter = new util.math.Vec3d(
-               util.math.MathHelper.lerp(t, this.smoothSphereCenter.x, targetPos.x),
-               util.math.MathHelper.lerp(t, this.smoothSphereCenter.y, targetPos.y),
-               util.math.MathHelper.lerp(t, this.smoothSphereCenter.z, targetPos.z)
+            this.smoothSphereCenter = new Vec3d(
+               MathHelper.lerp(t, this.smoothSphereCenter.x, targetPos.x),
+               MathHelper.lerp(t, this.smoothSphereCenter.y, targetPos.y),
+               MathHelper.lerp(t, this.smoothSphereCenter.z, targetPos.z)
             );
             return this.smoothSphereCenter;
          }
@@ -1032,9 +1032,9 @@ public class AmbientsModule extends Module {
    }
 
    private void renderSphereBlur(WorldRenderContext context) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.player != null && context.camera() != null) {
-         client.gl.Framebuffer mainFbo = mc.getFramebuffer();
+         Framebuffer mainFbo = mc.getFramebuffer();
          if (mainFbo != null) {
             int width = mainFbo.textureWidth;
             int height = mainFbo.textureHeight;
@@ -1075,9 +1075,9 @@ public class AmbientsModule extends Module {
                      float[] invViewProjArr = new float[16];
                      invViewProjMat.get(invViewProjArr);
                      float tickDelta = context.tickCounter() != null ? context.tickCounter().getTickDelta(true) : 1.0F;
-                     util.math.Vec3d sphereCenter = this.getSmoothSphereCenter(tickDelta);
-                     util.math.Vec3d camPos = context.camera().getPos();
-                     util.math.Vec3d sphereCenterRelCam = sphereCenter.subtract(camPos);
+                     Vec3d sphereCenter = this.getSmoothSphereCenter(tickDelta);
+                     Vec3d camPos = context.camera().getPos();
+                     Vec3d sphereCenterRelCam = sphereCenter.subtract(camPos);
                      int sampleCount = 32;
                      String quality = this.blurQuality.get();
                      if (quality.equals("Low")) {
@@ -1211,7 +1211,7 @@ public class AmbientsModule extends Module {
             this.saturationFbo.delete();
          }
 
-         this.saturationFbo = new client.gl.SimpleFramebuffer(width, height, false);
+         this.saturationFbo = new SimpleFramebuffer(width, height, false);
          this.saturationFbo.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
          GL11.glBindTexture(3553, this.saturationFbo.getColorAttachment());
          GL11.glTexParameteri(3553, 10241, 9729);
@@ -1269,11 +1269,11 @@ public class AmbientsModule extends Module {
    }
 
    private void renderSaturation(WorldRenderContext context) {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.player != null) {
          float satVal = (float)this.saturation.get();
          if (!(Math.abs(satVal - 1.0F) < 0.001F)) {
-            client.gl.Framebuffer mainFbo = mc.getFramebuffer();
+            Framebuffer mainFbo = mc.getFramebuffer();
             if (mainFbo != null) {
                int width = mainFbo.textureWidth;
                int height = mainFbo.textureHeight;

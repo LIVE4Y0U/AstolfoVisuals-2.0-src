@@ -24,13 +24,13 @@ import xyz.angames.astolfoclient.client.module.modules.render.ShaderHand;
 import xyz.angames.astolfoclient.client.module.modules.render.SwingAnimationModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.item.HeldItemRenderer.class)
+@Mixin(HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
    @Inject(
       method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",
       at = @At("HEAD")
    )
-   private void onRenderFirstPersonItemsHead(float tickDelta, util.math.MatrixStack matrices, render.VertexConsumerProvider.Immediate vertexConsumers, client.network.ClientPlayerEntity player, int light, CallbackInfo ci) {
+   private void onRenderFirstPersonItemsHead(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, ClientPlayerEntity player, int light, CallbackInfo ci) {
       SwingAnimationModule swingAnim = (SwingAnimationModule)ModuleManager.getModule(SwingAnimationModule.class);
       if (swingAnim != null) {
          swingAnim.updatePhysics(player, tickDelta);
@@ -44,19 +44,19 @@ public abstract class HeldItemRendererMixin {
    }
 
    @Shadow
-   protected abstract void renderArmHoldingItem(util.math.MatrixStack var1, client.render.VertexConsumerProvider var2, int var3, float var4, float var5, minecraft.util.Arm var6);
+   protected abstract void renderArmHoldingItem(MatrixStack var1, VertexConsumerProvider var2, int var3, float var4, float var5, Arm var6);
 
    @Inject(method = "renderFirstPersonItem", at = @At("HEAD"), cancellable = true)
    private void onRenderFirstPersonItem(
-      client.network.AbstractClientPlayerEntity player,
+      AbstractClientPlayerEntity player,
       float tickDelta,
       float pitch,
-      minecraft.util.Hand hand,
+      Hand hand,
       float swingProgress,
-      minecraft.item.ItemStack item,
+      ItemStack item,
       float equipProgress,
-      util.math.MatrixStack matrices,
-      client.render.VertexConsumerProvider vertexConsumers,
+      MatrixStack matrices,
+      VertexConsumerProvider vertexConsumers,
       int light,
       CallbackInfo ci
    ) {
@@ -64,7 +64,7 @@ public abstract class HeldItemRendererMixin {
       HandPositionModule handMod = (HandPositionModule)ModuleManager.getModule(HandPositionModule.class);
       boolean swingEnabled = swingMod != null && swingMod.isEnabled();
       boolean handEnabled = handMod != null && handMod.isEnabled();
-      if ((swingEnabled || handEnabled) && !item.isEmpty() && !(item.getItem() instanceof minecraft.item.FilledMapItem)) {
+      if ((swingEnabled || handEnabled) && !item.isEmpty() && !(item.getItem() instanceof FilledMapItem)) {
          ci.cancel();
          if (swingMod != null) {
             swingMod.handleRenderItem(player, tickDelta, pitch, hand, swingProgress, item, equipProgress, matrices, vertexConsumers, light);
@@ -74,12 +74,12 @@ public abstract class HeldItemRendererMixin {
 
    @Inject(method = "renderArmHoldingItem", at = @At("HEAD"))
    private void onRenderArmHoldingItemHead(
-      util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, minecraft.util.Arm arm, CallbackInfo ci
+      MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, Arm arm, CallbackInfo ci
    ) {
       if (!SwingAnimationModule.renderingCustomItem) {
          HandPositionModule handMod = (HandPositionModule)ModuleManager.getModule(HandPositionModule.class);
          if (handMod != null && handMod.isEnabled()) {
-            minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+            MinecraftClient mc = MinecraftClient.getInstance();
             boolean isMainHand = mc.player != null && arm == mc.player.getMainArm();
             float[] pos = isMainHand ? handMod.getMainHandPos() : handMod.getOffHandPos();
             matrices.translate(pos[0], pos[1], pos[2]);
@@ -91,7 +91,7 @@ public abstract class HeldItemRendererMixin {
       method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",
       at = @At("TAIL")
    )
-   private void onRenderFirstPersonItemsTail(float tickDelta, util.math.MatrixStack matrices, render.VertexConsumerProvider.Immediate vertexConsumers, client.network.ClientPlayerEntity player, int light, CallbackInfo ci) {
+   private void onRenderFirstPersonItemsTail(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, ClientPlayerEntity player, int light, CallbackInfo ci) {
       ShaderHand mod = ShaderHand.getInstance();
       if (mod != null && ShaderHand.rendering) {
          vertexConsumers.draw();
@@ -108,7 +108,7 @@ public abstract class HeldItemRendererMixin {
       )
    )
    private void onRenderRightArm(
-      util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, minecraft.util.Arm arm, CallbackInfo ci
+      MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, Arm arm, CallbackInfo ci
    ) {
       SwingAnimationModule mod = (SwingAnimationModule)ModuleManager.getModule(SwingAnimationModule.class);
       if (mod != null && mod.isHoldMyItemsEnabled()) {
@@ -124,7 +124,7 @@ public abstract class HeldItemRendererMixin {
       )
    )
    private void onRenderLeftArm(
-      util.math.MatrixStack matrices, client.render.VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, minecraft.util.Arm arm, CallbackInfo ci
+      MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, Arm arm, CallbackInfo ci
    ) {
       SwingAnimationModule mod = (SwingAnimationModule)ModuleManager.getModule(SwingAnimationModule.class);
       if (mod != null && mod.isHoldMyItemsEnabled()) {

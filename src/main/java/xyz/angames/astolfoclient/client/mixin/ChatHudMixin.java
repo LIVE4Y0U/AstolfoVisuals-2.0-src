@@ -11,14 +11,14 @@ import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 import xyz.angames.astolfoclient.client.module.modules.misc.PasswordHiderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.hud.ChatHud.class)
+@Mixin(ChatHud.class)
 public class ChatHudMixin {
    @ModifyVariable(
       method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V",
       at = @At("HEAD"),
       argsOnly = true
    )
-   private minecraft.text.Text modifyChatMessages(minecraft.text.Text message) {
+   private Text modifyChatMessages(Text message) {
       message = PasswordHiderModule.getProtectedChat(message);
       return NameProtectModule.getProtectedText(message);
    }

@@ -28,11 +28,11 @@ public class DamageIndicatorRenderer {
       DamageIndicatorModule module = (DamageIndicatorModule)AstolfoclientClient.moduleManager.getModuleByName("DamageIndicators");
       if (module != null && module.isEnabled()) {
          if (!this.manager.getParticles().isEmpty()) {
-            minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
-            client.font.TextRenderer textRenderer = client.textRenderer;
-            client.render.Camera camera = context.camera();
-            util.math.MatrixStack matrices = context.matrixStack();
-            render.VertexConsumerProvider.Immediate vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
+            MinecraftClient client = MinecraftClient.getInstance();
+            TextRenderer textRenderer = client.textRenderer;
+            Camera camera = context.camera();
+            MatrixStack matrices = context.matrixStack();
+            VertexConsumerProvider.Immediate vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
             double camX = camera.getPos().x;
             double camY = camera.getPos().y;
             double camZ = camera.getPos().z;
@@ -67,14 +67,14 @@ public class DamageIndicatorRenderer {
                color = color & 16777215 | alphaHex;
                matrices.push();
                matrices.translate(p.x - camX, p.y - camY, p.z - camZ);
-               matrices.multiply(util.math.RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
-               matrices.multiply(util.math.RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+               matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
+               matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
                float currentScale = baseScale * (p.isCrit ? 1.3F : 1.0F) * popScale;
                matrices.scale(-currentScale, -currentScale, currentScale);
                Matrix4f positionMatrix = matrices.peek().getPositionMatrix();
-               minecraft.text.Text text = minecraft.text.Text.literal(p.text);
+               Text text = Text.literal(p.text);
                float xOffset = -textRenderer.getWidth(text) / 2.0F;
-               textRenderer.draw(text, xOffset, 0.0F, color, true, positionMatrix, vertexConsumers, font.TextRenderer.TextLayerType.NORMAL, 0, 15728880);
+               textRenderer.draw(text, xOffset, 0.0F, color, true, positionMatrix, vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, 15728880);
                matrices.pop();
             }
 

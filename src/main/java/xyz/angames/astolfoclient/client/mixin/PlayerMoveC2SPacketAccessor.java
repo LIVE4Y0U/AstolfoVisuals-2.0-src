@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Environment(EnvType.CLIENT)
-@Mixin(c2s.play.PlayerMoveC2SPacket.class)
+@Mixin(PlayerMoveC2SPacket.class)
 public interface PlayerMoveC2SPacketAccessor {
    @Accessor("horizontalCollision")
    boolean getHorizontalCollision();

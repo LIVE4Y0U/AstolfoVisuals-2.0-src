@@ -14,13 +14,13 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-@Mixin(entity.projectile.ProjectileEntity.class)
+@Mixin(ProjectileEntity.class)
 public class ProjectileEntityMixin {
    @Inject(method = "onEntityHit", at = @At("HEAD"))
-   private void onEntityHit(util.hit.EntityHitResult entityHitResult, CallbackInfo ci) {
-      entity.projectile.ProjectileEntity self = (entity.projectile.ProjectileEntity)this;
-      if (self.getOwner() == minecraft.client.MinecraftClient.getInstance().player) {
-         minecraft.entity.Entity target = entityHitResult.getEntity();
+   private void onEntityHit(EntityHitResult entityHitResult, CallbackInfo ci) {
+      ProjectileEntity self = (ProjectileEntity)this;
+      if (self.getOwner() == MinecraftClient.getInstance().player) {
+         Entity target = entityHitResult.getEntity();
          if (AstolfoclientClient.killEffectManager != null) {
             Module mod = AstolfoclientClient.moduleManager.getModuleByName("KillEffect");
             if (mod != null && mod.isEnabled()) {

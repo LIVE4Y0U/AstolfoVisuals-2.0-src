@@ -41,13 +41,13 @@ public class TargetHudManager {
    private static final Supplier<MsdfFont> BOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("bold").data("bold").build());
    private static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
    private static final Supplier<MsdfFont> MEDIUM_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("medium").data("medium").build());
-   private static final minecraft.util.Identifier DEFAULT_MOB_ICON = minecraft.util.Identifier.of("astolfoclient", "textures/gui/mob_icon.png");
+   private static final Identifier DEFAULT_MOB_ICON = Identifier.of("astolfoclient", "textures/gui/mob_icon.png");
    private static final Pattern HEALTH_PATTERN = Pattern.compile("(\\d+(\\.\\d+)?)");
    private final float baseWidth = 122.0F;
    private final float baseHeight = 33.0F;
    public float x = 100.0F;
    public float y = 100.0F;
-   private minecraft.entity.LivingEntity currentTarget;
+   private LivingEntity currentTarget;
    private long lastHitTime;
    private long lastDamageTime;
    private float animationProgress = 0.0F;
@@ -60,7 +60,7 @@ public class TargetHudManager {
    private float dragOffsetY;
    private long lastUpdateTimeNs = -1L;
 
-   public void setTarget(minecraft.entity.LivingEntity target) {
+   public void setTarget(LivingEntity target) {
       if (target == null || !TargetUtils.isInvisible(target)) {
          if (this.currentTarget != target) {
             this.currentTarget = target;
@@ -81,8 +81,8 @@ public class TargetHudManager {
       this.lastDamageTime = (long)(System.nanoTime() / 1000000.0);
    }
 
-   public void render(client.gui.DrawContext context, float tickDelta) {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   public void render(DrawContext context, float tickDelta) {
+      MinecraftClient client = MinecraftClient.getInstance();
       if (client.world != null) {
          boolean isEditing = client.currentScreen instanceof HudEditorScreen;
          long nowNs = System.nanoTime();
@@ -105,7 +105,7 @@ public class TargetHudManager {
          if (this.animationProgress < 0.005F && !shouldShow) {
             this.currentTarget = null;
          } else {
-            minecraft.entity.LivingEntity entityToRender = (minecraft.entity.LivingEntity)(isEditing ? client.player : this.currentTarget);
+            LivingEntity entityToRender = (LivingEntity)(isEditing ? client.player : this.currentTarget);
             if (entityToRender != null) {
                float realHealth = this.getRealHealth(entityToRender);
                float realAbsorption = entityToRender.getAbsorptionAmount();
@@ -221,19 +221,19 @@ public class TargetHudManager {
       }
    }
 
-   public float getRealHealth(minecraft.entity.LivingEntity entity) {
-      if (entity != null && minecraft.client.MinecraftClient.getInstance().world != null) {
-         minecraft.scoreboard.Scoreboard scoreboard = minecraft.client.MinecraftClient.getInstance().world.getScoreboard();
-         minecraft.scoreboard.ScoreboardObjective objective = scoreboard.getObjectiveForSlot(minecraft.scoreboard.ScoreboardDisplaySlot.BELOW_NAME);
+   public float getRealHealth(LivingEntity entity) {
+      if (entity != null && MinecraftClient.getInstance().world != null) {
+         Scoreboard scoreboard = MinecraftClient.getInstance().world.getScoreboard();
+         ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.BELOW_NAME);
          if (objective != null) {
-            minecraft.scoreboard.ReadableScoreboardScore score = scoreboard.getScore(entity, objective);
+            ReadableScoreboardScore score = scoreboard.getScore(entity, objective);
             if (score != null) {
                return score.getScore();
             }
          }
 
-         if (entity instanceof entity.player.PlayerEntity player) {
-            client.network.PlayerListEntry entry = minecraft.client.MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(player.getUuid());
+         if (entity instanceof PlayerEntity player) {
+            PlayerListEntry entry = MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(player.getUuid());
             if (entry != null && entry.getScoreboardTeam() != null) {
                String suffix = entry.getScoreboardTeam().getSuffix().getString();
                float extracted = this.extractHealthFromString(suffix);
@@ -243,8 +243,8 @@ public class TargetHudManager {
             }
          }
 
-         for (minecraft.entity.Entity e : minecraft.client.MinecraftClient.getInstance().world.getOtherEntities(entity, entity.getBoundingBox().expand(4.0, 2.0, 4.0))) {
-            if (e.isCustomNameVisible() || e instanceof entity.decoration.ArmorStandEntity) {
+         for (Entity e : MinecraftClient.getInstance().world.getOtherEntities(entity, entity.getBoundingBox().expand(4.0, 2.0, 4.0))) {
+            if (e.isCustomNameVisible() || e instanceof ArmorStandEntity) {
                float extracted = this.extractHealthFromString(e.getDisplayName().getString());
                if (extracted != -1.0F) {
                   return extracted;
@@ -283,11 +283,11 @@ public class TargetHudManager {
          .build()
          .render(matrix, bx, by);
       float safeMax = Math.max(maxHp, 20.0F);
-      float hpPct = util.math.MathHelper.clamp(this.visualHealth / safeMax, 0.0F, 1.0F);
+      float hpPct = MathHelper.clamp(this.visualHealth / safeMax, 0.0F, 1.0F);
       float hpWidth = bw * hpPct;
-      float absPct = util.math.MathHelper.clamp(this.visualAbsorption / safeMax, 0.0F, 1.0F);
+      float absPct = MathHelper.clamp(this.visualAbsorption / safeMax, 0.0F, 1.0F);
       float absWidth = bw * absPct;
-      float dmgPct = util.math.MathHelper.clamp(this.damageHealth / safeMax, 0.0F, 1.0F);
+      float dmgPct = MathHelper.clamp(this.damageHealth / safeMax, 0.0F, 1.0F);
       float dmgWidth = bw * dmgPct;
       if (hpWidth > 2.0F) {
          this.drawBarGlowShadow(matrix, bx, by, hpWidth, bh, bh / 2.0F, theme, 0.2F * alpha);
@@ -345,9 +345,9 @@ public class TargetHudManager {
       }
    }
 
-   private void renderEntityHead(minecraft.client.MinecraftClient client, minecraft.entity.LivingEntity entity, Matrix4f matrix, float hX, float hY, float size, Color tint, float alpha) {
-      if (entity instanceof client.network.AbstractClientPlayerEntity player) {
-         client.texture.AbstractTexture skin = client.getTextureManager().getTexture(player.getSkinTextures().comp_1626());
+   private void renderEntityHead(MinecraftClient client, LivingEntity entity, Matrix4f matrix, float hX, float hY, float size, Color tint, float alpha) {
+      if (entity instanceof AbstractClientPlayerEntity player) {
+         AbstractTexture skin = client.getTextureManager().getTexture(player.getSkinTextures().comp_1626());
          Builder.texture()
             .size(new SizeState(size, size))
             .radius(new QuadRadiusState(4.0F))
@@ -363,7 +363,7 @@ public class TargetHudManager {
             .build()
             .render(matrix, hX, hY);
       } else {
-         client.texture.AbstractTexture mob = client.getTextureManager().getTexture(DEFAULT_MOB_ICON);
+         AbstractTexture mob = client.getTextureManager().getTexture(DEFAULT_MOB_ICON);
          Builder.texture()
             .size(new SizeState(size, size))
             .radius(new QuadRadiusState(4.0F))
@@ -426,7 +426,7 @@ public class TargetHudManager {
    }
 
    private float getScaleModifier() {
-      minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient client = MinecraftClient.getInstance();
       double currentGuiScale = client.getWindow().getScaleFactor();
       if (currentGuiScale <= 0.0) {
          currentGuiScale = 2.0;
@@ -436,7 +436,7 @@ public class TargetHudManager {
    }
 
    private float lerp(float start, float end, float delta) {
-      return start + (end - start) * util.math.MathHelper.clamp(delta, 0.0F, 1.0F);
+      return start + (end - start) * MathHelper.clamp(delta, 0.0F, 1.0F);
    }
 
    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
@@ -455,7 +455,7 @@ public class TargetHudManager {
 
    public boolean onMouseDragged(double mouseX, double mouseY, int button) {
       if (this.dragging && button == 0) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          float scaleModifier = this.getScaleModifier();
          float screenW = mc.getWindow().getScaledWidth();
          float screenH = mc.getWindow().getScaledHeight();

@@ -14,10 +14,10 @@ import xyz.angames.astolfoclient.client.config.ThemeManager;
 import xyz.angames.astolfoclient.client.module.modules.render.AmbientsModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.world.ClientWorld.class)
+@Mixin(ClientWorld.class)
 public class ClientWorldMixin {
    @Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
-   private void onGetSkyColor(util.math.Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
+   private void onGetSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
       if (AstolfoclientClient.moduleManager != null) {
          AmbientsModule ambients = (AmbientsModule)AstolfoclientClient.moduleManager.getModuleByName("Ambients");
          if (ambients != null && ambients.isEnabled() && ambients.customSkybox.get()) {

@@ -34,7 +34,7 @@ import xyz.angames.astolfoclient.client.module.setting.NumberSetting;
 
 @Environment(EnvType.CLIENT)
 public class CubeParticlesModule extends Module {
-   private static final minecraft.util.Identifier BLOOM_TEXTURE = minecraft.util.Identifier.of("astolfoclient", "textures/effects/bloom.png");
+   private static final Identifier BLOOM_TEXTURE = Identifier.of("astolfoclient", "textures/effects/bloom.png");
    public final NumberSetting maxAmount = new NumberSetting("Amount", 60.0, 10.0, 200.0, 5.0);
    public final NumberSetting baseSize = new NumberSetting("Size", 0.25, 0.05, 1.0, 0.01);
    public final NumberSetting speedMultiplier = new NumberSetting("Speed", 1.0, 0.1, 3.0, 0.1);
@@ -70,7 +70,7 @@ public class CubeParticlesModule extends Module {
 
    @Override
    public void onTick() {
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       if (mc.player != null && mc.world != null) {
          long now = System.currentTimeMillis();
          float speedMul = this.speedMultiplier.getFloat();
@@ -87,7 +87,7 @@ public class CubeParticlesModule extends Module {
 
          int targetCount = (int)this.maxAmount.get();
          double radius = this.spawnRadius.get();
-         util.math.Vec3d playerPos = mc.player.getPos();
+         Vec3d playerPos = mc.player.getPos();
          int spawnPerTick = Math.min(2, Math.max(1, (targetCount - this.particles.size()) / 12 + 1));
 
          for (int i = 0; i < spawnPerTick && this.particles.size() < targetCount; i++) {
@@ -97,10 +97,10 @@ public class CubeParticlesModule extends Module {
             double spawnX = playerPos.x + Math.cos(angle) * dist;
             double spawnY = playerPos.y + height;
             double spawnZ = playerPos.z + Math.sin(angle) * dist;
-            util.math.Vec3d spawnPos = new util.math.Vec3d(spawnX, spawnY, spawnZ);
-            util.math.Vec3d initialMotion = new util.math.Vec3d((Math.random() - 0.5) * 0.015, 0.003 + Math.random() * 0.01, (Math.random() - 0.5) * 0.015);
-            util.math.Vec3d initialRot = new util.math.Vec3d(Math.random() * Math.PI * 2.0, Math.random() * Math.PI * 2.0, Math.random() * Math.PI * 2.0);
-            util.math.Vec3d rotSpeed = new util.math.Vec3d(this.randomInRange(-0.03, 0.03), this.randomInRange(-0.03, 0.03), this.randomInRange(-0.03, 0.03));
+            Vec3d spawnPos = new Vec3d(spawnX, spawnY, spawnZ);
+            Vec3d initialMotion = new Vec3d((Math.random() - 0.5) * 0.015, 0.003 + Math.random() * 0.01, (Math.random() - 0.5) * 0.015);
+            Vec3d initialRot = new Vec3d(Math.random() * Math.PI * 2.0, Math.random() * Math.PI * 2.0, Math.random() * Math.PI * 2.0);
+            Vec3d rotSpeed = new Vec3d(this.randomInRange(-0.03, 0.03), this.randomInRange(-0.03, 0.03), this.randomInRange(-0.03, 0.03));
             long lifespan = (long)this.randomInRange(4000.0, 7500.0);
             float scaleVar = (float)this.randomInRange(0.85, 1.15);
             this.particles.add(new CubeParticlesModule.CubeParticle(spawnPos, initialMotion, initialRot, rotSpeed, lifespan, scaleVar));
@@ -112,12 +112,12 @@ public class CubeParticlesModule extends Module {
 
    public void onRender3D(WorldRenderContext context) {
       if (!this.particles.isEmpty()) {
-         minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient mc = MinecraftClient.getInstance();
          if (mc.player != null && mc.world != null) {
-            client.render.Camera camera = context.camera();
-            util.math.Vec3d cameraPos = camera.getPos();
+            Camera camera = context.camera();
+            Vec3d cameraPos = camera.getPos();
             float tickDelta = context.tickCounter().getTickDelta(true);
-            util.math.MatrixStack ms = context.matrixStack();
+            MatrixStack ms = context.matrixStack();
             long now = System.currentTimeMillis();
             float baseSizeVal = this.baseSize.getFloat();
             boolean renderBloom = this.bloomGlow.get();
@@ -128,7 +128,7 @@ public class CubeParticlesModule extends Module {
             boolean renderCore = this.internalCore.get();
             if (renderBloom) {
                RenderSystem.enableBlend();
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(false);
                RenderSystem.disableCull();
@@ -137,16 +137,16 @@ public class CubeParticlesModule extends Module {
                GlStateManager._texParameter(3553, 10240, 9729);
                GlStateManager._texParameter(3553, 10242, 33071);
                GlStateManager._texParameter(3553, 10243, 33071);
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-               client.render.BufferBuilder bloomBuffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+               BufferBuilder bloomBuffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
 
                for (CubeParticlesModule.CubeParticle p : this.particles) {
                   float alpha = p.getAlpha(now);
                   float scaleFactor = p.getScaleFactor(now);
                   if (!(alpha <= 0.005F) && !(scaleFactor <= 0.005F)) {
-                     double x = util.math.MathHelper.lerp(tickDelta, p.prevPos.x, p.pos.x);
-                     double y = util.math.MathHelper.lerp(tickDelta, p.prevPos.y, p.pos.y);
-                     double z = util.math.MathHelper.lerp(tickDelta, p.prevPos.z, p.pos.z);
+                     double x = MathHelper.lerp(tickDelta, p.prevPos.x, p.pos.x);
+                     double y = MathHelper.lerp(tickDelta, p.prevPos.y, p.pos.y);
+                     double z = MathHelper.lerp(tickDelta, p.prevPos.z, p.pos.z);
                      float particleSize = baseSizeVal * p.scaleMultiplier * scaleFactor;
                      float quadSize = particleSize * bloomScaleVal;
                      Color particleColor = this.getColor(p.creationTime);
@@ -159,31 +159,31 @@ public class CubeParticlesModule extends Module {
                   }
                }
 
-               client.render.BuiltBuffer builtBloom = bloomBuffer.endNullable();
+               BuiltBuffer builtBloom = bloomBuffer.endNullable();
                if (builtBloom != null) {
-                  client.render.BufferRenderer.drawWithGlobalProgram(builtBloom);
+                  BufferRenderer.drawWithGlobalProgram(builtBloom);
                }
             }
 
             if (renderFaces) {
                RenderSystem.enableBlend();
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(false);
                RenderSystem.disableCull();
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-               client.render.BufferBuilder faceBuffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_COLOR);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+               BufferBuilder faceBuffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
                for (CubeParticlesModule.CubeParticle p : this.particles) {
                   float alpha = p.getAlpha(now);
                   float scaleFactor = p.getScaleFactor(now);
                   if (!(alpha <= 0.005F) && !(scaleFactor <= 0.005F)) {
-                     double x = util.math.MathHelper.lerp(tickDelta, p.prevPos.x, p.pos.x);
-                     double y = util.math.MathHelper.lerp(tickDelta, p.prevPos.y, p.pos.y);
-                     double z = util.math.MathHelper.lerp(tickDelta, p.prevPos.z, p.pos.z);
-                     double rotX = util.math.MathHelper.lerp(tickDelta, p.prevRot.x, p.rot.x);
-                     double rotY = util.math.MathHelper.lerp(tickDelta, p.prevRot.y, p.rot.y);
-                     double rotZ = util.math.MathHelper.lerp(tickDelta, p.prevRot.z, p.rot.z);
+                     double x = MathHelper.lerp(tickDelta, p.prevPos.x, p.pos.x);
+                     double y = MathHelper.lerp(tickDelta, p.prevPos.y, p.pos.y);
+                     double z = MathHelper.lerp(tickDelta, p.prevPos.z, p.pos.z);
+                     double rotX = MathHelper.lerp(tickDelta, p.prevRot.x, p.rot.x);
+                     double rotY = MathHelper.lerp(tickDelta, p.prevRot.y, p.rot.y);
+                     double rotZ = MathHelper.lerp(tickDelta, p.prevRot.z, p.rot.z);
                      float particleSize = baseSizeVal * p.scaleMultiplier * scaleFactor;
                      Color particleColor = this.getColor(p.creationTime);
                      float effectiveAlpha = alpha * faceAlphaVal;
@@ -196,32 +196,32 @@ public class CubeParticlesModule extends Module {
                   }
                }
 
-               client.render.BuiltBuffer builtFaces = faceBuffer.endNullable();
+               BuiltBuffer builtFaces = faceBuffer.endNullable();
                if (builtFaces != null) {
-                  client.render.BufferRenderer.drawWithGlobalProgram(builtFaces);
+                  BufferRenderer.drawWithGlobalProgram(builtFaces);
                }
             }
 
             if (renderWire || renderCore) {
                RenderSystem.enableBlend();
-               RenderSystem.blendFunc(platform.GlStateManager.SrcFactor.SRC_ALPHA, platform.GlStateManager.DstFactor.ONE);
+               RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
                RenderSystem.enableDepthTest();
                RenderSystem.depthMask(false);
                RenderSystem.disableCull();
                RenderSystem.lineWidth(2.0F);
-               RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_COLOR);
-               client.render.BufferBuilder lineBuffer = client.render.Tessellator.getInstance().begin(render.VertexFormat.DrawMode.DEBUG_LINES, client.render.VertexFormats.POSITION_COLOR);
+               RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+               BufferBuilder lineBuffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
 
                for (CubeParticlesModule.CubeParticle p : this.particles) {
                   float alpha = p.getAlpha(now);
                   float scaleFactor = p.getScaleFactor(now);
                   if (!(alpha <= 0.005F) && !(scaleFactor <= 0.005F)) {
-                     double x = util.math.MathHelper.lerp(tickDelta, p.prevPos.x, p.pos.x);
-                     double y = util.math.MathHelper.lerp(tickDelta, p.prevPos.y, p.pos.y);
-                     double z = util.math.MathHelper.lerp(tickDelta, p.prevPos.z, p.pos.z);
-                     double rotX = util.math.MathHelper.lerp(tickDelta, p.prevRot.x, p.rot.x);
-                     double rotY = util.math.MathHelper.lerp(tickDelta, p.prevRot.y, p.rot.y);
-                     double rotZ = util.math.MathHelper.lerp(tickDelta, p.prevRot.z, p.rot.z);
+                     double x = MathHelper.lerp(tickDelta, p.prevPos.x, p.pos.x);
+                     double y = MathHelper.lerp(tickDelta, p.prevPos.y, p.pos.y);
+                     double z = MathHelper.lerp(tickDelta, p.prevPos.z, p.pos.z);
+                     double rotX = MathHelper.lerp(tickDelta, p.prevRot.x, p.rot.x);
+                     double rotY = MathHelper.lerp(tickDelta, p.prevRot.y, p.rot.y);
+                     double rotZ = MathHelper.lerp(tickDelta, p.prevRot.z, p.rot.z);
                      float particleSize = baseSizeVal * p.scaleMultiplier * scaleFactor;
                      Color particleColor = this.getColor(p.creationTime);
                      ms.push();
@@ -242,9 +242,9 @@ public class CubeParticlesModule extends Module {
                   }
                }
 
-               client.render.BuiltBuffer builtLines = lineBuffer.endNullable();
+               BuiltBuffer builtLines = lineBuffer.endNullable();
                if (builtLines != null) {
-                  client.render.BufferRenderer.drawWithGlobalProgram(builtLines);
+                  BufferRenderer.drawWithGlobalProgram(builtLines);
                }
 
                RenderSystem.lineWidth(1.0F);
@@ -269,7 +269,7 @@ public class CubeParticlesModule extends Module {
       }
    }
 
-   private void drawBillboardQuad(util.math.MatrixStack ms, client.render.BufferBuilder builder, float x, float y, float w, float h, int color) {
+   private void drawBillboardQuad(MatrixStack ms, BufferBuilder builder, float x, float y, float w, float h, int color) {
       float r = (color >> 16 & 0xFF) / 255.0F;
       float g = (color >> 8 & 0xFF) / 255.0F;
       float b = (color & 0xFF) / 255.0F;
@@ -281,7 +281,7 @@ public class CubeParticlesModule extends Module {
       builder.vertex(m, x, y, 0.0F).texture(0.0F, 0.0F).color(r, g, b, a);
    }
 
-   private void renderUnitCubeFaces(util.math.MatrixStack ms, client.render.BufferBuilder builder, Color baseColor, float alpha) {
+   private void renderUnitCubeFaces(MatrixStack ms, BufferBuilder builder, Color baseColor, float alpha) {
       Matrix4f m = ms.peek().getPositionMatrix();
       int topColor = this.withAlpha(this.shadeColor(baseColor, 1.0F), alpha);
       int botColor = this.withAlpha(this.shadeColor(baseColor, 0.55F), alpha);
@@ -298,7 +298,7 @@ public class CubeParticlesModule extends Module {
    }
 
    private void renderQuad(
-      client.render.BufferBuilder builder,
+      BufferBuilder builder,
       Matrix4f m,
       float x1,
       float y1,
@@ -328,7 +328,7 @@ public class CubeParticlesModule extends Module {
       return new Color(Math.min(255, (int)(c.getRed() * factor)), Math.min(255, (int)(c.getGreen() * factor)), Math.min(255, (int)(c.getBlue() * factor)));
    }
 
-   private void renderUnitInternalDiagonals(util.math.MatrixStack ms, client.render.BufferBuilder builder, int color) {
+   private void renderUnitInternalDiagonals(MatrixStack ms, BufferBuilder builder, int color) {
       float r = (color >> 16 & 0xFF) / 255.0F;
       float g = (color >> 8 & 0xFF) / 255.0F;
       float b = (color & 0xFF) / 255.0F;
@@ -344,7 +344,7 @@ public class CubeParticlesModule extends Module {
       builder.vertex(m, -0.5F, 0.5F, -0.5F).color(r, g, b, a);
    }
 
-   private void renderUnitOutlinedBox(util.math.MatrixStack ms, client.render.BufferBuilder builder, int color) {
+   private void renderUnitOutlinedBox(MatrixStack ms, BufferBuilder builder, int color) {
       float r = (color >> 16 & 0xFF) / 255.0F;
       float g = (color >> 8 & 0xFF) / 255.0F;
       float b = (color & 0xFF) / 255.0F;
@@ -387,19 +387,19 @@ public class CubeParticlesModule extends Module {
 
    @Environment(EnvType.CLIENT)
    private static class CubeParticle {
-      util.math.Vec3d prevPos;
-      util.math.Vec3d pos;
-      util.math.Vec3d motion;
-      util.math.Vec3d prevRot;
-      util.math.Vec3d rot;
-      util.math.Vec3d rotSpeed;
+      Vec3d prevPos;
+      Vec3d pos;
+      Vec3d motion;
+      Vec3d prevRot;
+      Vec3d rot;
+      Vec3d rotSpeed;
       final long creationTime;
       final long lifespan;
       final long fadeIn = 750L;
       final long fadeOut = 950L;
       final float scaleMultiplier;
 
-      CubeParticle(util.math.Vec3d pos, util.math.Vec3d motion, util.math.Vec3d rot, util.math.Vec3d rotSpeed, long lifespan, float scaleMultiplier) {
+      CubeParticle(Vec3d pos, Vec3d motion, Vec3d rot, Vec3d rotSpeed, long lifespan, float scaleMultiplier) {
          this.pos = pos;
          this.prevPos = pos;
          this.motion = motion;
@@ -419,7 +419,7 @@ public class CubeParticlesModule extends Module {
          if (usePhysics) {
             double swayX = Math.sin((System.currentTimeMillis() + this.creationTime) * 0.002) * 6.0E-4;
             double swayZ = Math.cos((System.currentTimeMillis() + this.creationTime) * 0.002) * 6.0E-4;
-            this.motion = new util.math.Vec3d(this.motion.x * 0.98 + swayX, this.motion.y * 0.98 + 3.0E-4, this.motion.z * 0.98 + swayZ);
+            this.motion = new Vec3d(this.motion.x * 0.98 + swayX, this.motion.y * 0.98 + 3.0E-4, this.motion.z * 0.98 + swayZ);
             this.rotSpeed = this.rotSpeed.multiply(0.995);
          }
       }

@@ -13,7 +13,7 @@ import org.joml.Matrix4f;
 @Environment(EnvType.CLIENT)
 public final class DrawUtil {
    public static void drawLiquidRect(
-      util.math.MatrixStack matrices,
+      MatrixStack matrices,
       float x,
       float y,
       float width,

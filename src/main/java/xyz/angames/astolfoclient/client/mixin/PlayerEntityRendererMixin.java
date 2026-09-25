@@ -15,14 +15,14 @@ import xyz.angames.astolfoclient.client.effects.ChinaHatFeatureRenderer;
 import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.entity.PlayerEntityRenderer.class)
+@Mixin(PlayerEntityRenderer.class)
 public class PlayerEntityRendererMixin {
    @ModifyVariable(
       method = "renderLabelIfPresent(Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;Lnet/minecraft/text/Text;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
       at = @At("HEAD"),
       argsOnly = true
    )
-   private minecraft.text.Text onRenderLabel(minecraft.text.Text text) {
+   private Text onRenderLabel(Text text) {
       return NameProtectModule.getProtectedText(text);
    }
 
@@ -30,7 +30,7 @@ public class PlayerEntityRendererMixin {
       method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V",
       at = @At("HEAD")
    )
-   private void onUpdateRenderState(client.network.AbstractClientPlayerEntity player, entity.state.PlayerEntityRenderState state, float tickDelta, CallbackInfo ci) {
+   private void onUpdateRenderState(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float tickDelta, CallbackInfo ci) {
       ChinaHatFeatureRenderer.currentlyRenderingPlayer = player;
    }
 }

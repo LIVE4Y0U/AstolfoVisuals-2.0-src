@@ -11,7 +11,7 @@ public class NameLimiter {
    private NameLimiter() {
    }
 
-   public static minecraft.text.Text truncate(minecraft.text.Text name) {
+   public static Text truncate(Text name) {
       if (name == null) {
          return null;
       }
@@ -27,6 +27,6 @@ public class NameLimiter {
       }
 
       String cut = text.substring(0, cutIndex) + "...";
-      return minecraft.text.Text.literal(cut);
+      return Text.literal(cut);
    }
 }

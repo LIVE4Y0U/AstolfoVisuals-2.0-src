@@ -17,14 +17,14 @@ import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.block.AbstractBlock.class)
+@Mixin(AbstractBlock.class)
 public class MixinAbstractBlock {
    @Inject(method = "getCollisionShape", at = @At("HEAD"), cancellable = true)
-   private void onGetCollisionShape(minecraft.block.BlockState state, minecraft.world.BlockView world, util.math.BlockPos pos, minecraft.block.ShapeContext context, CallbackInfoReturnable<util.shape.VoxelShape> cir) {
+   private void onGetCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> cir) {
       if (AstolfoclientClient.moduleManager != null) {
          Module noClip = AstolfoclientClient.moduleManager.getModuleByName("NoClip");
          if (noClip != null && noClip.isEnabled()) {
-            cir.setReturnValue(util.shape.VoxelShapes.empty());
+            cir.setReturnValue(VoxelShapes.empty());
          }
       }
    }

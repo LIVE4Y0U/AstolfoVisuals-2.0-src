@@ -11,10 +11,10 @@ import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 import xyz.angames.astolfoclient.client.protection.NameLimiter;
 
 @Environment(EnvType.CLIENT)
-@Mixin(render.entity.EntityRenderer.class)
+@Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin {
    @ModifyVariable(method = "renderLabelIfPresent", at = @At("HEAD"), argsOnly = true)
-   private minecraft.text.Text onModifyLabel(minecraft.text.Text text) {
+   private Text onModifyLabel(Text text) {
       return NameProtectModule.getProtectedText(NameLimiter.truncate(text));
    }
 }

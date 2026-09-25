@@ -13,15 +13,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.protection.ClientProtectionManager;
 
 @Environment(EnvType.CLIENT)
-@Mixin(minecraft.network.ClientConnection.class)
+@Mixin(ClientConnection.class)
 public abstract class ClientConnectionMixin {
    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
-   private static void receivePackets(network.packet.Packet<?> packet, network.listener.PacketListener listener, CallbackInfo callbackInfo) {
+   private static void receivePackets(Packet<?> packet, PacketListener listener, CallbackInfo callbackInfo) {
       if (ClientProtectionManager.getInstance().isMaliciousPacket(packet)) {
          callbackInfo.cancel();
       } else {
-         if (packet instanceof s2c.play.BundleS2CPacket bundlePacket) {
-            for (network.packet.Packet<?> innerPacket : bundlePacket.getPackets()) {
+         if (packet instanceof BundleS2CPacket bundlePacket) {
+            for (Packet<?> innerPacket : bundlePacket.getPackets()) {
                if (ClientProtectionManager.getInstance().isMaliciousPacket(innerPacket)) {
                   callbackInfo.cancel();
                   return;

@@ -6,6 +6,6 @@ import net.minecraft.client.gl.ShaderProgram;
 
 @Environment(EnvType.CLIENT)
 public class ShaderManager {
-   public static client.gl.ShaderProgram ROUNDED_RECT_PROGRAM = null;
-   public static client.gl.ShaderProgram ROUNDED_BORDER_PROGRAM = null;
+   public static ShaderProgram ROUNDED_RECT_PROGRAM = null;
+   public static ShaderProgram ROUNDED_BORDER_PROGRAM = null;
 }

@@ -19,7 +19,7 @@ import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 
 @Environment(EnvType.CLIENT)
-public class HudEditorScreen extends gui.screen.Screen {
+public class HudEditorScreen extends Screen {
    private static final Supplier<MsdfFont> BIKO_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("biko").data("biko").build());
    private Object currentlyDraggedManager = null;
    private static boolean activeVLine = false;
@@ -28,7 +28,7 @@ public class HudEditorScreen extends gui.screen.Screen {
    private static float activeHLineY = 0.0F;
 
    public HudEditorScreen() {
-      super(minecraft.text.Text.literal("HUD Editor"));
+      super(Text.literal("HUD Editor"));
    }
 
    protected void init() {
@@ -94,11 +94,11 @@ public class HudEditorScreen extends gui.screen.Screen {
       }
    }
 
-   public void renderInGameBackground(client.gui.DrawContext context) {
+   public void renderInGameBackground(DrawContext context) {
    }
 
-   public void render(client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
-      if (gui.screen.Screen.hasShiftDown()) {
+   public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+      if (Screen.hasShiftDown()) {
          float gridSpacing = 10.0F;
          int gridColor = 234881023;
 
@@ -111,7 +111,7 @@ public class HudEditorScreen extends gui.screen.Screen {
          }
       }
 
-      minecraft.client.MinecraftClient mc = minecraft.client.MinecraftClient.getInstance();
+      MinecraftClient mc = MinecraftClient.getInstance();
       double currentGuiScale = mc.getWindow().getScaleFactor();
       float scaleModifier = (float)(2.0 / currentGuiScale);
       float hudWidth = this.width / scaleModifier;
@@ -157,7 +157,7 @@ public class HudEditorScreen extends gui.screen.Screen {
       AstolfoclientClient.testHudManager.render(context, delta);
       AstolfoclientClient.musicHudManager.render(context, delta);
       AstolfoclientClient.infoHudManager.render(context, delta);
-      if (gui.screen.Screen.hasShiftDown()) {
+      if (Screen.hasShiftDown()) {
          int guideColor = -65281;
          if (activeVLine) {
             context.fill((int)activeVLineX, 0, (int)activeVLineX + 1, this.height, guideColor);
@@ -226,7 +226,7 @@ public class HudEditorScreen extends gui.screen.Screen {
 
       HudEditorScreen.DraggedElement de = this.getDraggedElement();
       if (de != null) {
-         if (gui.screen.Screen.hasShiftDown()) {
+         if (Screen.hasShiftDown()) {
             this.applySnapping(de);
          }
 
@@ -453,7 +453,7 @@ public class HudEditorScreen extends gui.screen.Screen {
             f.setAccessible(true);
             return ((Number)f.get(manager)).floatValue();
          } catch (Exception var4) {
-            double currentGuiScale = minecraft.client.MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double currentGuiScale = MinecraftClient.getInstance().getWindow().getScaleFactor();
             return (float)(2.0 / currentGuiScale);
          }
       }
@@ -575,7 +575,7 @@ public class HudEditorScreen extends gui.screen.Screen {
    }
 
    private void applySnapping(HudEditorScreen.DraggedElement de) {
-      if (!gui.screen.Screen.hasShiftDown()) {
+      if (!Screen.hasShiftDown()) {
          activeVLine = false;
          activeHLine = false;
       } else {

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 
 @Environment(EnvType.CLIENT)
-@Mixin(client.network.ClientPlayNetworkHandler.class)
+@Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
    private void onSendChatMessage(String message, CallbackInfo ci) {

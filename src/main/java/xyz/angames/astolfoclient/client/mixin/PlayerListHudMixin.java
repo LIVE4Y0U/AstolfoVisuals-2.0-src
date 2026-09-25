@@ -12,18 +12,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.module.modules.misc.NameProtectModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.hud.PlayerListHud.class)
+@Mixin(PlayerListHud.class)
 public class PlayerListHudMixin {
    @Inject(method = "getPlayerName", at = @At("RETURN"), cancellable = true)
-   public void onGetPlayerName(client.network.PlayerListEntry entry, CallbackInfoReturnable<minecraft.text.Text> cir) {
-      minecraft.text.Text originalText = (minecraft.text.Text)cir.getReturnValue();
+   public void onGetPlayerName(PlayerListEntry entry, CallbackInfoReturnable<Text> cir) {
+      Text originalText = (Text)cir.getReturnValue();
       if (originalText != null) {
          cir.setReturnValue(NameProtectModule.getProtectedText(originalText));
       } else {
          String originalStr = entry.getProfile().getName();
          String protectedStr = NameProtectModule.getProtectedName(originalStr);
          if (!originalStr.equals(protectedStr)) {
-            cir.setReturnValue(minecraft.text.Text.literal(protectedStr));
+            cir.setReturnValue(Text.literal(protectedStr));
          }
       }
    }

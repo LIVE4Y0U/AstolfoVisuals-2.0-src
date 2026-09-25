@@ -17,7 +17,7 @@ import xyz.angames.astolfoclient.client.util.ModSounds;
 public class ScaleSettingsPopup {
    public static final String[] DISPLAY_NAMES = new String[]{"35%", "50%", "75%", "100% (Def)", "125%", "150%", "200%"};
 
-   public static void render(client.gui.DrawContext context, float x, float y, float w, float h, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   public static void render(DrawContext context, float x, float y, float w, float h, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       MsdfFont medFont = null;
 
       try {

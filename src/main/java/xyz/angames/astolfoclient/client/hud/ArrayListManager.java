@@ -23,10 +23,10 @@ import xyz.angames.astolfoclient.client.module.modules.render.InterfaceModule;
 
 @Environment(EnvType.CLIENT)
 public class ArrayListManager {
-   private final minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+   private final MinecraftClient client = MinecraftClient.getInstance();
    private static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
 
-   public void render(client.gui.DrawContext context) {
+   public void render(DrawContext context) {
       MsdfFont semibold = (MsdfFont)SEMIBOLD_FONT.get();
       if (semibold != null) {
          double currentGuiScale = this.client.getWindow().getScaleFactor();

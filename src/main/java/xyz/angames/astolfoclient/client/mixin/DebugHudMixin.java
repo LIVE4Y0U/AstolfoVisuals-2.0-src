@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.angames.astolfoclient.client.module.modules.misc.CoordsHiderModule;
 
 @Environment(EnvType.CLIENT)
-@Mixin(gui.hud.DebugHud.class)
+@Mixin(DebugHud.class)
 public class DebugHudMixin {
    @Inject(method = "getLeftText", at = @At("RETURN"), cancellable = true)
    private void onGetLeftText(CallbackInfoReturnable<List<String>> cir) {

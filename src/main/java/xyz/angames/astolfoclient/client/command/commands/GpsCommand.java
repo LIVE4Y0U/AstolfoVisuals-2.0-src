@@ -19,7 +19,7 @@ public class GpsCommand extends Command {
          this.sendSyntax();
       } else if (args[0].equalsIgnoreCase("clear")) {
          GpsManager.getInstance().clear();
-         sendMessage(minecraft.util.Formatting.GREEN + "GPS Waypoint cleared.");
+         sendMessage(Formatting.GREEN + "GPS Waypoint cleared.");
       } else if (args.length < 2) {
          this.sendError("Usage: $gps <x> <z> OR $gps clear");
       } else {
@@ -27,7 +27,7 @@ public class GpsCommand extends Command {
             double x = Double.parseDouble(args[0]);
             double z = Double.parseDouble(args[1]);
             GpsManager.getInstance().setWaypoint(x, z);
-            sendMessage(minecraft.util.Formatting.GREEN + String.format("GPS set to X: %.1f, Z: %.1f", x, z));
+            sendMessage(Formatting.GREEN + String.format("GPS set to X: %.1f, Z: %.1f", x, z));
          } catch (NumberFormatException e) {
             this.sendError("Invalid coordinates. Please enter numbers.");
          }

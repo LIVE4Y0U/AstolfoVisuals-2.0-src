@@ -89,18 +89,18 @@ public class PasswordHiderModule extends Module {
       return sb.toString();
    }
 
-   public static void setupChatField(gui.widget.TextFieldWidget chatField) {
+   public static void setupChatField(TextFieldWidget chatField) {
       if (chatField != null) {
          chatField.setRenderTextProvider((originalStr, firstCharacterIndex) -> {
             if (AstolfoclientClient.moduleManager == null) {
-               return minecraft.text.Text.literal(originalStr).asOrderedText();
+               return Text.literal(originalStr).asOrderedText();
             }
 
             Module mod = AstolfoclientClient.moduleManager.getModuleByName("PasswordHider");
             if (mod != null && mod.isEnabled()) {
                String fullText = chatField.getText();
                if (!isPasswordCommand(fullText)) {
-                  return minecraft.text.Text.literal(originalStr).asOrderedText();
+                  return Text.literal(originalStr).asOrderedText();
                }
 
                int firstSpace = fullText.indexOf(32);
@@ -117,18 +117,18 @@ public class PasswordHiderModule extends Module {
                   }
                }
 
-               return minecraft.text.Text.literal(sb.toString()).asOrderedText();
+               return Text.literal(sb.toString()).asOrderedText();
             } else {
-               return minecraft.text.Text.literal(originalStr).asOrderedText();
+               return Text.literal(originalStr).asOrderedText();
             }
          });
       }
    }
 
-   public static void renderChatFieldOverlay(client.gui.DrawContext context, gui.widget.TextFieldWidget chatField) {
+   public static void renderChatFieldOverlay(DrawContext context, TextFieldWidget chatField) {
    }
 
-   public static minecraft.text.Text getProtectedChat(minecraft.text.Text message) {
+   public static Text getProtectedChat(Text message) {
       if (message == null) {
          return null;
       }
@@ -154,30 +154,30 @@ public class PasswordHiderModule extends Module {
       }
    }
 
-   private static minecraft.text.Text protectChatTree(minecraft.text.Text text) {
+   private static Text protectChatTree(Text text) {
       if (text == null) {
          return null;
       }
 
-      minecraft.text.TextContent content = text.getContent();
-      minecraft.text.TextContent newContent = content;
+      TextContent content = text.getContent();
+      TextContent newContent = content;
       boolean contentChanged = false;
-      if (content instanceof text.PlainTextContent.Literal literal) {
+      if (content instanceof PlainTextContent.Literal literal) {
          String str = literal.comp_737();
          String masked = maskChatString(str);
          if (!masked.equals(str)) {
-            newContent = minecraft.text.Text.literal(masked).getContent();
+            newContent = Text.literal(masked).getContent();
             contentChanged = true;
          }
-      } else if (content instanceof minecraft.text.TranslatableTextContent trans) {
+      } else if (content instanceof TranslatableTextContent trans) {
          Object[] args = trans.getArgs();
          Object[] newArgs = new Object[args.length];
          boolean argsChanged = false;
 
          for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            if (arg instanceof minecraft.text.Text argText) {
-               minecraft.text.Text protectedArg = protectChatTree(argText);
+            if (arg instanceof Text argText) {
+               Text protectedArg = protectChatTree(argText);
                newArgs[i] = protectedArg;
                if (protectedArg != argText) {
                   argsChanged = true;
@@ -194,17 +194,17 @@ public class PasswordHiderModule extends Module {
          }
 
          if (argsChanged) {
-            newContent = new minecraft.text.TranslatableTextContent(trans.getKey(), trans.getFallback(), newArgs);
+            newContent = new TranslatableTextContent(trans.getKey(), trans.getFallback(), newArgs);
             contentChanged = true;
          }
       }
 
-      List<minecraft.text.Text> siblings = text.getSiblings();
-      List<minecraft.text.Text> newSiblings = new ArrayList<>(siblings.size());
+      List<Text> siblings = text.getSiblings();
+      List<Text> newSiblings = new ArrayList<>(siblings.size());
       boolean siblingsChanged = false;
 
-      for (minecraft.text.Text sibling : siblings) {
-         minecraft.text.Text protectedSibling = protectChatTree(sibling);
+      for (Text sibling : siblings) {
+         Text protectedSibling = protectChatTree(sibling);
          newSiblings.add(protectedSibling);
          if (protectedSibling != sibling) {
             siblingsChanged = true;
@@ -215,9 +215,9 @@ public class PasswordHiderModule extends Module {
          return text;
       }
 
-      minecraft.text.MutableText result = minecraft.text.MutableText.of(newContent).setStyle(text.getStyle());
+      MutableText result = MutableText.of(newContent).setStyle(text.getStyle());
 
-      for (minecraft.text.Text sibling : newSiblings) {
+      for (Text sibling : newSiblings) {
          result.append(sibling);
       }
 

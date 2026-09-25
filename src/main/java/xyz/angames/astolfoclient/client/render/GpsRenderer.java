@@ -26,22 +26,22 @@ import xyz.angames.astolfoclient.client.manager.GpsManager;
 @Environment(EnvType.CLIENT)
 public class GpsRenderer {
    private static final Supplier<MsdfFont> BIKO_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("biko").data("biko").build());
-   private static final minecraft.util.Identifier GPS_ICON = minecraft.util.Identifier.of("astolfoclient", "textures/icons/gps.png");
+   private static final Identifier GPS_ICON = Identifier.of("astolfoclient", "textures/icons/gps.png");
    private String cachedDistanceText = "";
    private int lastDistanceInt = -1;
 
    public void render(WorldRenderContext context) {
       GpsManager manager = GpsManager.getInstance();
       if (manager.isActive()) {
-         minecraft.client.MinecraftClient client = minecraft.client.MinecraftClient.getInstance();
+         MinecraftClient client = MinecraftClient.getInstance();
          if (client.player != null && client.world != null) {
-            util.math.Vec3d cameraPos = context.camera().getPos();
+            Vec3d cameraPos = context.camera().getPos();
             double targetX = manager.getTargetX();
             double targetZ = manager.getTargetZ();
             float tickDelta = context.tickCounter().getTickDelta(true);
-            double playerX = util.math.MathHelper.lerp(tickDelta, client.player.prevX, client.player.getX());
-            double playerY = util.math.MathHelper.lerp(tickDelta, client.player.prevY, client.player.getY());
-            double playerZ = util.math.MathHelper.lerp(tickDelta, client.player.prevZ, client.player.getZ());
+            double playerX = MathHelper.lerp(tickDelta, client.player.prevX, client.player.getX());
+            double playerY = MathHelper.lerp(tickDelta, client.player.prevY, client.player.getY());
+            double playerZ = MathHelper.lerp(tickDelta, client.player.prevZ, client.player.getZ());
             double targetY = playerY + 2.0;
             double distSq = client.player.squaredDistanceTo(targetX, client.player.getY(), targetZ);
             double realDistance = Math.sqrt(distSq);
@@ -77,7 +77,7 @@ public class GpsRenderer {
             RenderSystem.disableCull();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
-            util.math.MatrixStack matrixStack = context.matrixStack();
+            MatrixStack matrixStack = context.matrixStack();
             matrixStack.push();
             matrixStack.translate(renderX - cameraPos.x, renderYFinal - cameraPos.y, renderZ - cameraPos.z);
             matrixStack.multiply(context.camera().getRotation());
@@ -85,30 +85,30 @@ public class GpsRenderer {
             float fixedScale = 0.04F;
             matrixStack.scale(fixedScale, fixedScale, fixedScale);
             RenderSystem.setShaderTexture(0, GPS_ICON);
-            RenderSystem.setShader(client.gl.ShaderProgramKeys.POSITION_TEX_COLOR);
-            client.render.Tessellator tessellator = client.render.Tessellator.getInstance();
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+            Tessellator tessellator = Tessellator.getInstance();
             float size = 40.0F;
             float halfSize = size / 2.0F;
             float shadowOffset = 0.8F;
             matrixStack.push();
             matrixStack.translate(shadowOffset, shadowOffset, 0.05F);
             Matrix4f shadowMatrix = matrixStack.peek().getPositionMatrix();
-            client.render.BufferBuilder shadowBuffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+            BufferBuilder shadowBuffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
             shadowBuffer.vertex(shadowMatrix, -halfSize, -halfSize, 0.0F).texture(0.0F, 0.0F).color(0.0F, 0.0F, 0.0F, 1.0F);
             shadowBuffer.vertex(shadowMatrix, -halfSize, halfSize, 0.0F).texture(0.0F, 1.0F).color(0.0F, 0.0F, 0.0F, 1.0F);
             shadowBuffer.vertex(shadowMatrix, halfSize, halfSize, 0.0F).texture(1.0F, 1.0F).color(0.0F, 0.0F, 0.0F, 1.0F);
             shadowBuffer.vertex(shadowMatrix, halfSize, -halfSize, 0.0F).texture(1.0F, 0.0F).color(0.0F, 0.0F, 0.0F, 1.0F);
-            client.render.BufferRenderer.draw(shadowBuffer.end());
+            BufferRenderer.draw(shadowBuffer.end());
             matrixStack.pop();
             matrixStack.push();
             matrixStack.translate(0.0F, 0.0F, -0.1F);
             Matrix4f iconMatrix = matrixStack.peek().getPositionMatrix();
-            client.render.BufferBuilder buffer = tessellator.begin(render.VertexFormat.DrawMode.QUADS, client.render.VertexFormats.POSITION_TEXTURE_COLOR);
+            BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
             buffer.vertex(iconMatrix, -halfSize, -halfSize, 0.0F).texture(0.0F, 0.0F).color(1.0F, 1.0F, 1.0F, 1.0F);
             buffer.vertex(iconMatrix, -halfSize, halfSize, 0.0F).texture(0.0F, 1.0F).color(1.0F, 1.0F, 1.0F, 1.0F);
             buffer.vertex(iconMatrix, halfSize, halfSize, 0.0F).texture(1.0F, 1.0F).color(1.0F, 1.0F, 1.0F, 1.0F);
             buffer.vertex(iconMatrix, halfSize, -halfSize, 0.0F).texture(1.0F, 0.0F).color(1.0F, 1.0F, 1.0F, 1.0F);
-            client.render.BufferRenderer.draw(buffer.end());
+            BufferRenderer.draw(buffer.end());
             matrixStack.pop();
             float padding = 5.0F;
             matrixStack.translate(0.0F, halfSize + padding, 0.0F);
@@ -128,7 +128,7 @@ public class GpsRenderer {
       }
    }
 
-   private void renderText(util.math.MatrixStack stack, String text, Color color, float scale) {
+   private void renderText(MatrixStack stack, String text, Color color, float scale) {
       Matrix4f mat = stack.peek().getPositionMatrix();
       Builder.text().font((MsdfFont)BIKO_FONT.get()).text(text).color(color).size(20.0F * scale).build().render(mat, 0.0F, 0.0F);
    }

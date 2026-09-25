@@ -68,11 +68,11 @@ public class CommandManager {
          }
       }
 
-      if (minecraft.client.MinecraftClient.getInstance().inGameHud != null) {
-         minecraft.client.MinecraftClient.getInstance()
+      if (MinecraftClient.getInstance().inGameHud != null) {
+         MinecraftClient.getInstance()
             .inGameHud
             .getChatHud()
-            .addMessage(minecraft.text.Text.literal("§d[Astolfo] " + minecraft.util.Formatting.RED + "Unknown command: " + commandName + ". Try $help."));
+            .addMessage(Text.literal("§d[Astolfo] " + Formatting.RED + "Unknown command: " + commandName + ". Try $help."));
       }
 
       return true;

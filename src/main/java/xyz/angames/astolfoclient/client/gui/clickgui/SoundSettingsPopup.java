@@ -23,7 +23,7 @@ public class SoundSettingsPopup {
    private static final List<SoundSettingsPopup.SoundEntry> ENTRIES = new ArrayList<>();
    private static int draggingIndex = -1;
 
-   public static void render(client.gui.DrawContext context, float x, float y, float w, float h, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
+   public static void render(DrawContext context, float x, float y, float w, float h, int mouseX, int mouseY, float deltaTime, float alpha, Color themeColor) {
       MsdfFont medFont = null;
 
       try {
@@ -127,7 +127,7 @@ public class SoundSettingsPopup {
    private static void updateDrag(float mx, float tX, float trackW) {
       if (draggingIndex >= 0 && draggingIndex < ENTRIES.size()) {
          SoundSettingsPopup.SoundEntry entry = ENTRIES.get(draggingIndex);
-         float progress = util.math.MathHelper.clamp((mx - tX) / trackW, 0.0F, 1.0F);
+         float progress = MathHelper.clamp((mx - tX) / trackW, 0.0F, 1.0F);
          float newVal = Math.round(progress * 100.0F);
          entry.setter.accept(newVal);
          if (draggingIndex == 4) {

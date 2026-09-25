@@ -32,7 +32,7 @@ public class ThemeSelectorPanel {
       this.height = 40.0F;
    }
 
-   public void render(client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
+   public void render(DrawContext context, int mouseX, int mouseY, float delta) {
       if (this.isDragging) {
          this.x = mouseX - this.dragOffsetX;
          this.y = mouseY - this.dragOffsetY;
