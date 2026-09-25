@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import net.fabricmc.api.EnvType;
@@ -23,8 +23,8 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.client.render.VertexFormat.DrawMode;
-import net.minecraft.client.render.VertexConsumerProvider.Immediate;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -60,7 +60,7 @@ public class ChinaHatFeatureRenderer extends FeatureRenderer<PlayerEntityRenderS
 
                this.lastRenderTime = now;
                matrices.push();
-               ((PlayerEntityModel)this.getContextModel()).head.rotate(matrices);
+               ((PlayerEntityModel)(Object)this.getContextModel()).head.rotate(matrices);
                matrices.translate(0.0F, -0.4F, 0.0F);
                matrices.scale(1.0F, -1.0F, 1.0F);
                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(this.spinAngle));

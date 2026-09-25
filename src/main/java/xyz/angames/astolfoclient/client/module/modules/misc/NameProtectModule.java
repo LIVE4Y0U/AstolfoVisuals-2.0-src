@@ -10,7 +10,7 @@ import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TextContent;
-import net.minecraft.text.PlainTextContent.Literal;
+import net.minecraft.text.PlainTextContent;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.util.FriendManager;
@@ -75,7 +75,7 @@ public class NameProtectModule extends Module {
       TextContent newContent = content;
       boolean contentChanged = false;
       if (content instanceof PlainTextContent.Literal literal) {
-         String str = literal.comp_737();
+         String str = literal.string();
          String replaced = replaceTargets(str);
          if (!replaced.equals(str)) {
             newContent = Text.literal(replaced).getContent();

@@ -19,7 +19,7 @@ public class AbstractClientPlayerEntityMixin {
 
    @Inject(method = "getSkinTextures", at = @At("RETURN"), cancellable = true)
    private void onGetSkinTextures(CallbackInfoReturnable<SkinTextures> cir) {
-      AbstractClientPlayerEntity player = (AbstractClientPlayerEntity)this;
+      AbstractClientPlayerEntity player = (AbstractClientPlayerEntity)(Object)this;
       MinecraftClient mc = MinecraftClient.getInstance();
       boolean isSelf = mc.player != null && player.getUuid().equals(mc.player.getUuid());
       boolean isFriend = player.getName() != null && FriendManager.isFriend(player.getName().getString())
@@ -31,7 +31,7 @@ public class AbstractClientPlayerEntityMixin {
          }
 
          SkinTextures customTextures = new SkinTextures(
-            original.comp_1626(), original.comp_1911(), CUSTOM_CAPE, CUSTOM_CAPE, original.comp_1629(), original.comp_1630()
+            original.texture(), original.textureUrl(), CUSTOM_CAPE, CUSTOM_CAPE, original.model(), original.secure()
          );
          cir.setReturnValue(customTextures);
       }

@@ -87,7 +87,7 @@ public class EffectHudManager {
          Set<StatusEffect> currentActiveEffects = new HashSet<>();
          if (isSettingEnabled && (interfaceMod == null || interfaceMod.isEnabled() || isEditing)) {
             for (StatusEffectInstance inst : list) {
-               StatusEffect effect = (StatusEffect)inst.getEffectType().comp_349();
+               StatusEffect effect = (StatusEffect)inst.getEffectType().value();
                currentActiveEffects.add(effect);
                EffectHudManager.PotionCardState state = this.cardStateMap.computeIfAbsent(effect, k -> new EffectHudManager.PotionCardState());
                state.cachedInstance = inst;

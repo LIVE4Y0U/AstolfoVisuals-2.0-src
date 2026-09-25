@@ -12,24 +12,24 @@ public class ClickGuiIcons {
    public static final Supplier<MsdfFont> CLICKGUI_ICONS = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("clickgui_icons")
-         .data(Identifier.of("mre", "icons/clickgui/clickgui.json"))
-         .atlas(Identifier.of("mre", "icons/clickgui/clickgui.png"))
-         .glyphMapper(g -> 65 + g.index())
+         .data("clickgui")
+         .atlas("clickgui")
+         
          .build()
    );
    public static final Supplier<MsdfFont> SP_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("settings_panel")
-         .data(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
-         .atlas(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
-         .glyphMapper(g -> 65 + g.index())
+         .data("watermark-sp")
+         .atlas("watermark-sp")
+         
          .build()
    );
    public static final Supplier<MsdfFont> ASTOLFO_LOGO = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("astolfo_logo")
-         .data(Identifier.of("mre", "fonts/astolfo.json"))
-         .atlas(Identifier.of("mre", "fonts/astolfo.png"))
+         .data("astolfo")
+         .atlas("astolfo")
          .build()
    );
    public static final Supplier<MsdfFont> BOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("bold").data("bold").build());

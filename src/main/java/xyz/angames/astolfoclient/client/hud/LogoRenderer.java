@@ -43,62 +43,24 @@ public class LogoRenderer {
    public static final Supplier<MsdfFont> ASTOLFO_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("astolfo_logo")
-         .data(Identifier.of("mre", "fonts/astolfo.json"))
-         .atlas(Identifier.of("mre", "fonts/astolfo.png"))
+         .data("astolfo")
+         .atlas("astolfo")
          .build()
    );
    public static final Supplier<MsdfFont> WATERMARK_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("watermark_icons")
-         .data(Identifier.of("mre", "icons/watermark/watermark.json"))
-         .atlas(Identifier.of("mre", "icons/watermark/watermark.png"))
-         .glyphMapper(g -> {
-            int idx = g.index();
-            if (idx == 4) {
-               return 65;
-            } else if (idx == 5) {
-               return 66;
-            } else if (idx == 6) {
-               return 67;
-            } else if (idx == 7) {
-               return 68;
-            } else if (idx == 9) {
-               return 69;
-            } else if (idx == 10) {
-               return 70;
-            } else if (idx == 8) {
-               return 71;
-            } else if (idx == 3) {
-               return 72;
-            } else if (idx == 11) {
-               return 73;
-            } else if (idx == 12) {
-               return 74;
-            } else {
-               return idx == 0 ? 75 : g.unicode() != 0 ? g.unicode() : idx;
-            }
-         })
+         .data("watermark")
+         .atlas("watermark")
+         
          .build()
    );
    public static final Supplier<MsdfFont> SP_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("watermark_sp_icons")
-         .data(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
-         .atlas(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
-         .glyphMapper(g -> {
-            int idx = g.index();
-            if (idx == 4) {
-               return 65;
-            } else if (idx == 5) {
-               return 66;
-            } else if (idx == 6) {
-               return 67;
-            } else if (idx == 3) {
-               return 68;
-            } else {
-               return idx == 0 ? 69 : g.unicode() != 0 ? g.unicode() : idx;
-            }
-         })
+         .data("watermark-sp")
+         .atlas("watermark-sp")
+         
          .build()
    );
    public static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
@@ -629,7 +591,7 @@ public class LogoRenderer {
 
                   if (!drawnAvatar && this.client.player != null) {
                      try {
-                        Identifier skinTex = this.client.player.getSkinTextures().comp_1626();
+                        Identifier skinTex = this.client.player.getSkinTextures().texture();
                         if (skinTex != null) {
                            AbstractTexture tex = this.client.getTextureManager().getTexture(skinTex);
                            if (tex != null) {

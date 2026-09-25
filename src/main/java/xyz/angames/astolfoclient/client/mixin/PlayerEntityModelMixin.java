@@ -19,7 +19,7 @@ public abstract class PlayerEntityModelMixin {
    private void swellBabyHead(PlayerEntityRenderState state, CallbackInfo ci) {
       if (MinecraftClient.getInstance().player != null && state.id == MinecraftClient.getInstance().player.getId()) {
          Module babyMod = AstolfoclientClient.moduleManager.getModuleByName("BabyPlayer");
-         PlayerEntityModel model = (PlayerEntityModel)this;
+         PlayerEntityModel model = (PlayerEntityModel)(Object)this;
          if (babyMod != null && babyMod.isEnabled()) {
             model.head.xScale = 1.75F;
             model.head.yScale = 1.75F;

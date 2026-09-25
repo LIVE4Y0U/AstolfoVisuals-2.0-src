@@ -39,7 +39,7 @@ public class WindowMixin {
    }
 
    private void setCustomIcons() {
-      Window window = (Window)this;
+      Window window = (Window)(Object)this;
       long handle = window.getHandle();
       String[] paths = new String[]{
          "/assets/astolfoclient/textures/gui/logo_black_32.png",

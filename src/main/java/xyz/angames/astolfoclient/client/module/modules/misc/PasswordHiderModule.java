@@ -13,7 +13,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TextContent;
-import net.minecraft.text.PlainTextContent.Literal;
+import net.minecraft.text.PlainTextContent;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.Module;
 import xyz.angames.astolfoclient.client.module.setting.BooleanSetting;
@@ -163,7 +163,7 @@ public class PasswordHiderModule extends Module {
       TextContent newContent = content;
       boolean contentChanged = false;
       if (content instanceof PlainTextContent.Literal literal) {
-         String str = literal.comp_737();
+         String str = literal.string();
          String masked = maskChatString(str);
          if (!masked.equals(str)) {
             newContent = Text.literal(masked).getContent();

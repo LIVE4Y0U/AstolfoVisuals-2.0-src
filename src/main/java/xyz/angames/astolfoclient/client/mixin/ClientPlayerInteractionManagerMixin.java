@@ -105,7 +105,7 @@ public class ClientPlayerInteractionManagerMixin {
             ItemEnchantmentsComponent enchants = EnchantmentHelper.getEnchantments(player.getMainHandStack());
 
             for (Entry<RegistryEntry<Enchantment>> entry : enchants.getEnchantmentEntries()) {
-               String id = ((RegistryEntry)entry.getKey()).getKey().map(k -> k.getValue().toString()).orElse("");
+               String id = ((RegistryEntry)entry.getKey()).getIdAsString();
                if (id.contains("fire_aspect")) {
                   fireAspectLevel = entry.getIntValue();
                   break;

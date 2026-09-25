@@ -5,7 +5,7 @@ import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Formatting;
-import net.minecraft.entity.Entity.RemovalReason;
+import net.minecraft.entity.Entity;
 import xyz.angames.astolfoclient.client.command.Command;
 import xyz.angames.astolfoclient.client.util.FakePlayerEntity;
 

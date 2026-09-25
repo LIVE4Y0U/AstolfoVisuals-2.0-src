@@ -17,7 +17,7 @@ import xyz.angames.astolfoclient.client.util.FriendManager;
 public class MixinPlayerListEntry {
    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
    private void astolfo$formatFriendName(CallbackInfoReturnable<Text> cir) {
-      PlayerListEntry entry = (PlayerListEntry)this;
+      PlayerListEntry entry = (PlayerListEntry)(Object)this;
       if (entry.getProfile() != null && entry.getProfile().getName() != null) {
          String playerName = entry.getProfile().getName();
          if (FriendManager.isFriend(playerName)) {

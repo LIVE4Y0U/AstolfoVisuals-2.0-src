@@ -81,7 +81,7 @@ public class ClientProtectionManager {
       }
 
       if (packet instanceof ExplosionS2CPacket explosion) {
-         Vec3d center = explosion.comp_2883();
+         Vec3d center = explosion.center();
          if (center == null
             || isInvalidDouble(center.x)
             || isInvalidDouble(center.y)
@@ -93,8 +93,8 @@ public class ClientProtectionManager {
             return true;
          }
 
-         if (explosion.comp_2884().isPresent()) {
-            Vec3d kb = (Vec3d)explosion.comp_2884().get();
+         if (explosion.playerKnockback().isPresent()) {
+            Vec3d kb = (Vec3d)explosion.playerKnockback().get();
             if (kb == null
                || isInvalidDouble(kb.x)
                || isInvalidDouble(kb.y)
@@ -205,10 +205,10 @@ public class ClientProtectionManager {
          }
 
          if (packet instanceof PlayerPositionLookS2CPacket teleport) {
-            PlayerPosition change = teleport.comp_3228();
+            PlayerPosition change = teleport.change();
             if (change != null) {
-               Vec3d pos = change.comp_3148();
-               Vec3d delta = change.comp_3149();
+               Vec3d pos = change.position();
+               Vec3d delta = change.deltaMovement();
                if (pos == null
                   || isInvalidDouble(pos.x)
                   || isInvalidDouble(pos.y)
@@ -225,17 +225,17 @@ public class ClientProtectionManager {
                            || Math.abs(delta.y) > 1000000.0
                            || Math.abs(delta.z) > 1000000.0
                      )
-                  || Float.isNaN(change.comp_3150())
-                  || Float.isInfinite(change.comp_3150())
-                  || Float.isNaN(change.comp_3151())
-                  || Float.isInfinite(change.comp_3151())) {
+                  || Float.isNaN(change.yaw())
+                  || Float.isInfinite(change.yaw())
+                  || Float.isNaN(change.pitch())
+                  || Float.isInfinite(change.pitch())) {
                   String coordsStr = pos != null ? String.format("X: %.1f, Y: %.1f, Z: %.1f", pos.x, pos.y, pos.z) : "null";
                   this.onCrashBlocked("Teleport Crash", "Invalid Coordinates (" + coordsStr + ")");
 
                   try {
                      MinecraftClient mc = MinecraftClient.getInstance();
                      if (mc != null && mc.getNetworkHandler() != null) {
-                        mc.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(teleport.comp_3133()));
+                        mc.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(teleport.teleportId()));
                      }
                   } catch (Exception var9) {
                   }
@@ -246,7 +246,7 @@ public class ClientProtectionManager {
          }
 
          if (packet instanceof VehicleMoveS2CPacket vehicleMove) {
-            Vec3d pos = vehicleMove.comp_3347();
+            Vec3d pos = vehicleMove.position();
             if (pos == null
                || isInvalidDouble(pos.x)
                || isInvalidDouble(pos.y)
@@ -254,19 +254,19 @@ public class ClientProtectionManager {
                || Math.abs(pos.x) > 3.0E7
                || Math.abs(pos.y) > 3.0E7
                || Math.abs(pos.z) > 3.0E7
-               || Float.isNaN(vehicleMove.comp_3348())
-               || Float.isInfinite(vehicleMove.comp_3348())
-               || Float.isNaN(vehicleMove.comp_3349())
-               || Float.isInfinite(vehicleMove.comp_3349())) {
+               || Float.isNaN(vehicleMove.yaw())
+               || Float.isInfinite(vehicleMove.yaw())
+               || Float.isNaN(vehicleMove.pitch())
+               || Float.isInfinite(vehicleMove.pitch())) {
                this.onCrashBlocked("Vehicle Crash", "Invalid vehicle coordinates or rotation");
                return true;
             }
          }
 
          if (packet instanceof EntityPositionS2CPacket entityPos) {
-            PlayerPosition change = entityPos.comp_3238();
+            PlayerPosition change = entityPos.change();
             if (change != null) {
-               Vec3d pos = change.comp_3148();
+               Vec3d pos = change.position();
                if (pos == null
                   || isInvalidDouble(pos.x)
                   || isInvalidDouble(pos.y)
@@ -281,9 +281,9 @@ public class ClientProtectionManager {
          }
 
          if (packet instanceof EntityPositionSyncS2CPacket entitySync) {
-            PlayerPosition values = entitySync.comp_3224();
+            PlayerPosition values = entitySync.values();
             if (values != null) {
-               Vec3d pos = values.comp_3148();
+               Vec3d pos = values.position();
                if (pos == null
                   || isInvalidDouble(pos.x)
                   || isInvalidDouble(pos.y)
@@ -315,7 +315,7 @@ public class ClientProtectionManager {
                Packet<?> p = this.pendingAdvancements.poll();
                if (p != null) {
                   try {
-                     p.apply(mc.getNetworkHandler());
+                     applyRawAdvancement(p, mc);
                   } catch (Exception var5) {
                   }
                }
@@ -326,6 +326,11 @@ public class ClientProtectionManager {
 
    private static boolean isInvalidDouble(double val) {
       return Double.isNaN(val) || Double.isInfinite(val);
+   }
+
+   @SuppressWarnings({"rawtypes", "unchecked"})
+   private static void applyRawAdvancement(Packet p, MinecraftClient mc) {
+      p.apply(mc.getNetworkHandler());
    }
 
    @Environment(EnvType.CLIENT)

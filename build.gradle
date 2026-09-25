@@ -8,12 +8,32 @@ group = project.maven_group
 
 base { archivesName = project.archives_base_name }
 
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    // MRE (dev.sxmurxy.mre) — не публикуется в maven, лежит локально в libs/
+    flatDir { dirs 'libs' }
+}
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    // Библиотека 2D-рендера, использованная оригинальным модом
+    modImplementation "dev.sxmurxy.mre:minecraft-render-enhancer-2D-1.0-1.21.4"
+
+    implementation "com.google.code.gson:gson:2.11.0"
+    implementation "org.joml:joml:1.10.8"
+    implementation "com.mojang:brigadier:1.3.10"
+
+    // Вложенные jar'ы, поставляемые модом (в META-INF/jars), нужны как compile-зависимости
+    compileOnly files('src/main/resources/META-INF/jars/media-player-info-0.1.0.jar')
+    compileOnly files('src/main/resources/META-INF/jars/luaj-jse-3.0.1.jar')
+    compileOnly files('src/main/resources/META-INF/jars/jlayer-1.0.1.jar')
+
+    // MRE (dev.sxmurxy.mre) — собрана из исходников в libs/, ядро рендера
+    modImplementation files('libs/minecraft-render-enhancer-2D-1.0-1.21.4.jar')
 }
 
 processResources {

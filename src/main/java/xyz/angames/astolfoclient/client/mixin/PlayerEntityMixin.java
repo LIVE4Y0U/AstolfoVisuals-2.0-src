@@ -20,7 +20,7 @@ import xyz.angames.astolfoclient.client.util.TargetUtils;
 public class PlayerEntityMixin {
    @Inject(method = "attack", at = @At("HEAD"))
    private void onAttack(Entity target, CallbackInfo ci) {
-      if (this == MinecraftClient.getInstance().player && target instanceof LivingEntity livingTarget) {
+      if ((Object)this == MinecraftClient.getInstance().player && target instanceof LivingEntity livingTarget) {
          if (!TargetUtils.isInvisible(livingTarget)) {
             TargetEspModule.addTargetAttack(target);
             if (AstolfoclientClient.targetHudManager != null) {

@@ -19,7 +19,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.render.VertexFormat.DrawMode;
+import net.minecraft.client.render.VertexFormat;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.manager.GpsManager;
 

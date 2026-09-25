@@ -24,7 +24,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
    @Inject(method = "tickMovement", at = @At("HEAD"))
    public void onTickMovement(CallbackInfo ci) {
-      ClientPlayerEntity player = (ClientPlayerEntity)this;
+      ClientPlayerEntity player = (ClientPlayerEntity)(Object)this;
       NoRenderModule noRender = NoRenderModule.getInstance();
       if (noRender != null && noRender.isEnabled() && noRender.blindness.get()) {
          boolean actuallyBlind = false;

@@ -21,7 +21,7 @@ public abstract class ScreenMixin {
 
    @Inject(method = "init", at = @At("TAIL"))
    private void onInit(CallbackInfo ci) {
-      Screen screen = (Screen)this;
+      Screen screen = (Screen)(Object)this;
       IASAccountHelper.onScreenInit(screen, this::addDrawableChild);
    }
 }

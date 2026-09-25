@@ -18,7 +18,7 @@ import xyz.angames.astolfoclient.client.module.Module;
 public class ProjectileEntityMixin {
    @Inject(method = "onEntityHit", at = @At("HEAD"))
    private void onEntityHit(EntityHitResult entityHitResult, CallbackInfo ci) {
-      ProjectileEntity self = (ProjectileEntity)this;
+      ProjectileEntity self = (ProjectileEntity)(Object)this;
       if (self.getOwner() == MinecraftClient.getInstance().player) {
          Entity target = entityHitResult.getEntity();
          if (AstolfoclientClient.killEffectManager != null) {

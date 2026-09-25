@@ -22,7 +22,7 @@ import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.VertexFormat.DrawMode;
+import net.minecraft.client.render.VertexFormat;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.config.ThemeManager;
@@ -38,7 +38,8 @@ public class RagdollRenderer {
       if (mc.world != null && entity != null) {
          try {
             EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
-            EntityRenderer<?, ?> renderer = dispatcher.getRenderer(entity);
+            @SuppressWarnings({"rawtypes", "unchecked"})
+            EntityRenderer renderer = dispatcher.getRenderer(entity);
             if (renderer == null) {
                return;
             }

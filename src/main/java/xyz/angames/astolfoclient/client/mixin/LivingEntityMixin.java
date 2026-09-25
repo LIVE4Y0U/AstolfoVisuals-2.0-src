@@ -24,7 +24,7 @@ import xyz.angames.astolfoclient.client.module.modules.render.SwingAnimationModu
 public class LivingEntityMixin {
    @Inject(method = "jump", at = @At("HEAD"))
    private void onJump(CallbackInfo ci) {
-      LivingEntity entity = (LivingEntity)this;
+      LivingEntity entity = (LivingEntity)(Object)this;
       if (entity.equals(MinecraftClient.getInstance().player) && AstolfoclientClient.moduleManager != null) {
          Module jumpCircleModule = AstolfoclientClient.moduleManager.getModuleByName("JumpCircle");
          if (jumpCircleModule != null && jumpCircleModule.isEnabled() && AstolfoclientClient.jumpCircleManager != null) {
@@ -35,7 +35,7 @@ public class LivingEntityMixin {
 
    @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
    private void onHasStatusEffect(RegistryEntry<StatusEffect> effect, CallbackInfoReturnable<Boolean> cir) {
-      LivingEntity entity = (LivingEntity)this;
+      LivingEntity entity = (LivingEntity)(Object)this;
       if (entity == MinecraftClient.getInstance().player) {
          NoRenderModule noRender = NoRenderModule.getInstance();
          if (noRender != null
@@ -49,7 +49,7 @@ public class LivingEntityMixin {
 
    @Inject(method = "getStatusEffect", at = @At("HEAD"), cancellable = true)
    private void onGetStatusEffect(RegistryEntry<StatusEffect> effect, CallbackInfoReturnable<StatusEffectInstance> cir) {
-      LivingEntity entity = (LivingEntity)this;
+      LivingEntity entity = (LivingEntity)(Object)this;
       if (entity == MinecraftClient.getInstance().player) {
          NoRenderModule noRender = NoRenderModule.getInstance();
          if (noRender != null
@@ -63,7 +63,7 @@ public class LivingEntityMixin {
 
    @Inject(method = "handleStatus(B)V", at = @At("HEAD"))
    private void onHandleStatus(byte status, CallbackInfo ci) {
-      LivingEntity entity = (LivingEntity)this;
+      LivingEntity entity = (LivingEntity)(Object)this;
       if ((status == 35 || status == 3) && AstolfoclientClient.moduleManager != null) {
          Module ragdollModule = AstolfoclientClient.moduleManager.getModuleByName("Ragdoll");
          if (ragdollModule != null && ragdollModule.isEnabled()) {
@@ -85,7 +85,7 @@ public class LivingEntityMixin {
 
    @Inject(method = "getHandSwingDuration", at = @At("HEAD"), cancellable = true)
    private void onGetHandSwingDuration(CallbackInfoReturnable<Integer> cir) {
-      LivingEntity entity = (LivingEntity)this;
+      LivingEntity entity = (LivingEntity)(Object)this;
       if (entity == MinecraftClient.getInstance().player && AstolfoclientClient.moduleManager != null) {
          SwingAnimationModule swing = (SwingAnimationModule)AstolfoclientClient.moduleManager.getModuleByName("SwingAnimation");
          if (swing != null && swing.isEnabled() && swing.slow.get()) {

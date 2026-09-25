@@ -20,8 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import ru.vidtu.ias.account.Account;
-import ru.vidtu.ias.config.IASStorage;
 
 @Environment(EnvType.CLIENT)
 public class RandomNameGenerator {
@@ -1007,10 +1005,18 @@ public class RandomNameGenerator {
       Set<String> existingNames = new HashSet<>(SESSION_USED_NAMES);
 
       try {
-         if (IASStorage.ACCOUNTS != null) {
-            for (Account acc : IASStorage.ACCOUNTS) {
-               if (acc != null && acc.name() != null) {
-                  existingNames.add(acc.name().toLowerCase(Locale.ROOT));
+         // IAS (In-Game Account Switcher) — опциональная зависимость, обращаемся рефлексией,
+         // чтобы мод компилировался и работал без установленного IAS.
+         Class<?> storageClass = Class.forName("ru.vidtu.ias.config.IASStorage");
+         Object accountsObj = storageClass.getField("ACCOUNTS").get(null);
+         if (accountsObj instanceof Iterable<?> accounts) {
+            for (Object acc : accounts) {
+               if (acc == null) {
+                  continue;
+               }
+               Object nameObj = acc.getClass().getMethod("name").invoke(acc);
+               if (nameObj instanceof String name && !name.isBlank()) {
+                  existingNames.add(name.toLowerCase(Locale.ROOT));
                }
             }
          }

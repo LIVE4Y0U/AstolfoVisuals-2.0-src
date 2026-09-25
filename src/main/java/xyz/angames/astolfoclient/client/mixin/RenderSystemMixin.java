@@ -23,12 +23,12 @@ public class RenderSystemMixin {
 
       AmbientsModule ambients = (AmbientsModule)AstolfoclientClient.moduleManager.getModuleByName("Ambients");
       if (ambients != null && ambients.isEnabled() && ambients.customFog.get()) {
-         float start = originalFog.comp_3009();
-         float end = originalFog.comp_3010();
-         float r = originalFog.comp_3012();
-         float g = originalFog.comp_3013();
-         float b = originalFog.comp_3014();
-         float a = originalFog.comp_3015();
+         float start = originalFog.start();
+         float end = originalFog.end();
+         float r = originalFog.red();
+         float g = originalFog.green();
+         float b = originalFog.blue();
+         float a = originalFog.alpha();
          start = (float)ambients.fogStart.get();
          end = (float)ambients.fogEnd.get();
          if (ambients.fogColorEnabled.get() && ambients.themeSync.get()) {
@@ -44,7 +44,7 @@ public class RenderSystemMixin {
             }
          }
 
-         return new Fog(start, end, originalFog.comp_3011(), r, g, b, a);
+         return new Fog(start, end, originalFog.shape(), r, g, b, a);
       } else {
          return originalFog;
       }

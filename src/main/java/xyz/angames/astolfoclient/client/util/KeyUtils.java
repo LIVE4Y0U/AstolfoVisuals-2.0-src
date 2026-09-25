@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.util.InputUtil.Key;
-import net.minecraft.client.util.InputUtil.Type;
+import net.minecraft.client.util.InputUtil;
 
 @Environment(EnvType.CLIENT)
 public class KeyUtils {

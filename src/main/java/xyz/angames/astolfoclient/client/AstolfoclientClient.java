@@ -370,7 +370,7 @@ public class AstolfoclientClient implements ClientModInitializer {
       LivingEntityFeatureRendererRegistrationCallback.EVENT
          .register((LivingEntityFeatureRendererRegistrationCallback)(entityType, entityRenderer, registrationHelper, context) -> {
             if (entityType == EntityType.PLAYER) {
-               registrationHelper.register(new ChinaHatFeatureRenderer(entityRenderer));
+               registerChinaHat(registrationHelper, entityRenderer);
             }
          });
       WorldRenderEvents.AFTER_TRANSLUCENT.register((AfterTranslucent)context -> gpsRenderer.render(context));
@@ -615,6 +615,14 @@ public class AstolfoclientClient implements ClientModInitializer {
 
    public String getBio() {
       return "https://fakecrime.bio/SRS";
+   }
+
+   @SuppressWarnings({"rawtypes", "unchecked"})
+   private static void registerChinaHat(
+      net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.RegistrationHelper helper,
+      net.minecraft.client.render.entity.EntityRenderer renderer
+   ) {
+      helper.register(new ChinaHatFeatureRenderer((net.minecraft.client.render.entity.feature.FeatureRendererContext)renderer));
    }
 
    public DiscordRpcManager getDiscordRpcManager() {

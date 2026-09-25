@@ -1,73 +1,45 @@
-# Astolfo Visuals 2.0 — Recovered Source
+# Astolfo Visuals 2.0
 
-Восстановленный исходный код мода **Astolfo Visuals 2.0** (Fabric, Minecraft 1.21.4).
+Исходный код клиентского мода **Astolfo Visuals 2.0** для Minecraft 1.21.4 (Fabric), восстановленный из
+распространённого бинарного jar-файла.
 
-Исходники получены декомпиляцией `astolfovisuals-2.0.jar` через **Vineflower 1.12.0**,
-затем все intermediary-имена (`class_XXXX` / `method_XXXX` / `field_XXXX`) переведены
-в читаемые yarn-имена скриптом. Это не побайтовая копия утраченного оригинала:
-комментарии и часть исходных конструкций из байткода не восстанавливаются.
+**Автор оригинала:** SRS — https://fakecrime.bio/SRS
+**Лицензия:** GPL-3.0-only
 
-## Состояние
+## Что нужно для сборки
 
-| | |
-|---|---|
-| Файлов Java | 206 |
-| Строк переименований | ~5000 |
-| Остатков `class_` / `method_` / `field_` | 0 |
-| `./gradlew build` | **не проходит** — см. «Блокеры» |
+- JDK 21
+- Gradle (wrapper в комплекте)
+- Локальный jar `minecraft-render-enhancer-2D` — библиотека рендера от
+  [sxmurxy0](https://github.com/sxmurxy0/Minecraft-Render-Enhancer-2D-1.21), ветка `fabric-1.21.4`.
+  Собирается из исходников и кладётся в `libs/minecraft-render-enhancer-2D-1.0-1.21.4.jar`
+  (в Maven Central и JitPack её нет).
 
-Рабочие коммиты:
-
-- `8b75320` — pristine: декомпилированный intermediary-код (точка отката)
-- `f20dd58` — конвертация intermediary → yarn (`class_`/`method_`/`field_`)
-- `4b6a4de` — фикс ссылок в теле: простые имена без усечённых пакетных префиксов
-
-## Структура
-
+```bash
+JAVA_HOME=/usr/lib/jvm/java-21-openjdk ./gradlew build
 ```
-src/main/java/xyz/angames/astolfoclient/client/
-├── AstolfoclientClient.java      entrypoint
-├── command/                      команды + commands/
-├── config/                       конфигурация
-├── effects/                      ESP, партиклы (~30)
-├── gui/clickgui/                 ClickGUI
-├── hud/                          HUD-менеджеры (~20)
-├── mixin/                        миксины (~30 из 55 объявленных)
-├── module/                       модули + modules/ + setting/
-├── render/                       рендер-утилиты
-└── util/                         утилиты
 
-src/main/resources/
-├── fabric.mod.json
-├── astolfoclient.client.mixins.json
-├── client-astolfoclient-refmap.json
-├── assets/astolfoclient/         шейдеры (mre: liquidglass, blur, msdf_font), шрифты, звуки
-└── META-INF/jars/                jlayer-1.0.1, luaj-jse-3.0.1, media-player-info-0.1.0
-```
+Артефакт: `build/libs/astolfovisuals-2.0.jar`
 
 ## Блокеры сборки
 
-1. **`build.gradle`: пустой `dependencies {}`** — подключены только minecraft/mappings/loader.
-   Нужны: `fabric-api`, `dev.sxmurxy.mre`, gson, joml, brigadier.
-2. **`dev.sxmurxy.mre` не найдена** — библиотека рендера, без неё сборка невозможна.
-3. **25 миксинов из `astolfoclient.client.mixins.json` отсутствуют как файлы**
-   (в `mixin/` лежит ~30 из 55) → краш при загрузке мода, т.к. `required: true`.
-4. **`fabricloader >= 0.19.3`** в `fabric.mod.json` против `loader_version=0.16.10`
-   в `gradle.properties` — противоречие.
-5. `AstolfoclientDataGenerator` объявлен в `fabric-datagen` entrypoint, но файла нет.
-6. Синтетические имена Vineflower (`var13`, `var14`) — чистка читаемости, не блокер.
+Исходный код декомпилирован (Vineflower), поэтому часть данных потеряна. Сборка проходит,
+но при запуске возможны проблемы:
 
-## Сборка (после устранения блокеров)
-
-```bash
-./gradlew build          # артефакт в build/libs/
-./gradlew runClient      # запуск dev-клиента
-```
-
-Требуется JDK 21.
-
-## Лицензия
-
-`GPL-3.0-only` — как указано в оригинальном `fabric.mod.json`.
-
-Оригинальный автор: **SRS**.
+1. **`dev.sxmurxy.mre` нет в публичных репозиториях** — библиотеку рендера приходится собирать
+   из исходников вручную и подкладывать в `libs/` (см. выше).
+2. **Синтетические имена Vineflower** (`var13`, `var14`, `field_53536`) в отдельных местах —
+   на компиляцию не влияет, читаемость страдает.
+3. **Дженерики в миксинах потеряны** — компилятор не восстанавливает generic-параметры у
+   `EntityRenderer<?,?>` и `Packet<?>`, поэтому в `RagdollRenderer`, `ClientProtectionManager`
+   и `AstolfoclientClient` стоят raw-type заглушки с `@SuppressWarnings`.
+4. **Отсутствующие внешние моды** — `ru.vidtu.ias` переведён на рефлексию (мод соберётся и
+   запустится без IAS, но функция случайных оффлайн-аккаунтов работать не будет);
+   `media-player-info` подключён как `compileOnly` из `META-INF/jars/`.
+5. **`Builder.liquidGlass()` отсутствует в MRE 1.21.4** — эффект liquid glass есть только
+   в 1.21.5-ветке библиотеки, здесь заменён на blur.
+6. **`fabric-datagen` entrypoint убран** — `AstolfoclientDataGenerator` в исходниках не было,
+   генерировать данные нечем.
+7. **Миксины не проверялись в рантайме** — все 56 объявленных в
+   `astolfoclient.client.mixins.json` присутствуют как файлы, но корректность их таргетов
+   под 1.21.4 не подтверждена (проверяется только запуском игры).

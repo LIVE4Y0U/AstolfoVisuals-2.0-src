@@ -47,15 +47,11 @@ public final class DrawUtil {
          .color(new QuadColorState(new Color(255, 255, 255, 45)))
          .build()
          .render(matrix, x, y);
-      Builder.liquidGlass()
+      Builder.blur()
          .size(new SizeState(width, height))
          .radius(liquidRadiusState)
          .color(new QuadColorState(awtColor))
-         .smoothness(1.0F, cornerSmoothness)
-         .alpha(1.0F, baseAlpha)
-         .fresnel(fresnelPower, Color.WHITE, fresnelAlpha, fresnelMix, fresnelInvert)
-         .distortStrength(distortStrength)
-         .captureBackground()
+         .smoothness(1.0F)
          .build()
          .render(matrix, x, y);
    }

@@ -10,9 +10,8 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
-import net.minecraft.client.render.VertexFormat.DrawMode;
-import net.minecraft.client.render.RenderPhase.Transparency;
-import net.minecraft.client.render.RenderPhase.ShaderProgram;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.RenderPhase;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)

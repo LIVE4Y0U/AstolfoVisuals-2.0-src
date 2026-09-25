@@ -46,15 +46,15 @@ public class ScoreboardManager {
                List<String> lines = new ArrayList<>();
                Collection<ScoreboardEntry> scores = scoreboard.getScoreboardEntries(objective);
                List<ScoreboardEntry> list = scores.stream()
-                  .filter(score -> score.comp_2127() != null && !score.comp_2127().startsWith("#"))
-                  .sorted((s1, s2) -> Integer.compare(s2.comp_2128(), s1.comp_2128()))
+                  .filter(score -> score.owner() != null && !score.owner().startsWith("#"))
+                  .sorted((s1, s2) -> Integer.compare(s2.value(), s1.value()))
                   .limit(15L)
                   .collect(Collectors.toList());
                String title = objective.getDisplayName().getString();
 
                for (ScoreboardEntry score : list) {
-                  Team team = scoreboard.getScoreHolderTeam(score.comp_2127());
-                  Text text = Team.decorateName(team, Text.literal(score.comp_2127()));
+                  Team team = scoreboard.getScoreHolderTeam(score.owner());
+                  Text text = Team.decorateName(team, Text.literal(score.owner()));
                   lines.add(text.getString());
                }
 

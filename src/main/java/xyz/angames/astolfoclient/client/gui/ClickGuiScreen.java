@@ -579,7 +579,7 @@ public class ClickGuiScreen extends Screen {
 
       if (!drawnAvatar && this.client.player != null) {
          try {
-            Identifier skinTex = this.client.player.getSkinTextures().comp_1626();
+            Identifier skinTex = this.client.player.getSkinTextures().texture();
             if (skinTex != null) {
                AbstractTexture tex = this.client.getTextureManager().getTexture(skinTex);
                if (tex != null) {

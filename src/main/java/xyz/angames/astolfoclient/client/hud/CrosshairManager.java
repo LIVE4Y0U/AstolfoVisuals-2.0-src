@@ -9,7 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.Perspective;
-import net.minecraft.util.hit.HitResult.Type;
+import net.minecraft.util.hit.HitResult;
 import org.joml.Matrix4f;
 import xyz.angames.astolfoclient.client.AstolfoclientClient;
 import xyz.angames.astolfoclient.client.module.modules.render.CrosshairModule;

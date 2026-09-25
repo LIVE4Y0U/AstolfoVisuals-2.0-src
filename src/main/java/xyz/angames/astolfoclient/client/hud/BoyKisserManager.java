@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider.Immediate;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)

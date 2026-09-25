@@ -1,7 +1,7 @@
 package xyz.angames.astolfoclient.client.render;
 
-import com.mojang.blaze3d.platform.GlStateManager.DstFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SrcFactor;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.sxmurxy.mre.builders.Builder;
 import dev.sxmurxy.mre.builders.states.QuadColorState;
@@ -49,12 +49,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.hit.HitResult.Type;
-import net.minecraft.client.render.VertexFormat.DrawMode;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.world.RaycastContext.FluidHandling;
 import net.minecraft.world.RaycastContext.ShapeType;
-import net.minecraft.client.render.VertexConsumerProvider.Immediate;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

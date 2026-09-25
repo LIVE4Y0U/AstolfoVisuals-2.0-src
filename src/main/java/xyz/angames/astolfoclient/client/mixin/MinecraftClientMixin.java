@@ -38,7 +38,7 @@ public class MinecraftClientMixin {
    @Inject(method = "doAttack", at = @At("HEAD"))
    private void onDoAttack(CallbackInfoReturnable<Boolean> cir) {
       if (AstolfoclientClient.moduleManager != null) {
-         MinecraftClient client = (MinecraftClient)this;
+         MinecraftClient client = (MinecraftClient)(Object)this;
          if (client.crosshairTarget instanceof EntityHitResult hitResult) {
             Entity target = hitResult.getEntity();
             Module hitEspModule = AstolfoclientClient.moduleManager.getModuleByName("HitESP");

@@ -347,7 +347,7 @@ public class TargetHudManager {
 
    private void renderEntityHead(MinecraftClient client, LivingEntity entity, Matrix4f matrix, float hX, float hY, float size, Color tint, float alpha) {
       if (entity instanceof AbstractClientPlayerEntity player) {
-         AbstractTexture skin = client.getTextureManager().getTexture(player.getSkinTextures().comp_1626());
+         AbstractTexture skin = client.getTextureManager().getTexture(player.getSkinTextures().texture());
          Builder.texture()
             .size(new SizeState(size, size))
             .radius(new QuadRadiusState(4.0F))

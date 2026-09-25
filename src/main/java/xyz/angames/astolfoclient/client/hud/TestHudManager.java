@@ -58,15 +58,11 @@ public class TestHudManager {
                .build()
                .render(matrix, x1, y1);
             float liquidGlassRadius = roundingVal * squirtVal / 2.0F;
-            Builder.liquidGlass()
+            Builder.blur()
                .size(new SizeState(w + 2.0F, h + 2.0F))
                .radius(new QuadRadiusState(liquidGlassRadius))
                .color(new QuadColorState(Color.WHITE))
-               .smoothness(0.5F, squirtVal)
-               .alpha(1.0F, baseAlphaVal)
-               .fresnel(fresnelPowerVal, Color.WHITE.getRGB(), 1.0F, 0.0F, true)
-               .distortStrength(distortVal)
-               .captureBackground()
+               .smoothness(0.5F)
                .build()
                .render(matrix, x1 - 1.0F, y1 - 1.0F);
             Builder.rectangle()

@@ -3,7 +3,7 @@ package xyz.angames.astolfoclient.client.mixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.text.Text;
-import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;
+import net.minecraft.entity.decoration.DisplayEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

@@ -14,9 +14,6 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.screen.Screen;
-import ru.vidtu.ias.IAS;
-import ru.vidtu.ias.account.OfflineAccount;
-import ru.vidtu.ias.config.IASStorage;
 
 @Environment(EnvType.CLIENT)
 public class IASAccountHelper {
@@ -73,10 +70,25 @@ public class IASAccountHelper {
    public static void addRandomOfflineAccount(Screen screen) {
       try {
          String randomName = RandomNameGenerator.generateUniqueName();
-         OfflineAccount account = new OfflineAccount(randomName, null);
-         IASStorage.ACCOUNTS.add(account);
-         IAS.disclaimersStorage();
-         IAS.saveStorage();
+
+         // IAS — опциональная зависимость. Все обращения рефлексией, чтобы мод
+         // компилировался и грузился без установленного IAS.
+         Class<?> offlineAccountClass = Class.forName("ru.vidtu.ias.account.OfflineAccount");
+         Object account = offlineAccountClass
+            .getConstructor(String.class, String.class)
+            .newInstance(randomName, null);
+
+         Class<?> storageClass = Class.forName("ru.vidtu.ias.config.IASStorage");
+         Object accountsObj = storageClass.getField("ACCOUNTS").get(null);
+         if (accountsObj instanceof java.util.List<?> accounts) {
+            @SuppressWarnings("unchecked")
+            java.util.List<Object> raw = (java.util.List<Object>)accounts;
+            raw.add(account);
+         }
+
+         Class<?> iasClass = Class.forName("ru.vidtu.ias.IAS");
+         iasClass.getMethod("disclaimersStorage").invoke(null);
+         iasClass.getMethod("saveStorage").invoke(null);
 
          for (Field field : screen.getClass().getDeclaredFields()) {
             if (field.getType().getName().equals("ru.vidtu.ias.screen.AccountList")) {

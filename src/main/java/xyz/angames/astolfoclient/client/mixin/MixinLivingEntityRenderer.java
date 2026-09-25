@@ -49,7 +49,7 @@ public abstract class MixinLivingEntityRenderer {
    )
    private void renderCustomModel(LivingEntityRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
       if (state instanceof PlayerEntityRenderState playerState) {
-         if (this instanceof PlayerEntityRenderer) {
+         if (((Object)this) instanceof PlayerEntityRenderer) {
             ModelsModule modelsModule = (ModelsModule)AstolfoclientClient.moduleManager.getModuleByName("Models");
             if (modelsModule != null && modelsModule.isEnabled()) {
                MinecraftClient mc = MinecraftClient.getInstance();
