@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "astolfovisuals",
+  "version": "2.0",
+  "name": "Astolfo Visuals",
+  "description": "Astolfo Visuals it is a mod what adds some unic features to minecratf",
+  "authors": [
+    "SRS"
+  ],
+  "license": "GPL-3.0-only",
+  "icon": "assets/astolfoclient/textures/gui/mob_icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "xyz.angames.astolfoclient.client.AstolfoclientClient"
+    ],
+    "fabric-datagen": [
+      "xyz.angames.astolfoclient.client.AstolfoclientDataGenerator"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "astolfoclient.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": "\u003e\u003d0.19.3",
+    "fabric-api": "*",
+    "minecraft": "1.21.4"
+  },
+  "suggests": {
+    "modmenu": "*"
+  },
+  "jars": [
+    {
+      "file": "META-INF/jars/jlayer-1.0.1.jar"
+    },
+    {
+      "file": "META-INF/jars/luaj-jse-3.0.1.jar"
+    },
+    {
+      "file": "META-INF/jars/media-player-info-0.1.0.jar"
+    }
+  ]
+}
