@@ -1,10 +1,9 @@
 # Astolfo Visuals 2.0
 
-Исходный код клиентского мода **Astolfo Visuals 2.0** для Minecraft 1.21.4 (Fabric), восстановленный из
-распространённого бинарного jar-файла.
+Исходники **Astolfo Visuals 2.0** для 1.21.4 (Fabric), восстановленный из
+[этих сурсов](https://github.com/SRS-0/AstolfoVisuals).
 
 **Автор оригинала:** SRS — https://fakecrime.bio/SRS
-**Лицензия:** GPL-3.0-only
 
 ## Что нужно для сборки
 
@@ -17,12 +16,6 @@
   (`fabric-1.21.4`) **старее** той, на которой собран мод: в ней нет
   `MsdfFont.Builder.glyphMapper()`, `data(Identifier)` и `Builder.liquidGlass()`,
   из-за чего иконки ClickGUI и liquid-glass не работают.
-
-```bash
-JAVA_HOME=/usr/lib/jvm/java-21-openjdk ./gradlew build
-```
-
-Артефакт: `build/libs/astolfovisuals-2.0.jar`
 
 ## Блокеры сборки
 
