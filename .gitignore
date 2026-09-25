@@ -2,3 +2,7 @@ build/
 .gradle/
 *.class
 run/
+out/
+.idea/
+*.iml
+.vscode/
