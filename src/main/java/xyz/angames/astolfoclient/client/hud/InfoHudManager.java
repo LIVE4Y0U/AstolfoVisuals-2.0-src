@@ -28,9 +28,9 @@ public class InfoHudManager {
    private static final Supplier<MsdfFont> ICON_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("interface_icons_infohud")
-         .data("interface")
-         .atlas("interface")
-         
+         .data(Identifier.of("mre", "icons/interface/interface.json"))
+         .atlas(Identifier.of("mre", "icons/interface/interface.png"))
+         .glyphMapper(g -> 'A' + g.index())
          .build()
    );
    public static float height = 18.0F;

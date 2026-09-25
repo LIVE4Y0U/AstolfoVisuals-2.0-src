@@ -34,9 +34,9 @@ public class ActiveBindsManager {
    private static final Supplier<MsdfFont> ICON_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("interface_icons_activebinds")
-         .data("interface")
-         .atlas("interface")
-         
+         .data(Identifier.of("mre", "icons/interface/interface.json"))
+         .atlas(Identifier.of("mre", "icons/interface/interface.png"))
+         .glyphMapper(g -> 'A' + g.index())
          .build()
    );
    public float x = 10.0F;

@@ -12,17 +12,17 @@ public class ClickGuiIcons {
    public static final Supplier<MsdfFont> CLICKGUI_ICONS = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("clickgui_icons")
-         .data("clickgui")
-         .atlas("clickgui")
-         
+         .data(Identifier.of("mre", "icons/clickgui/clickgui.json"))
+         .atlas(Identifier.of("mre", "icons/clickgui/clickgui.png"))
+         .glyphMapper(g -> 'A' + g.index())
          .build()
    );
    public static final Supplier<MsdfFont> SP_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("settings_panel")
-         .data("watermark-sp")
-         .atlas("watermark-sp")
-         
+         .data(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
+         .atlas(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
+         .glyphMapper(g -> 'A' + g.index())
          .build()
    );
    public static final Supplier<MsdfFont> ASTOLFO_LOGO = Suppliers.memoize(

@@ -50,17 +50,17 @@ public class LogoRenderer {
    public static final Supplier<MsdfFont> WATERMARK_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("watermark_icons")
-         .data("watermark")
-         .atlas("watermark")
-         
+         .data(Identifier.of("mre", "icons/watermark/watermark.json"))
+         .atlas(Identifier.of("mre", "icons/watermark/watermark.png"))
+         .glyphMapper(g -> 'A' + g.index())
          .build()
    );
    public static final Supplier<MsdfFont> SP_FONT = Suppliers.memoize(
       () -> MsdfFont.builder()
          .name("watermark_sp_icons")
-         .data("watermark-sp")
-         .atlas("watermark-sp")
-         
+         .data(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.json"))
+         .atlas(Identifier.of("mre", "icons/watermark/seting-panel/watermark-sp.png"))
+         .glyphMapper(g -> 'A' + g.index())
          .build()
    );
    public static final Supplier<MsdfFont> SEMIBOLD_FONT = Suppliers.memoize(() -> MsdfFont.builder().atlas("semibold").data("semibold").build());
